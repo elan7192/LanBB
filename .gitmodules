@@ -1,0 +1,3 @@
+[submodule "tools/semantica"]
+	path = tools/semantica
+	url = https://github.com/semantica-agi/semantica.git
