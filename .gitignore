@@ -1,0 +1,9 @@
+# Isolated runtime for the book-to-skill wrapper
+tools/book-to-skill/.venv/
+tools/book-to-skill/.cache/
+__pycache__/
+*.py[cod]
+
+# Generated skill bundles. These may derive from third-party books — keep them
+# private and out of git. See tools/book-to-skill/README.md.
+/skills/*/
