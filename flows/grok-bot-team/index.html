@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LanBB — Grok Bot team</title>
+  <meta name="description" content="LanBB Grok Bot team routing: n8n-style flow graph. lead is the front door and the only approval hop." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --bg-elev: #161d24;
+      --bg-panel: #1b2430;
+      --line: rgba(143, 176, 209, 0.14);
+      --text: #e8eef5;
+      --muted: #8fa8c0;
+      --dim: #5f7388;
+      --blue: #2d72d2;
+      --font: "IBM Plex Sans", sans-serif;
+      --mono: "IBM Plex Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); overflow: hidden; }
+    .app { height: 100%; display: grid; grid-template-rows: 48px 1fr; }
+    .topbar {
+      display: flex; align-items: center; gap: 14px; padding: 0 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #141b22, #10161c);
+    }
+    .mark { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .mark-badge {
+      width: 22px; height: 22px; border-radius: 4px;
+      background: linear-gradient(135deg, var(--blue), #1f4b8f);
+      display: grid; place-items: center; font-size: 11px;
+    }
+    .mark small { color: var(--muted); font-weight: 500; margin-left: 6px; }
+    .top-tabs { display: flex; gap: 2px; margin-left: 8px; }
+    .top-tab {
+      border: 0; background: transparent; color: var(--muted);
+      font: 500 13px/1 var(--font); padding: 8px 12px; border-radius: 6px; cursor: pointer;
+    }
+    .top-tab[data-active="true"] { background: rgba(45,114,210,0.16); color: #9ec3f5; }
+    .pill {
+      margin-left: auto; border: 1px solid var(--line); border-radius: 999px;
+      padding: 5px 10px; font-family: var(--mono); font-size: 11px; color: var(--muted);
+    }
+    .body { min-height: 0; display: grid; grid-template-columns: 240px 1fr 300px; }
+    .sidebar, .right {
+      background: var(--bg-elev); overflow: auto; padding: 12px 10px;
+    }
+    .sidebar { border-right: 1px solid var(--line); }
+    .right { border-left: 1px solid var(--line); }
+    .side-label {
+      font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--dim); padding: 8px 8px 6px;
+    }
+    .lane {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 6px; color: var(--muted); font-size: 13px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .rule {
+      padding: 8px 10px; margin: 0 0 6px; border: 1px solid var(--line);
+      border-radius: 6px; font-size: 12px; color: var(--muted); line-height: 1.4;
+    }
+    .rule b { color: var(--text); font-weight: 600; }
+    #canvas { min-height: 0; }
+    .hidden { display: none !important; }
+    h2 { font-size: 13px; margin: 0 0 10px; }
+    pre {
+      white-space: pre-wrap; word-break: break-word; font: 11px/1.45 var(--mono);
+      color: var(--muted); background: #10161c; border: 1px solid var(--line);
+      border-radius: 6px; padding: 10px; max-height: 55vh; overflow: auto;
+    }
+    .kv { display: grid; grid-template-columns: 88px 1fr; gap: 6px 8px; font-size: 12px; margin-bottom: 12px; }
+    .kv b { color: var(--dim); font-weight: 500; }
+    .warn { color: #e8a598; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="mark">
+        <div class="mark-badge">L</div>
+        LanBB <small>Grok Bot team · Flow Studio</small>
+      </div>
+      <div class="top-tabs">
+        <button class="top-tab" data-view="flow" data-active="true">Flow</button>
+        <button class="top-tab" data-view="case">Case graph</button>
+      </div>
+      <div class="pill">wiki FULL FREEZE · arxiv paused · search on-demand</div>
+    </header>
+    <div class="body">
+      <aside class="sidebar">
+        <div class="side-label">Team lanes</div>
+        <div id="laneList"></div>
+        <div class="side-label">Routing</div>
+        <div class="rule"><b>Paper hits</b><br/>search → lead → arxiv</div>
+        <div class="rule"><b>Social finds</b><br/>search → lead → wiki after approve</div>
+        <div class="rule"><b>New user requests</b><br/>anyone/user → lead → specialist</div>
+        <div class="rule"><b>Approvals</b><br/>specialist → lead (never ask user to click)</div>
+        <div class="side-label">Holds</div>
+        <div class="rule warn"><b>wiki</b> — elan7192/second-brain FULL FREEZE (no ingest/push)</div>
+        <div class="rule warn"><b>arxiv</b> — harvest dead, digests paused for quota</div>
+        <div class="rule warn"><b>search</b> — no scheduled scout unless lan E asks</div>
+      </aside>
+      <div id="canvas"></div>
+      <aside class="right">
+        <h2 id="inspTitle">Node inspector</h2>
+        <div class="kv" id="inspKv"></div>
+        <pre id="inspPre">Click a node.</pre>
+      </aside>
+    </div>
+  </div>
+  <script>
+    const FLOW = {
+  "id": "flow_grok_bot_team",
+  "name": "LanBB Grok Bot team",
+  "description": "LanBB Grok Bot team routing, n8n-style. lead is the front door and the only approval hop (merge/push/pay/auth) \u2014 specialists never ask the user to click. wiki is FULL FREEZE. arxiv harvest is dead and digests are paused for quota. search scouts only on demand (Google/Reddit/X/FB/IG/Threads).",
+  "nodes": [
+    {
+      "id": "n_user_request",
+      "type": "trigger",
+      "label": "New user request",
+      "config": {
+        "lane": "lead",
+        "badge": "ANYONE \u2192 LEAD"
+      },
+      "position": {
+        "x": 210.0,
+        "y": 52.0
+      },
+      "status": "idle",
+      "category": "lead",
+      "description": "anyone/user \u2192 lead. All new requests enter the front door.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lead_intake",
+      "type": "agent",
+      "label": "lead \u00b7 front door",
+      "config": {
+        "role": "lead",
+        "owns": [
+          "intake",
+          "routing",
+          "approvals"
+        ],
+        "lane": "lead",
+        "badge": "FRONT DOOR"
+      },
+      "position": {
+        "x": 710.0,
+        "y": 52.0
+      },
+      "status": "idle",
+      "category": "lead",
+      "description": "Front door. All new requests + routing. Approvals (merge/push/pay/auth) are a later lead node.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_route",
+      "type": "merge",
+      "label": "Route to specialist",
+      "config": {
+        "lane": "lead"
+      },
+      "position": {
+        "x": 960.0,
+        "y": 52.0
+      },
+      "status": "idle",
+      "category": "lead",
+      "description": "lead \u2192 specialist. New user requests are handed to the matching lane.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lead_approve",
+      "type": "decision_gate",
+      "label": "lead \u00b7 approvals",
+      "config": {
+        "field": "ready",
+        "fail_closed": true,
+        "actions": [
+          "merge",
+          "push",
+          "pay",
+          "auth"
+        ],
+        "lane": "lead",
+        "badge": "NEVER ASK USER"
+      },
+      "position": {
+        "x": 1460.0,
+        "y": 52.0
+      },
+      "status": "idle",
+      "category": "lead",
+      "description": "specialist \u2192 lead. merge/push/pay/auth. Never ask the user to click.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_export",
+      "type": "graph_export",
+      "label": "Export team graph",
+      "config": {
+        "format": "semantica_case_graph",
+        "lane": "lead"
+      },
+      "position": {
+        "x": 1710.0,
+        "y": 52.0
+      },
+      "status": "idle",
+      "category": "lead",
+      "description": "Export the LanBB team case graph (semantica_case_graph).",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_wiki_gate",
+      "type": "decision_gate",
+      "label": "Approve wiki ingest",
+      "config": {
+        "field": "wiki_thawed",
+        "fail_closed": true,
+        "wiki_thawed": false,
+        "lane": "wiki",
+        "badge": "CLOSED"
+      },
+      "position": {
+        "x": 960.0,
+        "y": 220.0
+      },
+      "status": "idle",
+      "category": "wiki",
+      "description": "Social finds: search \u2192 lead \u2192 wiki after approve. Gate is CLOSED \u2014 wiki is FULL FREEZE.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_wiki",
+      "type": "agent",
+      "label": "wiki",
+      "config": {
+        "role": "wiki",
+        "vault": "elan7192/second-brain",
+        "status": "FULL_FREEZE",
+        "ingest": false,
+        "push": false,
+        "lane": "wiki",
+        "badge": "FULL FREEZE"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 220.0
+      },
+      "status": "idle",
+      "category": "wiki",
+      "description": "second-brain vault elan7192/second-brain. Currently FULL FREEZE (no ingest/push).",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_arxiv",
+      "type": "agent",
+      "label": "arxiv",
+      "config": {
+        "role": "arxiv",
+        "harvest": "dead",
+        "digests": "paused_quota",
+        "lane": "arxiv",
+        "badge": "PAUSED"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 388.0
+      },
+      "status": "idle",
+      "category": "arxiv",
+      "description": "Paper corpus. Harvest dead, digests paused for quota. Paper hits: search \u2192 lead \u2192 arxiv.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_search_scout",
+      "type": "agent",
+      "label": "search \u00b7 scout",
+      "config": {
+        "role": "search",
+        "mode": "scout",
+        "sources": [
+          "Google",
+          "Reddit",
+          "X",
+          "FB",
+          "IG",
+          "Threads"
+        ],
+        "scheduled_scout": false,
+        "lane": "search",
+        "badge": "ON-DEMAND"
+      },
+      "position": {
+        "x": 210.0,
+        "y": 556.0
+      },
+      "status": "idle",
+      "category": "search",
+      "description": "Only scout. Google/Reddit/X/FB/IG/Threads. NO scheduled scout unless lan E asks.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_paper_hit",
+      "type": "trigger",
+      "label": "Paper hit",
+      "config": {
+        "lane": "search",
+        "badge": "SEARCH \u2192 LEAD \u2192 ARXIV"
+      },
+      "position": {
+        "x": 460.0,
+        "y": 520.0
+      },
+      "status": "idle",
+      "category": "search",
+      "description": "Paper hits: search \u2192 lead \u2192 arxiv.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_social_find",
+      "type": "trigger",
+      "label": "Social find",
+      "config": {
+        "lane": "search",
+        "badge": "SEARCH \u2192 LEAD \u2192 WIKI"
+      },
+      "position": {
+        "x": 460.0,
+        "y": 592.0
+      },
+      "status": "idle",
+      "category": "search",
+      "description": "Social finds: search \u2192 lead \u2192 wiki after approve.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_search_ondemand",
+      "type": "agent",
+      "label": "search \u00b7 on-demand",
+      "config": {
+        "role": "search",
+        "mode": "on_demand",
+        "scheduled_scout": false,
+        "lane": "search",
+        "badge": "NO SCHEDULE"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 556.0
+      },
+      "status": "idle",
+      "category": "search",
+      "description": "Specialist work only when lan E asks via lead. Not a scheduled scout.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lanbb",
+      "type": "agent",
+      "label": "lanbb",
+      "config": {
+        "role": "lanbb",
+        "product": "LanBB",
+        "lane": "lanbb",
+        "badge": "PRODUCT"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 724.0
+      },
+      "status": "idle",
+      "category": "lanbb",
+      "description": "LanBB product.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_cursor",
+      "type": "agent",
+      "label": "cursor",
+      "config": {
+        "role": "cursor",
+        "scope": "owned_repos_only",
+        "lane": "cursor",
+        "badge": "OWNED REPOS"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 892.0
+      },
+      "status": "idle",
+      "category": "cursor",
+      "description": "CloudAgents on owned repos.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_design",
+      "type": "agent",
+      "label": "design huddle",
+      "config": {
+        "role": "design huddle",
+        "surfaces": [
+          "figma",
+          "motion",
+          "experiments",
+          "devbot"
+        ],
+        "lane": "design huddle",
+        "badge": "CREATIVE"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 1060.0
+      },
+      "status": "idle",
+      "category": "design huddle",
+      "description": "figma, motion, experiments, devbot.",
+      "ports": [],
+      "result": null,
+      "error": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_n_user_request_n_lead_intake_new_request",
+      "source": "n_user_request",
+      "target": "n_lead_intake",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "new request"
+    },
+    {
+      "id": "e_n_lead_intake_n_route_route",
+      "source": "n_lead_intake",
+      "target": "n_route",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "route"
+    },
+    {
+      "id": "e_n_search_scout_n_paper_hit_scout",
+      "source": "n_search_scout",
+      "target": "n_paper_hit",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "scout"
+    },
+    {
+      "id": "e_n_paper_hit_n_lead_intake_paper_hits",
+      "source": "n_paper_hit",
+      "target": "n_lead_intake",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "paper hits"
+    },
+    {
+      "id": "e_n_lead_intake_n_arxiv_paper_hits",
+      "source": "n_lead_intake",
+      "target": "n_arxiv",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "paper hits"
+    },
+    {
+      "id": "e_n_search_scout_n_social_find_scout",
+      "source": "n_search_scout",
+      "target": "n_social_find",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "scout"
+    },
+    {
+      "id": "e_n_social_find_n_lead_intake_social_finds",
+      "source": "n_social_find",
+      "target": "n_lead_intake",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "social finds"
+    },
+    {
+      "id": "e_n_lead_intake_n_wiki_gate_social_finds",
+      "source": "n_lead_intake",
+      "target": "n_wiki_gate",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "social finds"
+    },
+    {
+      "id": "e_n_wiki_gate_n_wiki_after_approve",
+      "source": "n_wiki_gate",
+      "target": "n_wiki",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "after approve"
+    },
+    {
+      "id": "e_n_route_n_wiki_gate_specialist",
+      "source": "n_route",
+      "target": "n_wiki_gate",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_route_n_arxiv_specialist",
+      "source": "n_route",
+      "target": "n_arxiv",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_route_n_search_ondemand_specialist",
+      "source": "n_route",
+      "target": "n_search_ondemand",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_route_n_lanbb_specialist",
+      "source": "n_route",
+      "target": "n_lanbb",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_route_n_cursor_specialist",
+      "source": "n_route",
+      "target": "n_cursor",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_route_n_design_specialist",
+      "source": "n_route",
+      "target": "n_design",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_wiki_n_lead_approve_approval",
+      "source": "n_wiki",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_arxiv_n_lead_approve_approval",
+      "source": "n_arxiv",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_search_ondemand_n_lead_approve_approval",
+      "source": "n_search_ondemand",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_lanbb_n_lead_approve_approval",
+      "source": "n_lanbb",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_cursor_n_lead_approve_approval",
+      "source": "n_cursor",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_design_n_lead_approve_approval",
+      "source": "n_design",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_lead_approve_n_export_signed_off",
+      "source": "n_lead_approve",
+      "target": "n_export",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "signed off"
+    }
+  ],
+  "metadata": {
+    "template": "grok_bot_team",
+    "product": "LanBB",
+    "domain": "team_routing",
+    "style": "n8n_graph",
+    "lanes": [
+      "lead",
+      "wiki",
+      "arxiv",
+      "search",
+      "lanbb",
+      "cursor",
+      "design huddle"
+    ],
+    "wiki_status": "FULL_FREEZE",
+    "wiki_vault": "elan7192/second-brain",
+    "arxiv_harvest": "dead",
+    "arxiv_digests": "paused_quota",
+    "search_scheduled_scout": false,
+    "search_sources": [
+      "Google",
+      "Reddit",
+      "X",
+      "FB",
+      "IG",
+      "Threads"
+    ],
+    "approval_actions": [
+      "merge",
+      "push",
+      "pay",
+      "auth"
+    ],
+    "approval_never_asks_user": true,
+    "authorized_only": true
+  },
+  "version": "1.0.0"
+};
+    const GRAPH = {
+  "nodes": [
+    {
+      "id": "team:grok-bot",
+      "type": "Team",
+      "label": "LanBB Grok Bot team",
+      "properties": {
+        "product": "LanBB",
+        "lanes": [
+          "lead",
+          "wiki",
+          "arxiv",
+          "search",
+          "lanbb",
+          "cursor",
+          "design huddle"
+        ],
+        "front_door": "lead"
+      }
+    },
+    {
+      "id": "intake:user-request",
+      "type": "Intake",
+      "label": "New user request",
+      "properties": {
+        "from": "anyone/user",
+        "route": "lead \u2192 specialist"
+      }
+    },
+    {
+      "id": "intake:paper-hit",
+      "type": "Intake",
+      "label": "Paper hit",
+      "properties": {
+        "from": "search",
+        "route": "search \u2192 lead \u2192 arxiv"
+      }
+    },
+    {
+      "id": "intake:social-find",
+      "type": "Intake",
+      "label": "Social find",
+      "properties": {
+        "from": "search",
+        "route": "search \u2192 lead \u2192 wiki after approve"
+      }
+    },
+    {
+      "id": "approval:lead",
+      "type": "Approval",
+      "label": "lead approvals",
+      "properties": {
+        "actions": [
+          "merge",
+          "push",
+          "pay",
+          "auth"
+        ],
+        "never_ask_user": true
+      }
+    },
+    {
+      "id": "policy:wiki-freeze",
+      "type": "Policy",
+      "label": "wiki FULL FREEZE",
+      "properties": {
+        "ingest": false,
+        "push": false,
+        "vault": "elan7192/second-brain"
+      }
+    },
+    {
+      "id": "policy:arxiv-pause",
+      "type": "Policy",
+      "label": "arxiv paused",
+      "properties": {
+        "harvest": "dead",
+        "digests": "paused_quota"
+      }
+    },
+    {
+      "id": "policy:search-on-demand",
+      "type": "Policy",
+      "label": "search on-demand only",
+      "properties": {
+        "scheduled_scout": false,
+        "unless": "lan E asks",
+        "sources": [
+          "Google",
+          "Reddit",
+          "X",
+          "FB",
+          "IG",
+          "Threads"
+        ]
+      }
+    },
+    {
+      "id": "agent:lead",
+      "type": "Agent",
+      "label": "lead",
+      "properties": {
+        "label": "lead",
+        "duty": "front door. All new requests + approvals (merge/push/pay/auth).",
+        "status": "active"
+      }
+    },
+    {
+      "id": "agent:wiki",
+      "type": "Agent",
+      "label": "wiki",
+      "properties": {
+        "label": "wiki",
+        "duty": "second-brain vault elan7192/second-brain.",
+        "status": "FULL_FREEZE",
+        "ingest": false,
+        "push": false,
+        "vault": "elan7192/second-brain"
+      }
+    },
+    {
+      "id": "agent:arxiv",
+      "type": "Agent",
+      "label": "arxiv",
+      "properties": {
+        "label": "arxiv",
+        "duty": "paper corpus.",
+        "status": "paused",
+        "harvest": "dead",
+        "digests": "paused_quota"
+      }
+    },
+    {
+      "id": "agent:search",
+      "type": "Agent",
+      "label": "search",
+      "properties": {
+        "label": "search",
+        "duty": "only scout. Google/Reddit/X/FB/IG/Threads.",
+        "status": "on_demand",
+        "scheduled_scout": false,
+        "sources": [
+          "Google",
+          "Reddit",
+          "X",
+          "FB",
+          "IG",
+          "Threads"
+        ]
+      }
+    },
+    {
+      "id": "agent:lanbb",
+      "type": "Agent",
+      "label": "lanbb",
+      "properties": {
+        "label": "lanbb",
+        "duty": "LanBB product.",
+        "status": "active",
+        "product": "LanBB"
+      }
+    },
+    {
+      "id": "agent:cursor",
+      "type": "Agent",
+      "label": "cursor",
+      "properties": {
+        "label": "cursor",
+        "duty": "CloudAgents on owned repos.",
+        "status": "active",
+        "scope": "owned_repos_only"
+      }
+    },
+    {
+      "id": "agent:design huddle",
+      "type": "Agent",
+      "label": "design huddle",
+      "properties": {
+        "label": "design huddle",
+        "duty": "figma, motion, experiments, devbot.",
+        "status": "active",
+        "surfaces": [
+          "figma",
+          "motion",
+          "experiments",
+          "devbot"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e:member:lead",
+      "source": "team:grok-bot",
+      "target": "agent:lead",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:wiki",
+      "source": "team:grok-bot",
+      "target": "agent:wiki",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:arxiv",
+      "source": "team:grok-bot",
+      "target": "agent:arxiv",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:search",
+      "source": "team:grok-bot",
+      "target": "agent:search",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:lanbb",
+      "source": "team:grok-bot",
+      "target": "agent:lanbb",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:cursor",
+      "source": "team:grok-bot",
+      "target": "agent:cursor",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:design huddle",
+      "source": "team:grok-bot",
+      "target": "agent:design huddle",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:intake-user",
+      "source": "intake:user-request",
+      "target": "agent:lead",
+      "type": "ENTERS"
+    },
+    {
+      "id": "e:paper-search",
+      "source": "agent:search",
+      "target": "intake:paper-hit",
+      "type": "SCOUTS"
+    },
+    {
+      "id": "e:paper-lead",
+      "source": "intake:paper-hit",
+      "target": "agent:lead",
+      "type": "PAPER_HITS"
+    },
+    {
+      "id": "e:paper-arxiv",
+      "source": "agent:lead",
+      "target": "agent:arxiv",
+      "type": "PAPER_HITS"
+    },
+    {
+      "id": "e:social-search",
+      "source": "agent:search",
+      "target": "intake:social-find",
+      "type": "SCOUTS"
+    },
+    {
+      "id": "e:social-lead",
+      "source": "intake:social-find",
+      "target": "agent:lead",
+      "type": "SOCIAL_FINDS"
+    },
+    {
+      "id": "e:social-wiki",
+      "source": "agent:lead",
+      "target": "agent:wiki",
+      "type": "SOCIAL_FINDS_AFTER_APPROVE"
+    },
+    {
+      "id": "e:user-route",
+      "source": "agent:lead",
+      "target": "intake:user-request",
+      "type": "ROUTES"
+    },
+    {
+      "id": "e:route:wiki",
+      "source": "agent:lead",
+      "target": "agent:wiki",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:route:arxiv",
+      "source": "agent:lead",
+      "target": "agent:arxiv",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:route:search",
+      "source": "agent:lead",
+      "target": "agent:search",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:route:lanbb",
+      "source": "agent:lead",
+      "target": "agent:lanbb",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:route:cursor",
+      "source": "agent:lead",
+      "target": "agent:cursor",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:route:design huddle",
+      "source": "agent:lead",
+      "target": "agent:design huddle",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:approve:wiki",
+      "source": "agent:wiki",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approve:arxiv",
+      "source": "agent:arxiv",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approve:search",
+      "source": "agent:search",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approve:lanbb",
+      "source": "agent:lanbb",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approve:cursor",
+      "source": "agent:cursor",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approve:design huddle",
+      "source": "agent:design huddle",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approval-owned",
+      "source": "agent:lead",
+      "target": "approval:lead",
+      "type": "OWNS"
+    },
+    {
+      "id": "e:wiki-policy",
+      "source": "policy:wiki-freeze",
+      "target": "agent:wiki",
+      "type": "BINDS"
+    },
+    {
+      "id": "e:arxiv-policy",
+      "source": "policy:arxiv-pause",
+      "target": "agent:arxiv",
+      "type": "BINDS"
+    },
+    {
+      "id": "e:search-policy",
+      "source": "policy:search-on-demand",
+      "target": "agent:search",
+      "type": "BINDS"
+    }
+  ],
+  "exported_at": "2026-08-25T02:44:35.443590+00:00",
+  "format": "semantica_case_graph",
+  "product": "LanBB",
+  "flow_id": "flow_grok_bot_team",
+  "flow_name": "LanBB Grok Bot team"
+};
+    const LANE_COLOR = {
+      lead: "#2d72d2", wiki: "#9179f2", arxiv: "#d9822b", search: "#32a467",
+      lanbb: "#48aff0", cursor: "#c8763a", "design huddle": "#db6bcf"
+    };
+    const TYPE_COLOR = {
+      Team: "#2d72d2", Agent: "#48aff0", Intake: "#32a467", Approval: "#d9822b", Policy: "#9179f2"
+    };
+
+    document.getElementById("laneList").innerHTML = (FLOW.metadata.lanes || []).map((lane) => `
+      <div class="lane"><span class="dot" style="background:${LANE_COLOR[lane] || "#8fa8c0"}"></span>${lane}</div>
+    `).join("");
+
+    let network;
+    let view = "flow";
+
+    function inspect(obj) {
+      const kv = document.getElementById("inspKv");
+      document.getElementById("inspTitle").textContent = obj.label || obj.id || "Node";
+      kv.innerHTML = `
+        <b>id</b><span>${obj.id || ""}</span>
+        <b>type</b><span>${obj.type || ""}</span>
+        <b>lane</b><span>${obj.category || obj.config?.lane || "—"}</span>
+      `;
+      document.getElementById("inspPre").textContent = JSON.stringify(obj, null, 2);
+    }
+
+    function drawFlow() {
+      const nodes = new vis.DataSet(FLOW.nodes.map((n) => ({
+        id: n.id,
+        label: n.label + (n.config?.badge ? "\n" + n.config.badge : ""),
+        x: n.position?.x || 0,
+        y: n.position?.y || 0,
+        physics: false,
+        color: {
+          background: "#161d24",
+          border: LANE_COLOR[n.category] || "#8fa8c0",
+          highlight: { background: "#1b2430", border: "#9ec3f5" }
+        },
+        font: { color: "#e8eef5", face: "IBM Plex Sans", size: 13, multi: true },
+        shape: "box",
+        margin: 12,
+        widthConstraint: { minimum: 160, maximum: 200 },
+        borderWidth: 2,
+        raw: n
+      })));
+      const edges = new vis.DataSet(FLOW.edges.map((e) => ({
+        id: e.id, from: e.source, to: e.target, label: e.label || "",
+        arrows: { to: { enabled: true, scaleFactor: 0.7 } },
+        color: { color: "rgba(143,168,192,0.45)", highlight: "#2d72d2" },
+        font: { color: "#8fa8c0", size: 10, strokeWidth: 0, face: "IBM Plex Mono" },
+        dashes: e.label === "after approve" || e.source === "n_wiki_gate",
+        smooth: { type: "cubicBezier", forceDirection: "horizontal", roundness: 0.25 }
+      })));
+      return { nodes, edges };
+    }
+
+    function drawCase() {
+      const nodes = new vis.DataSet(GRAPH.nodes.map((n) => ({
+        id: n.id,
+        label: n.label,
+        color: {
+          background: TYPE_COLOR[n.type] || "#738694",
+          border: "rgba(255,255,255,0.18)",
+          highlight: { background: "#f5f8fa", border: "#2d72d2" }
+        },
+        font: { color: "#0f1419", face: "IBM Plex Sans", size: 12, bold: true },
+        shape: "box",
+        margin: 12,
+        raw: n
+      })));
+      const edges = new vis.DataSet(GRAPH.edges.map((e) => ({
+        id: e.id, from: e.source, to: e.target, label: e.type,
+        arrows: { to: { enabled: true, scaleFactor: 0.65 } },
+        color: { color: "rgba(143,168,192,0.45)", highlight: "#2d72d2" },
+        font: { color: "#8fa8c0", size: 9, strokeWidth: 0, face: "IBM Plex Mono" },
+        smooth: { type: "cubicBezier", forceDirection: "horizontal", roundness: 0.35 }
+      })));
+      return { nodes, edges };
+    }
+
+    function mount(kind) {
+      view = kind;
+      document.querySelectorAll(".top-tab").forEach((t) => {
+        t.dataset.active = String(t.dataset.view === kind);
+      });
+      const data = kind === "flow" ? drawFlow() : drawCase();
+      const options = kind === "flow"
+        ? { physics: false, interaction: { hover: true, dragNodes: true }, edges: { font: { align: "middle" } } }
+        : { physics: { barnesHut: { gravitationalConstant: -14000, springLength: 130 }, stabilization: { iterations: 120 } }, interaction: { hover: true } };
+      if (network) network.destroy();
+      network = new vis.Network(document.getElementById("canvas"), data, options);
+      network.on("click", (params) => {
+        if (!params.nodes.length) return;
+        inspect(data.nodes.get(params.nodes[0]).raw);
+      });
+      if (kind === "case") {
+        network.once("stabilizationIterationsDone", () => network.setOptions({ physics: false }));
+      } else {
+        setTimeout(() => network.fit({ animation: true }), 50);
+      }
+    }
+
+    document.querySelectorAll(".top-tab").forEach((el) => {
+      el.addEventListener("click", () => mount(el.dataset.view));
+    });
+    inspect({ id: FLOW.id, type: "FlowGraph", label: FLOW.name, category: "LanBB", ...FLOW.metadata });
+    mount("flow");
+  </script>
+</body>
+</html>

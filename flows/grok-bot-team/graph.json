@@ -1,0 +1,384 @@
+{
+  "nodes": [
+    {
+      "id": "team:grok-bot",
+      "type": "Team",
+      "label": "LanBB Grok Bot team",
+      "properties": {
+        "product": "LanBB",
+        "lanes": [
+          "lead",
+          "wiki",
+          "arxiv",
+          "search",
+          "lanbb",
+          "cursor",
+          "design huddle"
+        ],
+        "front_door": "lead"
+      }
+    },
+    {
+      "id": "intake:user-request",
+      "type": "Intake",
+      "label": "New user request",
+      "properties": {
+        "from": "anyone/user",
+        "route": "lead \u2192 specialist"
+      }
+    },
+    {
+      "id": "intake:paper-hit",
+      "type": "Intake",
+      "label": "Paper hit",
+      "properties": {
+        "from": "search",
+        "route": "search \u2192 lead \u2192 arxiv"
+      }
+    },
+    {
+      "id": "intake:social-find",
+      "type": "Intake",
+      "label": "Social find",
+      "properties": {
+        "from": "search",
+        "route": "search \u2192 lead \u2192 wiki after approve"
+      }
+    },
+    {
+      "id": "approval:lead",
+      "type": "Approval",
+      "label": "lead approvals",
+      "properties": {
+        "actions": [
+          "merge",
+          "push",
+          "pay",
+          "auth"
+        ],
+        "never_ask_user": true
+      }
+    },
+    {
+      "id": "policy:wiki-freeze",
+      "type": "Policy",
+      "label": "wiki FULL FREEZE",
+      "properties": {
+        "ingest": false,
+        "push": false,
+        "vault": "elan7192/second-brain"
+      }
+    },
+    {
+      "id": "policy:arxiv-pause",
+      "type": "Policy",
+      "label": "arxiv paused",
+      "properties": {
+        "harvest": "dead",
+        "digests": "paused_quota"
+      }
+    },
+    {
+      "id": "policy:search-on-demand",
+      "type": "Policy",
+      "label": "search on-demand only",
+      "properties": {
+        "scheduled_scout": false,
+        "unless": "lan E asks",
+        "sources": [
+          "Google",
+          "Reddit",
+          "X",
+          "FB",
+          "IG",
+          "Threads"
+        ]
+      }
+    },
+    {
+      "id": "agent:lead",
+      "type": "Agent",
+      "label": "lead",
+      "properties": {
+        "label": "lead",
+        "duty": "front door. All new requests + approvals (merge/push/pay/auth).",
+        "status": "active"
+      }
+    },
+    {
+      "id": "agent:wiki",
+      "type": "Agent",
+      "label": "wiki",
+      "properties": {
+        "label": "wiki",
+        "duty": "second-brain vault elan7192/second-brain.",
+        "status": "FULL_FREEZE",
+        "ingest": false,
+        "push": false,
+        "vault": "elan7192/second-brain"
+      }
+    },
+    {
+      "id": "agent:arxiv",
+      "type": "Agent",
+      "label": "arxiv",
+      "properties": {
+        "label": "arxiv",
+        "duty": "paper corpus.",
+        "status": "paused",
+        "harvest": "dead",
+        "digests": "paused_quota"
+      }
+    },
+    {
+      "id": "agent:search",
+      "type": "Agent",
+      "label": "search",
+      "properties": {
+        "label": "search",
+        "duty": "only scout. Google/Reddit/X/FB/IG/Threads.",
+        "status": "on_demand",
+        "scheduled_scout": false,
+        "sources": [
+          "Google",
+          "Reddit",
+          "X",
+          "FB",
+          "IG",
+          "Threads"
+        ]
+      }
+    },
+    {
+      "id": "agent:lanbb",
+      "type": "Agent",
+      "label": "lanbb",
+      "properties": {
+        "label": "lanbb",
+        "duty": "LanBB product.",
+        "status": "active",
+        "product": "LanBB"
+      }
+    },
+    {
+      "id": "agent:cursor",
+      "type": "Agent",
+      "label": "cursor",
+      "properties": {
+        "label": "cursor",
+        "duty": "CloudAgents on owned repos.",
+        "status": "active",
+        "scope": "owned_repos_only"
+      }
+    },
+    {
+      "id": "agent:design huddle",
+      "type": "Agent",
+      "label": "design huddle",
+      "properties": {
+        "label": "design huddle",
+        "duty": "figma, motion, experiments, devbot.",
+        "status": "active",
+        "surfaces": [
+          "figma",
+          "motion",
+          "experiments",
+          "devbot"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e:member:lead",
+      "source": "team:grok-bot",
+      "target": "agent:lead",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:wiki",
+      "source": "team:grok-bot",
+      "target": "agent:wiki",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:arxiv",
+      "source": "team:grok-bot",
+      "target": "agent:arxiv",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:search",
+      "source": "team:grok-bot",
+      "target": "agent:search",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:lanbb",
+      "source": "team:grok-bot",
+      "target": "agent:lanbb",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:cursor",
+      "source": "team:grok-bot",
+      "target": "agent:cursor",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:member:design huddle",
+      "source": "team:grok-bot",
+      "target": "agent:design huddle",
+      "type": "HAS_LANE"
+    },
+    {
+      "id": "e:intake-user",
+      "source": "intake:user-request",
+      "target": "agent:lead",
+      "type": "ENTERS"
+    },
+    {
+      "id": "e:paper-search",
+      "source": "agent:search",
+      "target": "intake:paper-hit",
+      "type": "SCOUTS"
+    },
+    {
+      "id": "e:paper-lead",
+      "source": "intake:paper-hit",
+      "target": "agent:lead",
+      "type": "PAPER_HITS"
+    },
+    {
+      "id": "e:paper-arxiv",
+      "source": "agent:lead",
+      "target": "agent:arxiv",
+      "type": "PAPER_HITS"
+    },
+    {
+      "id": "e:social-search",
+      "source": "agent:search",
+      "target": "intake:social-find",
+      "type": "SCOUTS"
+    },
+    {
+      "id": "e:social-lead",
+      "source": "intake:social-find",
+      "target": "agent:lead",
+      "type": "SOCIAL_FINDS"
+    },
+    {
+      "id": "e:social-wiki",
+      "source": "agent:lead",
+      "target": "agent:wiki",
+      "type": "SOCIAL_FINDS_AFTER_APPROVE"
+    },
+    {
+      "id": "e:user-route",
+      "source": "agent:lead",
+      "target": "intake:user-request",
+      "type": "ROUTES"
+    },
+    {
+      "id": "e:route:wiki",
+      "source": "agent:lead",
+      "target": "agent:wiki",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:route:arxiv",
+      "source": "agent:lead",
+      "target": "agent:arxiv",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:route:search",
+      "source": "agent:lead",
+      "target": "agent:search",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:route:lanbb",
+      "source": "agent:lead",
+      "target": "agent:lanbb",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:route:cursor",
+      "source": "agent:lead",
+      "target": "agent:cursor",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:route:design huddle",
+      "source": "agent:lead",
+      "target": "agent:design huddle",
+      "type": "ROUTES_TO"
+    },
+    {
+      "id": "e:approve:wiki",
+      "source": "agent:wiki",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approve:arxiv",
+      "source": "agent:arxiv",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approve:search",
+      "source": "agent:search",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approve:lanbb",
+      "source": "agent:lanbb",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approve:cursor",
+      "source": "agent:cursor",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approve:design huddle",
+      "source": "agent:design huddle",
+      "target": "approval:lead",
+      "type": "ASKS_APPROVAL"
+    },
+    {
+      "id": "e:approval-owned",
+      "source": "agent:lead",
+      "target": "approval:lead",
+      "type": "OWNS"
+    },
+    {
+      "id": "e:wiki-policy",
+      "source": "policy:wiki-freeze",
+      "target": "agent:wiki",
+      "type": "BINDS"
+    },
+    {
+      "id": "e:arxiv-policy",
+      "source": "policy:arxiv-pause",
+      "target": "agent:arxiv",
+      "type": "BINDS"
+    },
+    {
+      "id": "e:search-policy",
+      "source": "policy:search-on-demand",
+      "target": "agent:search",
+      "type": "BINDS"
+    }
+  ],
+  "exported_at": "2026-08-25T02:44:35.443590+00:00",
+  "format": "semantica_case_graph",
+  "product": "LanBB",
+  "flow_id": "flow_grok_bot_team",
+  "flow_name": "LanBB Grok Bot team"
+}

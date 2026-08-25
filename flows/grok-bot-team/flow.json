@@ -1,0 +1,556 @@
+{
+  "id": "flow_grok_bot_team",
+  "name": "LanBB Grok Bot team",
+  "description": "LanBB Grok Bot team routing, n8n-style. lead is the front door and the only approval hop (merge/push/pay/auth) \u2014 specialists never ask the user to click. wiki is FULL FREEZE. arxiv harvest is dead and digests are paused for quota. search scouts only on demand (Google/Reddit/X/FB/IG/Threads).",
+  "nodes": [
+    {
+      "id": "n_user_request",
+      "type": "trigger",
+      "label": "New user request",
+      "config": {
+        "lane": "lead",
+        "badge": "ANYONE \u2192 LEAD"
+      },
+      "position": {
+        "x": 210.0,
+        "y": 52.0
+      },
+      "status": "idle",
+      "category": "lead",
+      "description": "anyone/user \u2192 lead. All new requests enter the front door.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lead_intake",
+      "type": "agent",
+      "label": "lead \u00b7 front door",
+      "config": {
+        "role": "lead",
+        "owns": [
+          "intake",
+          "routing",
+          "approvals"
+        ],
+        "lane": "lead",
+        "badge": "FRONT DOOR"
+      },
+      "position": {
+        "x": 710.0,
+        "y": 52.0
+      },
+      "status": "idle",
+      "category": "lead",
+      "description": "Front door. All new requests + routing. Approvals (merge/push/pay/auth) are a later lead node.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_route",
+      "type": "merge",
+      "label": "Route to specialist",
+      "config": {
+        "lane": "lead"
+      },
+      "position": {
+        "x": 960.0,
+        "y": 52.0
+      },
+      "status": "idle",
+      "category": "lead",
+      "description": "lead \u2192 specialist. New user requests are handed to the matching lane.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lead_approve",
+      "type": "decision_gate",
+      "label": "lead \u00b7 approvals",
+      "config": {
+        "field": "ready",
+        "fail_closed": true,
+        "actions": [
+          "merge",
+          "push",
+          "pay",
+          "auth"
+        ],
+        "lane": "lead",
+        "badge": "NEVER ASK USER"
+      },
+      "position": {
+        "x": 1460.0,
+        "y": 52.0
+      },
+      "status": "idle",
+      "category": "lead",
+      "description": "specialist \u2192 lead. merge/push/pay/auth. Never ask the user to click.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_export",
+      "type": "graph_export",
+      "label": "Export team graph",
+      "config": {
+        "format": "semantica_case_graph",
+        "lane": "lead"
+      },
+      "position": {
+        "x": 1710.0,
+        "y": 52.0
+      },
+      "status": "idle",
+      "category": "lead",
+      "description": "Export the LanBB team case graph (semantica_case_graph).",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_wiki_gate",
+      "type": "decision_gate",
+      "label": "Approve wiki ingest",
+      "config": {
+        "field": "wiki_thawed",
+        "fail_closed": true,
+        "wiki_thawed": false,
+        "lane": "wiki",
+        "badge": "CLOSED"
+      },
+      "position": {
+        "x": 960.0,
+        "y": 220.0
+      },
+      "status": "idle",
+      "category": "wiki",
+      "description": "Social finds: search \u2192 lead \u2192 wiki after approve. Gate is CLOSED \u2014 wiki is FULL FREEZE.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_wiki",
+      "type": "agent",
+      "label": "wiki",
+      "config": {
+        "role": "wiki",
+        "vault": "elan7192/second-brain",
+        "status": "FULL_FREEZE",
+        "ingest": false,
+        "push": false,
+        "lane": "wiki",
+        "badge": "FULL FREEZE"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 220.0
+      },
+      "status": "idle",
+      "category": "wiki",
+      "description": "second-brain vault elan7192/second-brain. Currently FULL FREEZE (no ingest/push).",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_arxiv",
+      "type": "agent",
+      "label": "arxiv",
+      "config": {
+        "role": "arxiv",
+        "harvest": "dead",
+        "digests": "paused_quota",
+        "lane": "arxiv",
+        "badge": "PAUSED"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 388.0
+      },
+      "status": "idle",
+      "category": "arxiv",
+      "description": "Paper corpus. Harvest dead, digests paused for quota. Paper hits: search \u2192 lead \u2192 arxiv.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_search_scout",
+      "type": "agent",
+      "label": "search \u00b7 scout",
+      "config": {
+        "role": "search",
+        "mode": "scout",
+        "sources": [
+          "Google",
+          "Reddit",
+          "X",
+          "FB",
+          "IG",
+          "Threads"
+        ],
+        "scheduled_scout": false,
+        "lane": "search",
+        "badge": "ON-DEMAND"
+      },
+      "position": {
+        "x": 210.0,
+        "y": 556.0
+      },
+      "status": "idle",
+      "category": "search",
+      "description": "Only scout. Google/Reddit/X/FB/IG/Threads. NO scheduled scout unless lan E asks.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_paper_hit",
+      "type": "trigger",
+      "label": "Paper hit",
+      "config": {
+        "lane": "search",
+        "badge": "SEARCH \u2192 LEAD \u2192 ARXIV"
+      },
+      "position": {
+        "x": 460.0,
+        "y": 520.0
+      },
+      "status": "idle",
+      "category": "search",
+      "description": "Paper hits: search \u2192 lead \u2192 arxiv.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_social_find",
+      "type": "trigger",
+      "label": "Social find",
+      "config": {
+        "lane": "search",
+        "badge": "SEARCH \u2192 LEAD \u2192 WIKI"
+      },
+      "position": {
+        "x": 460.0,
+        "y": 592.0
+      },
+      "status": "idle",
+      "category": "search",
+      "description": "Social finds: search \u2192 lead \u2192 wiki after approve.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_search_ondemand",
+      "type": "agent",
+      "label": "search \u00b7 on-demand",
+      "config": {
+        "role": "search",
+        "mode": "on_demand",
+        "scheduled_scout": false,
+        "lane": "search",
+        "badge": "NO SCHEDULE"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 556.0
+      },
+      "status": "idle",
+      "category": "search",
+      "description": "Specialist work only when lan E asks via lead. Not a scheduled scout.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lanbb",
+      "type": "agent",
+      "label": "lanbb",
+      "config": {
+        "role": "lanbb",
+        "product": "LanBB",
+        "lane": "lanbb",
+        "badge": "PRODUCT"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 724.0
+      },
+      "status": "idle",
+      "category": "lanbb",
+      "description": "LanBB product.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_cursor",
+      "type": "agent",
+      "label": "cursor",
+      "config": {
+        "role": "cursor",
+        "scope": "owned_repos_only",
+        "lane": "cursor",
+        "badge": "OWNED REPOS"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 892.0
+      },
+      "status": "idle",
+      "category": "cursor",
+      "description": "CloudAgents on owned repos.",
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_design",
+      "type": "agent",
+      "label": "design huddle",
+      "config": {
+        "role": "design huddle",
+        "surfaces": [
+          "figma",
+          "motion",
+          "experiments",
+          "devbot"
+        ],
+        "lane": "design huddle",
+        "badge": "CREATIVE"
+      },
+      "position": {
+        "x": 1210.0,
+        "y": 1060.0
+      },
+      "status": "idle",
+      "category": "design huddle",
+      "description": "figma, motion, experiments, devbot.",
+      "ports": [],
+      "result": null,
+      "error": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_n_user_request_n_lead_intake_new_request",
+      "source": "n_user_request",
+      "target": "n_lead_intake",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "new request"
+    },
+    {
+      "id": "e_n_lead_intake_n_route_route",
+      "source": "n_lead_intake",
+      "target": "n_route",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "route"
+    },
+    {
+      "id": "e_n_search_scout_n_paper_hit_scout",
+      "source": "n_search_scout",
+      "target": "n_paper_hit",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "scout"
+    },
+    {
+      "id": "e_n_paper_hit_n_lead_intake_paper_hits",
+      "source": "n_paper_hit",
+      "target": "n_lead_intake",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "paper hits"
+    },
+    {
+      "id": "e_n_lead_intake_n_arxiv_paper_hits",
+      "source": "n_lead_intake",
+      "target": "n_arxiv",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "paper hits"
+    },
+    {
+      "id": "e_n_search_scout_n_social_find_scout",
+      "source": "n_search_scout",
+      "target": "n_social_find",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "scout"
+    },
+    {
+      "id": "e_n_social_find_n_lead_intake_social_finds",
+      "source": "n_social_find",
+      "target": "n_lead_intake",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "social finds"
+    },
+    {
+      "id": "e_n_lead_intake_n_wiki_gate_social_finds",
+      "source": "n_lead_intake",
+      "target": "n_wiki_gate",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "social finds"
+    },
+    {
+      "id": "e_n_wiki_gate_n_wiki_after_approve",
+      "source": "n_wiki_gate",
+      "target": "n_wiki",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "after approve"
+    },
+    {
+      "id": "e_n_route_n_wiki_gate_specialist",
+      "source": "n_route",
+      "target": "n_wiki_gate",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_route_n_arxiv_specialist",
+      "source": "n_route",
+      "target": "n_arxiv",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_route_n_search_ondemand_specialist",
+      "source": "n_route",
+      "target": "n_search_ondemand",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_route_n_lanbb_specialist",
+      "source": "n_route",
+      "target": "n_lanbb",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_route_n_cursor_specialist",
+      "source": "n_route",
+      "target": "n_cursor",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_route_n_design_specialist",
+      "source": "n_route",
+      "target": "n_design",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "specialist"
+    },
+    {
+      "id": "e_n_wiki_n_lead_approve_approval",
+      "source": "n_wiki",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_arxiv_n_lead_approve_approval",
+      "source": "n_arxiv",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_search_ondemand_n_lead_approve_approval",
+      "source": "n_search_ondemand",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_lanbb_n_lead_approve_approval",
+      "source": "n_lanbb",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_cursor_n_lead_approve_approval",
+      "source": "n_cursor",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_design_n_lead_approve_approval",
+      "source": "n_design",
+      "target": "n_lead_approve",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "approval"
+    },
+    {
+      "id": "e_n_lead_approve_n_export_signed_off",
+      "source": "n_lead_approve",
+      "target": "n_export",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "signed off"
+    }
+  ],
+  "metadata": {
+    "template": "grok_bot_team",
+    "product": "LanBB",
+    "domain": "team_routing",
+    "style": "n8n_graph",
+    "lanes": [
+      "lead",
+      "wiki",
+      "arxiv",
+      "search",
+      "lanbb",
+      "cursor",
+      "design huddle"
+    ],
+    "wiki_status": "FULL_FREEZE",
+    "wiki_vault": "elan7192/second-brain",
+    "arxiv_harvest": "dead",
+    "arxiv_digests": "paused_quota",
+    "search_scheduled_scout": false,
+    "search_sources": [
+      "Google",
+      "Reddit",
+      "X",
+      "FB",
+      "IG",
+      "Threads"
+    ],
+    "approval_actions": [
+      "merge",
+      "push",
+      "pay",
+      "auth"
+    ],
+    "approval_never_asks_user": true,
+    "authorized_only": true
+  },
+  "version": "1.0.0"
+}

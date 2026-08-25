@@ -6,3 +6,5 @@ LanBB is the product.
 
 - Canonical engine remote: https://github.com/semantica-agi/semantica
 - Nesting: git submodule at `tools/semantica`
+
+Grok Bot team workflow (n8n-style): [`flows/grok-bot-team/`](flows/grok-bot-team/).
