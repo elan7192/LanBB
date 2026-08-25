@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# Thin wrapper around https://github.com/xhluca/session-migrate
+# Does not vendor or rewrite the converter.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+UPSTREAM_REPO="https://github.com/xhluca/session-migrate"
+INSTALLER_URL="https://session-migrate.github.io/install.sh"
+
+die() {
+  echo "session-migrate: $*" >&2
+  exit 2
+}
+
+usage() {
+  cat <<EOF
+LanBB wrapper for session-migrate (quota-death session convert).
+
+Upstream: ${UPSTREAM_REPO}
+This script installs or execs the published CLI. It does not reimplement formats.
+
+Install:
+  ${ROOT}/session-migrate install
+
+One-command convert (standalone artifact, does not touch native agent homes):
+  ${ROOT}/session-migrate convert SOURCE --to TARGET --output PATH
+
+  SOURCE  native transcript (file or store)
+  TARGET  claude | codex | opencode | copilot | cursor | pi | antigravity | vibe
+  PATH    destination file (sidecar manifest is PATH.session-migrate.json)
+
+Install into another agent's native store and resume:
+  ${ROOT}/session-migrate transfer SESSION_ID --from SOURCE_FMT --to TARGET --cwd "\$PWD"
+
+Other upstream commands are passed through (inspect, import, catalog, …).
+
+Environment:
+  SESSION_MIGRATE_BIN   absolute path to smigrate / session-migrate
+EOF
+}
+
+resolve_bin() {
+  if [[ -n "${SESSION_MIGRATE_BIN:-}" ]]; then
+    if [[ -x "${SESSION_MIGRATE_BIN}" ]]; then
+      printf '%s\n' "${SESSION_MIGRATE_BIN}"
+      return 0
+    fi
+    die "SESSION_MIGRATE_BIN is set but not executable: ${SESSION_MIGRATE_BIN}"
+  fi
+
+  local name
+  for name in smigrate session-migrate; do
+    if command -v "${name}" >/dev/null 2>&1; then
+      command -v "${name}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+install_upstream() {
+  if command -v uv >/dev/null 2>&1; then
+    exec uv tool install session-migrate "$@"
+  fi
+  if command -v pipx >/dev/null 2>&1; then
+    exec pipx install session-migrate "$@"
+  fi
+  if command -v curl >/dev/null 2>&1; then
+    curl -LsSf "${INSTALLER_URL}" | sh
+    return
+  fi
+  die "need uv, pipx, or curl to install ${UPSTREAM_REPO}"
+}
+
+cmd="${1:-}"
+case "${cmd}" in
+  "" | -h | --help | help)
+    usage
+    exit 0
+    ;;
+  install)
+    shift
+    install_upstream "$@"
+    ;;
+esac
+
+if ! bin="$(resolve_bin)"; then
+  echo "session-migrate: upstream CLI not found." >&2
+  echo "Install it with: ${ROOT}/session-migrate install" >&2
+  echo "Or set SESSION_MIGRATE_BIN to the smigrate executable." >&2
+  exit 2
+fi
+
+exec "${bin}" "$@"
