@@ -102,6 +102,40 @@ python3 tools/book-to-skill/convert.py --from-workdir /path/to/book_skill_work -
 python3 -m unittest discover -s tools/book-to-skill/tests -v
 ```
 
+## Scan a generated bundle (NVIDIA SkillSpector)
+
+After `convert.py` writes `skills/<slug>/`, you can run a **static** security
+pass with [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector)
+(Apache-2.0). SkillSpector is **not** vendored or installed by this wrapper.
+
+Install (see upstream [Quick Start](https://github.com/NVIDIA/SkillSpector#quick-start)):
+
+```bash
+# CLI-only (recommended)
+uv tool install git+https://github.com/NVIDIA/skillspector.git
+
+# or from source
+git clone https://github.com/NVIDIA/SkillSpector.git
+cd SkillSpector
+python3 -m venv .venv && source .venv/bin/activate
+make install
+```
+
+Scan the bundle — static checks only, no LLM calls:
+
+```bash
+skillspector scan ./skills/my-slug/ --no-llm
+```
+
+LanBB thin wrapper (same flags; requires `skillspector` on `PATH`):
+
+```bash
+tools/book-to-skill/scan-skill.sh ./skills/my-slug/
+```
+
+Hosted guide: [Scan agent skills before installation](https://docs.nvidia.com/skills/scanning-agent-skills).
+Exit codes and report formats: `skillspector scan --help`.
+
 ## Out of scope
 
 - Wiki / second-brain ingest
