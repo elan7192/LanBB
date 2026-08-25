@@ -29,6 +29,22 @@ Trigger phrases: merge conflict, rebase conflict, `<<<<<<<`, unmerged paths,
 Or copy `SKILL.md` into your host's skills directory and keep the upstream link
 in the header for updates.
 
+## Dry-run
+
+Walk the five SKILL steps on a tiny fixture merge (never `--abort`):
+
+```bash
+tools/resolving-merge-conflicts/dry-run.sh
+```
+
+Fixture layout: `fixtures/merge-conflict/` (`main` vs `feature` on `greeting.txt`).
+
+Test wrapper:
+
+```bash
+tools/resolving-merge-conflicts/tests/test_dry_run.sh
+```
+
 ## Out of scope
 
 - `tools/semantica` file edits (submodule pointer only)
