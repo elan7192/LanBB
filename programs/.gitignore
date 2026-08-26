@@ -1,0 +1,15 @@
+# Evidence — raw recon dumps, screenshots, HTTP traffic
+**/recon/subdomains/*
+!**/recon/subdomains/.gitkeep
+**/screenshots/
+**/http-traffic/
+**/*.har
+**/*.pcap
+**/*.pcapng
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.webp
+score.json
+*.dump
+*.log

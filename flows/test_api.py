@@ -68,11 +68,18 @@ class GraphFilesTest(unittest.TestCase):
         gates = [
             n
             for n in graph["nodes"]
-            if n["id"] in ("n_scope_gate", "n_auth_gate")
+            if n["id"] in ("n_scope_gate", "n_auth_gate", "n_recon_gate")
         ]
-        self.assertEqual(len(gates), 2)
+        self.assertEqual(len(gates), 3)
         for gate in gates:
             self.assertTrue(gate["config"]["fail_closed"])
+        recon = [n for n in graph["nodes"] if n["id"] == "n_recon"]
+        self.assertEqual(len(recon), 1)
+        self.assertTrue(recon[0]["config"]["in_scope_only"])
+        self.assertTrue(recon[0]["config"]["requires_scope_file"])
+        self.assertEqual(recon[0]["config"].get("optional_cli"), "subfaster")
+        memory = [n for n in graph["nodes"] if n["id"] == "n_memory"]
+        self.assertEqual(len(memory), 1)
 
     def test_team_is_not_default(self):
         path = ROOT / "graphs" / "team-swimlanes.json"
@@ -109,6 +116,7 @@ class ApiTest(unittest.TestCase):
         serve.GRAPHS = self.tmp / "graphs"
         serve.TEMPLATES = self.tmp / "templates"
         serve.STUDIO = self.tmp / "studio"
+        serve.REPO_ROOT = self.tmp
         self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), serve.FlowHandler)
         self.thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
         self.thread.start()
@@ -163,6 +171,28 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(code, 400)
         self.assertIn("forbidden", data["error"])
         self.assertFalse((self.tmp / "graphs" / "bad.json").exists())
+
+    def test_score_without_scope_file_fails_closed(self):
+        code, data = get_status(f"{self.base}/api/case/score?program=juice-shop")
+        self.assertEqual(code, 400)
+        self.assertTrue(data.get("fail_closed"))
+
+    def test_score_with_scope_file_is_allowed(self):
+        scope = self.tmp / "programs" / "juice-shop" / "scope.md"
+        scope.parent.mkdir(parents=True)
+        scope.write_text("---\nkind: lab\n---\n## In scope\n- localhost:3000\n")
+        status, data = get(f"{self.base}/api/case/score?program=juice-shop")
+        self.assertEqual(status, 200)
+        self.assertFalse(data.get("fail_closed"))
+
+
+def get_status(url: str):
+    try:
+        with urlopen(url) as res:
+            return res.status, json.loads(res.read().decode("utf-8"))
+    except HTTPError as exc:
+        body = json.loads(exc.read().decode("utf-8"))
+        return exc.code, body
 
 
 if __name__ == "__main__":

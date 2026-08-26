@@ -1,0 +1,12 @@
+{
+  "lab": "juice-shop",
+  "wall": "v1-hardened",
+  "overlays": ["v0-stock", "v1-hardened"],
+  "last_score": "0/116",
+  "challenges": 116,
+  "docker_solvable": 98,
+  "docker_disabled_env": 18,
+  "image": "bkimminich/juice-shop",
+  "score_url": "http://127.0.0.1:3000/api/Challenges/",
+  "note": "Hunt the current wall. Stock is v0. Each loop must raise the wall. Never live programs. Never porn programs."
+}

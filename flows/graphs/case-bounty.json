@@ -1,8 +1,8 @@
 {
   "id": "case-bounty",
   "name": "Authorized bug-bounty CASE",
-  "description": "Default LanBB CASE DAG. Intake, scope, authorization, report, close. Scope and authorization gates fail closed. CASE workflow only.",
-  "version": "1.0.0",
+  "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, report, close. Scope, authorization, and recon gates fail closed. CASE workflow only. Local lab score is shown in Flow Studio.",
+  "version": "1.1.0",
   "nodes": [
     {
       "id": "n_intake",
@@ -15,7 +15,10 @@
         "stage": "intake",
         "badge": "INTAKE"
       },
-      "position": { "x": 56, "y": 168 },
+      "position": {
+        "x": 56,
+        "y": 168
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -31,7 +34,10 @@
         "stage": "scope",
         "badge": "SCOPE"
       },
-      "position": { "x": 280, "y": 168 },
+      "position": {
+        "x": 280,
+        "y": 168
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -50,7 +56,10 @@
         "pass_when": "scope recorded and current",
         "fail_action": "hold"
       },
-      "position": { "x": 504, "y": 168 },
+      "position": {
+        "x": 504,
+        "y": 168
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -67,7 +76,10 @@
         "badge": "HOLD",
         "fail_closed": true
       },
-      "position": { "x": 504, "y": 360 },
+      "position": {
+        "x": 504,
+        "y": 360
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -83,7 +95,10 @@
         "stage": "authorization",
         "badge": "AUTH"
       },
-      "position": { "x": 728, "y": 168 },
+      "position": {
+        "x": 728,
+        "y": 168
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -102,7 +117,10 @@
         "pass_when": "written authorization on file",
         "fail_action": "hold"
       },
-      "position": { "x": 952, "y": 168 },
+      "position": {
+        "x": 952,
+        "y": 168
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -119,7 +137,78 @@
         "badge": "HOLD",
         "fail_closed": true
       },
-      "position": { "x": 952, "y": 360 },
+      "position": {
+        "x": 952,
+        "y": 360
+      },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_recon",
+      "type": "case_step",
+      "label": "Passive subdomain recon",
+      "category": "recon",
+      "status": "idle",
+      "description": "Optional subfaster (crt.name) on in-scope domains only. Local labs skip public CT lookup. Missing program scope file does not continue.",
+      "config": {
+        "stage": "recon",
+        "badge": "RECON",
+        "fail_closed": true,
+        "in_scope_only": true,
+        "requires_scope_file": true,
+        "optional_cli": "subfaster",
+        "cli_homepage": "https://crt.name"
+      },
+      "position": {
+        "x": 1176,
+        "y": 168
+      },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_recon_gate",
+      "type": "decision_gate",
+      "label": "In-scope recon gate",
+      "category": "recon",
+      "status": "idle",
+      "description": "Fail-closed. Pass only for hosts listed in programs/<slug>/scope.md. Out-of-scope or missing scope file holds.",
+      "config": {
+        "stage": "recon",
+        "badge": "FAIL-CLOSED",
+        "fail_closed": true,
+        "pass_when": "target in scope file",
+        "fail_action": "hold",
+        "requires_scope_file": true,
+        "in_scope_only": true
+      },
+      "position": {
+        "x": 1400,
+        "y": 168
+      },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_recon_hold",
+      "type": "hold",
+      "label": "Recon held",
+      "category": "recon",
+      "status": "idle",
+      "description": "Fail-closed stop. No subdomain lookup without a program scope file and an in-scope host.",
+      "config": {
+        "stage": "recon",
+        "badge": "HOLD",
+        "fail_closed": true
+      },
+      "position": {
+        "x": 1400,
+        "y": 360
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -135,7 +224,10 @@
         "stage": "report",
         "badge": "CASE FILE"
       },
-      "position": { "x": 1176, "y": 168 },
+      "position": {
+        "x": 1624,
+        "y": 168
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -151,7 +243,10 @@
         "stage": "report",
         "badge": "REPORT"
       },
-      "position": { "x": 1400, "y": 168 },
+      "position": {
+        "x": 1848,
+        "y": 168
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -169,7 +264,10 @@
         "fail_closed": false,
         "pass_when": "program accepts the report package"
       },
-      "position": { "x": 1624, "y": 168 },
+      "position": {
+        "x": 2072,
+        "y": 168
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -185,7 +283,29 @@
         "stage": "report",
         "badge": "REVISE"
       },
-      "position": { "x": 1624, "y": 360 },
+      "position": {
+        "x": 2072,
+        "y": 360
+      },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_memory",
+      "type": "case_step",
+      "label": "Emit loop memory",
+      "category": "close",
+      "status": "idle",
+      "description": "After hunt and harden: write a short semantic method note and one episodic row. Not working memory. Not a wiki.",
+      "config": {
+        "stage": "close",
+        "badge": "MEMORY"
+      },
+      "position": {
+        "x": 2296,
+        "y": 168
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -201,7 +321,10 @@
         "stage": "close",
         "badge": "CLOSE"
       },
-      "position": { "x": 1848, "y": 168 },
+      "position": {
+        "x": 2520,
+        "y": 168
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -253,7 +376,7 @@
     {
       "id": "e_auth_pass",
       "source": "n_auth_gate",
-      "target": "n_evidence",
+      "target": "n_recon",
       "source_port": "out",
       "target_port": "in",
       "label": "pass",
@@ -285,15 +408,6 @@
       "label": "submit"
     },
     {
-      "id": "e_review_close",
-      "source": "n_review",
-      "target": "n_close",
-      "source_port": "out",
-      "target_port": "in",
-      "label": "accept",
-      "kind": "pass"
-    },
-    {
       "id": "e_review_revise",
       "source": "n_review",
       "target": "n_revise",
@@ -309,6 +423,49 @@
       "source_port": "out",
       "target_port": "in",
       "label": "return"
+    },
+    {
+      "id": "e_recon_gate",
+      "source": "n_recon",
+      "target": "n_recon_gate",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "in-scope only"
+    },
+    {
+      "id": "e_recon_pass",
+      "source": "n_recon_gate",
+      "target": "n_evidence",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "pass",
+      "kind": "pass"
+    },
+    {
+      "id": "e_recon_fail",
+      "source": "n_recon_gate",
+      "target": "n_recon_hold",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "fail closed",
+      "kind": "fail"
+    },
+    {
+      "id": "e_review_memory",
+      "source": "n_review",
+      "target": "n_memory",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "accept",
+      "kind": "pass"
+    },
+    {
+      "id": "e_memory_close",
+      "source": "n_memory",
+      "target": "n_close",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "logged"
     }
   ],
   "metadata": {
@@ -319,15 +476,57 @@
     "fail_closed": true,
     "policy": {
       "fail_closed": true,
-      "forbidden_node_kinds": ["exploit", "scan", "payload", "attack", "weaponized"],
-      "required_stages": ["intake", "scope", "authorization", "report", "close"]
+      "forbidden_node_kinds": [
+        "exploit",
+        "scan",
+        "payload",
+        "attack",
+        "weaponized"
+      ],
+      "required_stages": [
+        "intake",
+        "scope",
+        "authorization",
+        "report",
+        "close"
+      ]
     },
     "stages": [
-      { "id": "intake", "label": "Intake", "x": 56 },
-      { "id": "scope", "label": "Scope", "x": 280 },
-      { "id": "authorization", "label": "Authorization", "x": 728 },
-      { "id": "report", "label": "Report", "x": 1176 },
-      { "id": "close", "label": "Close", "x": 1848 }
-    ]
+      {
+        "id": "intake",
+        "label": "Intake",
+        "x": 56
+      },
+      {
+        "id": "scope",
+        "label": "Scope",
+        "x": 280
+      },
+      {
+        "id": "authorization",
+        "label": "Authorization",
+        "x": 728
+      },
+      {
+        "id": "recon",
+        "label": "Recon",
+        "x": 1176
+      },
+      {
+        "id": "report",
+        "label": "Report",
+        "x": 1624
+      },
+      {
+        "id": "close",
+        "label": "Close",
+        "x": 2296
+      }
+    ],
+    "lab": {
+      "program": "juice-shop",
+      "score_from": "/api/Challenges",
+      "wall": "v1-hardened"
+    }
   }
 }

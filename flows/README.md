@@ -16,7 +16,7 @@ Persisted as files in `flows/graphs/*.json`.
 
 | File | Role |
 | --- | --- |
-| `graphs/case-bounty.json` | Default. Authorized CASE DAG: intake, scope, authorization, report, close. Scope and authorization gates fail closed. |
+| `graphs/case-bounty.json` | Default. Authorized CASE DAG: intake, scope, authorization, in-scope recon, report, close. Scope, authorization, and recon gates fail closed. Lab score pill reads `/api/case/score`. |
 | `graphs/team-swimlanes.json` | Second saved graph. Team lanes (lead, lanbb, wiki freeze). Not the default. |
 | `templates/case-bounty.json` | Documented template used when the catalog is empty. |
 

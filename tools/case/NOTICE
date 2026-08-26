@@ -1,0 +1,42 @@
+Copied SKILL.md files (Apache-2.0) from
+https://github.com/mukul975/Anthropic-Cybersecurity-Skills
+Copyright 2026 mukul975 (and per-file `author` in frontmatter)
+
+Full license text: tools/case/skills/LICENSE
+http://www.apache.org/licenses/LICENSE-2.0
+
+Each copied file keeps a copyright + license HTML comment and a Source blob URL.
+
+Copied (stripped of payloads / attack PoCs; when-to-use, checklist, report-shape kept):
+
+  conducting-external-reconnaissance-with-osint
+  performing-web-application-vulnerability-triage
+  prioritizing-vulnerabilities-with-cvss-scoring
+  testing-api-security-with-owasp-top-10
+  testing-for-xss-vulnerabilities
+  testing-for-json-web-token-vulnerabilities
+  testing-for-broken-access-control
+  testing-for-business-logic-vulnerabilities
+  testing-oauth2-implementation-flaws
+  conducting-api-security-testing
+  testing-cors-misconfiguration
+  testing-for-open-redirect-vulnerabilities
+  detecting-ai-model-prompt-injection-attacks
+
+Also reduced (not full copies) under tools/case/:
+  passive-recon/SKILL.md  ← auditing-tls-certificate-transparency-logs
+  write-report/SKILL.md   ← generating-threat-intelligence-reports
+  parse-scope/SKILL.md    ← LanBB-authored
+
+NOT copied (attack procedures / exploit tradecraft):
+  exploiting-sql-injection-vulnerabilities
+  exploiting-nosql-injection-vulnerabilities
+  exploiting-jwt-algorithm-confusion-attack
+  exploiting-idor-vulnerabilities
+  exploiting-mass-assignment-in-rest-apis
+  performing-ssrf-vulnerability-exploitation
+  performing-csrf-attack-simulation
+  performing-api-rate-limiting-bypass
+
+Not vendored: the remaining ~800 skills, sqlmap, AFL, nikto, C2, phishing, malware.
+Not a submodule. Not a clone of the catalogue.
