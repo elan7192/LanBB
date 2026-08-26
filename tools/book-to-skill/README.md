@@ -133,16 +133,17 @@ LanBB thin wrapper (same flags; requires `skillspector` on `PATH`):
 tools/book-to-skill/scan-skill.sh ./skills/my-slug/
 ```
 
-Repeatable end-to-end smoke (fixture → bundle → static scan):
+Repeatable end-to-end smoke (markdown + **PDF** fixtures → bundles → static scan):
 
 ```bash
 tools/book-to-skill/smoke.sh
 ```
 
-Uses the synthetic public-domain-style fixture
-`tests/fixtures/widget-protocol.md` and the test double generator so the
-bundle is complete without an agent CLI. On first run, installs SkillSpector
-into `tools/book-to-skill/.cache/skillspector-venv/` (gitignored, not vendored).
+Uses synthetic public-domain-style fixtures under `tests/fixtures/`:
+`widget-protocol.md` and `widget-protocol.pdf` (one-page PDF with extractable
+text; regenerate via `generate-pdf-fixture.py`). The test double generator
+completes bundles without an agent CLI. On first run, installs SkillSpector into
+`tools/book-to-skill/.cache/skillspector-venv/` (gitignored, not vendored).
 
 Hosted guide: [Scan agent skills before installation](https://docs.nvidia.com/skills/scanning-agent-skills).
 Exit codes and report formats: `skillspector scan --help`.

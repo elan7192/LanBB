@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -13,55 +14,9 @@ sys.path.insert(0, str(TOOL_ROOT))
 import convert  # noqa: E402
 
 FIXTURE = Path(__file__).resolve().parent / "fixtures" / "widget-protocol.md"
+PDF_FIXTURE = Path(__file__).resolve().parent / "fixtures" / "widget-protocol.pdf"
 FAKE_GENERATOR = Path(__file__).resolve().parent / "fake_generator.py"
 STUB_SPEC = Path(__file__).resolve().parent / "fixtures" / "stub-skill.md"
-
-# Minimal one-page PDF with extractable Helvetica text (not image-only).
-MINIMAL_PDF = b"""%PDF-1.4
-1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
-endobj
-2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
-endobj
-3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
-endobj
-4 0 obj
-<< /Length 220 >>
-stream
-BT
-/F1 16 Tf
-72 720 Td
-(Widget Protocol Handbook) Tj
-0 -28 Td
-(Chapter 1 Handshake) Tj
-0 -20 Td
-(Use the three-way handshake when opening a stream.) Tj
-0 -28 Td
-(Chapter 2 Backpressure) Tj
-0 -20 Td
-(Prefer credit-based flow control over unbounded queues.) Tj
-ET
-endstream
-endobj
-5 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
-endobj
-xref
-0 6
-0000000000 65535 f 
-0000000009 00000 n 
-0000000058 00000 n 
-0000000115 00000 n 
-0000000266 00000 n 
-0000000538 00000 n 
-trailer
-<< /Size 6 /Root 1 0 R >>
-startxref
-617
-%%EOF
-"""
 
 
 class SlugAndPathTests(unittest.TestCase):
@@ -176,10 +131,13 @@ class ExtractAndBundleTests(unittest.TestCase):
             self.assertTrue((workdir / "full_text.txt").is_file())
 
     def test_extracts_technical_pdf_via_mit_package(self) -> None:
+        if not PDF_FIXTURE.is_file():
+            subprocess.run(
+                [sys.executable, str(PDF_FIXTURE.parent / "generate-pdf-fixture.py")],
+                check=True,
+            )
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
-            pdf = tmp_path / "widget-protocol.pdf"
-            pdf.write_bytes(MINIMAL_PDF)
             workdir = tmp_path / "work"
             skills = tmp_path / "skills"
             code = self._run_convert(
@@ -195,7 +153,7 @@ class ExtractAndBundleTests(unittest.TestCase):
                     str(skills),
                     "--name",
                     "widget-protocol-pdf",
-                    str(pdf),
+                    str(PDF_FIXTURE),
                 ],
             )
             self.assertEqual(code, 0)
