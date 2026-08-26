@@ -122,13 +122,17 @@ function escapeHtml(value) {
 }
 
 function renderStages(graph) {
-  const stages = (graph.metadata && graph.metadata.stages) || [
-    { id: "intake", label: "Intake" },
-    { id: "scope", label: "Scope" },
-    { id: "authorization", label: "Authorization" },
-    { id: "report", label: "Report" },
-    { id: "close", label: "Close" },
-  ];
+  const meta = graph.metadata || {};
+  const stages =
+    meta.layout === "swimlanes" && Array.isArray(meta.lanes)
+      ? meta.lanes.map((lane) => ({ id: lane.id, label: lane.label }))
+      : meta.stages || [
+          { id: "intake", label: "Intake" },
+          { id: "scope", label: "Scope" },
+          { id: "authorization", label: "Authorization" },
+          { id: "report", label: "Report" },
+          { id: "close", label: "Close" },
+        ];
   $("stageNav").innerHTML = stages
     .map((s) => `<span class="stage-chip on">${escapeHtml(s.label)}</span>`)
     .join("");
@@ -382,10 +386,10 @@ function fitGraph(graph) {
     maxX = Math.max(maxX, n.position.x + NODE_W);
     maxY = Math.max(maxY, n.position.y + NODE_H);
   });
-  const pad = 56;
+  const pad = 80;
   const w = maxX - minX + pad * 2;
   const h = maxY - minY + pad * 2;
-  state.scale = Math.min(vw / w, vh / h, 1.05);
+  state.scale = Math.min((vw - 8) / w, (vh - 8) / h, 1);
   state.scale = Math.max(0.42, state.scale);
   state.pan.x = (vw - w * state.scale) / 2 - minX * state.scale + pad * state.scale;
   state.pan.y = (vh - h * state.scale) / 2 - minY * state.scale + pad * state.scale;
