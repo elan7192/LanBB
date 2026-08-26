@@ -1,0 +1,3 @@
+# Upstream MIT extractor. Not on PyPI yet — install from the tagged git source.
+# Extra [pdf] pulls pypdf + pdfminer.six. For Docling (tables/code), see README.
+book-to-skill[pdf] @ git+https://github.com/virgiliojr94/book-to-skill.git@v1.4.0
