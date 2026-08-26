@@ -1,0 +1,35 @@
+{
+  "id": "fail-skip-lead",
+  "name": "FAIL route skips lead",
+  "description": "Fixture. Intake routes to lanbb and skips lead.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "n_user",
+      "type": "trigger",
+      "label": "New user request",
+      "category": "user",
+      "description": "Case arrives from a user.",
+      "config": { "lane": "user", "route": "anyone -> lanbb" },
+      "position": { "x": 0, "y": 0 }
+    },
+    {
+      "id": "n_lanbb",
+      "type": "case_step",
+      "label": "LanBB CASE owner",
+      "category": "lanbb",
+      "description": "Takes the CASE file without lead.",
+      "config": { "lane": "lanbb" },
+      "position": { "x": 200, "y": 0 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_skip_lead",
+      "source": "n_user",
+      "target": "n_lanbb",
+      "label": "anyone -> lanbb"
+    }
+  ],
+  "metadata": { "product": "LanBB", "kind": "team_swimlanes", "default": false, "fixture": "fail_route_skips_lead" }
+}

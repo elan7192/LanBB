@@ -1,0 +1,41 @@
+{
+  "id": "fail-semantica-org",
+  "name": "FAIL forbidden org string",
+  "description": "Fixture. The CASE graph must not name that engine org.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "n_intake",
+      "type": "trigger",
+      "label": "Case intake",
+      "category": "intake",
+      "description": "Open a case.",
+      "config": { "stage": "intake" },
+      "position": { "x": 0, "y": 0 }
+    },
+    {
+      "id": "n_close",
+      "type": "close",
+      "label": "Close case",
+      "category": "close",
+      "description": "Archive the case.",
+      "config": { "stage": "close" },
+      "position": { "x": 200, "y": 0 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "n_intake",
+      "target": "n_close",
+      "label": "close"
+    }
+  ],
+  "metadata": {
+    "product": "LanBB",
+    "kind": "case_dag",
+    "default": false,
+    "fixture": "fail_semantica_agi",
+    "engine_org": "semantica-agi"
+  }
+}

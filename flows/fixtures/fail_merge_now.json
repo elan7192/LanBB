@@ -1,0 +1,35 @@
+{
+  "id": "fail-merge-now",
+  "name": "FAIL merge-now",
+  "description": "Fixture. merge-now is forbidden. Lead approvals stay with lead.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "n_intake",
+      "type": "trigger",
+      "label": "Case intake",
+      "category": "lead",
+      "description": "Front door.",
+      "config": { "lane": "lead" },
+      "position": { "x": 0, "y": 0 }
+    },
+    {
+      "id": "n_merge_now",
+      "type": "case_step",
+      "label": "merge-now",
+      "category": "lead",
+      "description": "Forbidden merge-now hop.",
+      "config": { "lane": "lead", "badge": "MERGE-NOW", "actions": ["merge-now"] },
+      "position": { "x": 200, "y": 0 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "n_intake",
+      "target": "n_merge_now",
+      "label": "merge-now"
+    }
+  ],
+  "metadata": { "product": "LanBB", "kind": "case_dag", "default": false, "fixture": "fail_merge_now" }
+}

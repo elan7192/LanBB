@@ -33,5 +33,7 @@ If that list is empty, Flow Studio `POST`s `/api/graphs` with `upsert_template`,
 ## Tests
 
 ```bash
-python3 flows/test_api.py
+python3 flows/test_api.py flows/test_case_gates.py
 ```
+
+CASE gates (leftover grok-bot-team 15/31 pass/fail cards): a graph fails if it has a coordinator node, wiki ingest True, a route that skips lead, merge-now, the semantica-agi org string, or a specialist that asks the user. `graphs/case-bounty.json` and `graphs/team-swimlanes.json` must pass. Fixtures under `flows/fixtures/` fail one rule each.
