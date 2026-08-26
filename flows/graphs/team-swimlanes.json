@@ -1,0 +1,207 @@
+{
+  "id": "team-swimlanes",
+  "name": "Team swimlanes",
+  "description": "Second saved graph. Team routing for CASE work. Not the default. Wiki lane is frozen. Lead holds authorization. LanBB owns the CASE file.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "n_program_case",
+      "type": "trigger",
+      "label": "Program case in",
+      "category": "lead",
+      "status": "idle",
+      "description": "A program case arrives. All new cases enter lead.",
+      "config": {
+        "lane": "lead",
+        "badge": "IN"
+      },
+      "position": { "x": 80, "y": 72 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lead_intake",
+      "type": "case_step",
+      "label": "Lead intake",
+      "category": "lead",
+      "status": "idle",
+      "description": "Lead is the front door. Route the case. Do not skip authorization.",
+      "config": {
+        "lane": "lead",
+        "badge": "FRONT DOOR"
+      },
+      "position": { "x": 340, "y": 72 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lead_auth",
+      "type": "decision_gate",
+      "label": "Lead authorization",
+      "category": "lead",
+      "status": "idle",
+      "description": "Fail-closed. Lead confirms written program authorization before LanBB takes the CASE file.",
+      "config": {
+        "lane": "lead",
+        "badge": "FAIL-CLOSED",
+        "fail_closed": true,
+        "pass_when": "written authorization on file"
+      },
+      "position": { "x": 600, "y": 72 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lead_hold",
+      "type": "hold",
+      "label": "Hold at lead",
+      "category": "lead",
+      "status": "idle",
+      "description": "Fail-closed stop. The case stays with lead until authorization is on file.",
+      "config": {
+        "lane": "lead",
+        "badge": "HOLD",
+        "fail_closed": true
+      },
+      "position": { "x": 860, "y": 72 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lanbb_case",
+      "type": "case_step",
+      "label": "LanBB CASE owner",
+      "category": "lanbb",
+      "status": "idle",
+      "description": "LanBB owns the CASE file after authorization. Load the authorized CASE DAG. Do not run wiki ingest from this lane.",
+      "config": {
+        "lane": "lanbb",
+        "badge": "CASE OWNER"
+      },
+      "position": { "x": 600, "y": 248 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lanbb_report",
+      "type": "case_step",
+      "label": "LanBB report",
+      "category": "lanbb",
+      "status": "idle",
+      "description": "Write the authorized disclosure report. Return to lead for close.",
+      "config": {
+        "lane": "lanbb",
+        "badge": "REPORT"
+      },
+      "position": { "x": 860, "y": 248 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_lead_close",
+      "type": "close",
+      "label": "Lead close",
+      "category": "lead",
+      "status": "idle",
+      "description": "Lead closes the case after the report package is accepted.",
+      "config": {
+        "lane": "lead",
+        "badge": "CLOSE"
+      },
+      "position": { "x": 1120, "y": 72 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_wiki_freeze",
+      "type": "hold",
+      "label": "Wiki freeze",
+      "category": "wiki",
+      "status": "idle",
+      "description": "second-brain wiki is frozen. No ingest and no push from this graph. Policy node, not a CASE path.",
+      "config": {
+        "lane": "wiki",
+        "badge": "FROZEN"
+      },
+      "position": { "x": 80, "y": 424 },
+      "ports": [],
+      "result": null,
+      "error": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_in_lead",
+      "source": "n_program_case",
+      "target": "n_lead_intake",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "new case"
+    },
+    {
+      "id": "e_lead_auth",
+      "source": "n_lead_intake",
+      "target": "n_lead_auth",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "route"
+    },
+    {
+      "id": "e_auth_pass",
+      "source": "n_lead_auth",
+      "target": "n_lanbb_case",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "pass",
+      "kind": "pass"
+    },
+    {
+      "id": "e_auth_fail",
+      "source": "n_lead_auth",
+      "target": "n_lead_hold",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "fail closed",
+      "kind": "fail"
+    },
+    {
+      "id": "e_case_report",
+      "source": "n_lanbb_case",
+      "target": "n_lanbb_report",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "file ready"
+    },
+    {
+      "id": "e_report_close",
+      "source": "n_lanbb_report",
+      "target": "n_lead_close",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "package"
+    }
+  ],
+  "metadata": {
+    "product": "LanBB",
+    "kind": "team_swimlanes",
+    "layout": "swimlanes",
+    "default": false,
+    "fail_closed": true,
+    "policy": {
+      "fail_closed": true,
+      "forbidden_node_kinds": ["exploit", "scan", "payload", "attack", "weaponized"]
+    },
+    "lanes": [
+      { "id": "lead", "label": "lead", "color": "#3d8bfd" },
+      { "id": "lanbb", "label": "lanbb", "color": "#5ee0b5" },
+      { "id": "wiki", "label": "wiki", "color": "#c4b5fd" }
+    ]
+  }
+}

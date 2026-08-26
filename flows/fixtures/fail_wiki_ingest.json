@@ -1,0 +1,28 @@
+{
+  "id": "fail-wiki-ingest",
+  "name": "FAIL wiki ingest True",
+  "description": "Fixture. Wiki ingest True is forbidden while the vault is frozen.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "n_lead_intake",
+      "type": "trigger",
+      "label": "Lead intake",
+      "category": "lead",
+      "description": "Front door.",
+      "config": { "lane": "lead" },
+      "position": { "x": 0, "y": 0 }
+    },
+    {
+      "id": "n_wiki",
+      "type": "hold",
+      "label": "Wiki ingest",
+      "category": "wiki",
+      "description": "Wiki lane with ingest enabled.",
+      "config": { "lane": "wiki", "ingest": true },
+      "position": { "x": 200, "y": 0 }
+    }
+  ],
+  "edges": [],
+  "metadata": { "product": "LanBB", "kind": "team_swimlanes", "default": false, "fixture": "fail_wiki_ingest_true" }
+}

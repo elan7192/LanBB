@@ -1,0 +1,35 @@
+{
+  "id": "fail-coordinator",
+  "name": "FAIL coordinator node",
+  "description": "Fixture. Coordinator node is forbidden on this CASE slice.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "n_intake",
+      "type": "trigger",
+      "label": "Case intake",
+      "category": "intake",
+      "description": "Open a case.",
+      "config": { "stage": "intake" },
+      "position": { "x": 0, "y": 0 }
+    },
+    {
+      "id": "n_coordinator",
+      "type": "case_step",
+      "label": "Coordinator",
+      "category": "report",
+      "description": "Forbidden coordinator node.",
+      "config": { "stage": "report", "role": "coordinator" },
+      "position": { "x": 200, "y": 0 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "n_intake",
+      "target": "n_coordinator",
+      "label": "open"
+    }
+  ],
+  "metadata": { "product": "LanBB", "kind": "case_dag", "default": false, "fixture": "fail_coordinator_node" }
+}

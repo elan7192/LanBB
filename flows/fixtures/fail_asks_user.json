@@ -1,0 +1,50 @@
+{
+  "id": "fail-asks-user",
+  "name": "FAIL specialist asks user",
+  "description": "Fixture. Specialists ask lead, never the user.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "n_lead",
+      "type": "trigger",
+      "label": "Lead intake",
+      "category": "lead",
+      "description": "Front door.",
+      "config": { "lane": "lead" },
+      "position": { "x": 0, "y": 0 }
+    },
+    {
+      "id": "n_lanbb",
+      "type": "case_step",
+      "label": "LanBB report",
+      "category": "lanbb",
+      "description": "Specialist asks user to click.",
+      "config": { "lane": "lanbb", "ask_user": true, "never_ask_user": false },
+      "position": { "x": 200, "y": 0 }
+    },
+    {
+      "id": "n_user",
+      "type": "hold",
+      "label": "User click",
+      "category": "user",
+      "description": "User is asked to click.",
+      "config": { "lane": "user" },
+      "position": { "x": 400, "y": 0 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_lead_lanbb",
+      "source": "n_lead",
+      "target": "n_lanbb",
+      "label": "pass"
+    },
+    {
+      "id": "e_ask_user",
+      "source": "n_lanbb",
+      "target": "n_user",
+      "label": "ask user"
+    }
+  ],
+  "metadata": { "product": "LanBB", "kind": "team_swimlanes", "default": false, "fixture": "fail_specialist_asks_user" }
+}
