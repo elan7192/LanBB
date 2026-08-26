@@ -1,0 +1,333 @@
+{
+  "id": "case-bounty",
+  "name": "Authorized bug-bounty CASE",
+  "description": "Default LanBB CASE DAG. Intake, scope, authorization, report, close. Scope and authorization gates fail closed. CASE workflow only.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "n_intake",
+      "type": "trigger",
+      "label": "Case intake",
+      "category": "intake",
+      "status": "idle",
+      "description": "Open a program case from an invite, researcher intake, or program ticket. No case work starts here.",
+      "config": {
+        "stage": "intake",
+        "badge": "INTAKE"
+      },
+      "position": { "x": 56, "y": 168 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_scope",
+      "type": "case_step",
+      "label": "Record scope",
+      "category": "scope",
+      "status": "idle",
+      "description": "Record in-scope assets, the out-of-scope list, and rules of engagement for this program. Missing scope does not continue.",
+      "config": {
+        "stage": "scope",
+        "badge": "SCOPE"
+      },
+      "position": { "x": 280, "y": 168 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_scope_gate",
+      "type": "decision_gate",
+      "label": "Scope gate",
+      "category": "scope",
+      "status": "idle",
+      "description": "Fail-closed. Pass only when scope is recorded and current. Unknown or missing scope holds the case.",
+      "config": {
+        "stage": "scope",
+        "badge": "FAIL-CLOSED",
+        "fail_closed": true,
+        "pass_when": "scope recorded and current",
+        "fail_action": "hold"
+      },
+      "position": { "x": 504, "y": 168 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_scope_hold",
+      "type": "hold",
+      "label": "Out of scope",
+      "category": "scope",
+      "status": "idle",
+      "description": "Fail-closed stop. The case does not continue without recorded, current scope.",
+      "config": {
+        "stage": "scope",
+        "badge": "HOLD",
+        "fail_closed": true
+      },
+      "position": { "x": 504, "y": 360 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_authorization",
+      "type": "case_step",
+      "label": "Record authorization",
+      "category": "authorization",
+      "status": "idle",
+      "description": "Record written program authorization and accepted terms for this case. Missing authorization does not continue.",
+      "config": {
+        "stage": "authorization",
+        "badge": "AUTH"
+      },
+      "position": { "x": 728, "y": 168 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_auth_gate",
+      "type": "decision_gate",
+      "label": "Authorization gate",
+      "category": "authorization",
+      "status": "idle",
+      "description": "Fail-closed. Pass only when written authorization is on file. Unknown or denied authorization holds the case.",
+      "config": {
+        "stage": "authorization",
+        "badge": "FAIL-CLOSED",
+        "fail_closed": true,
+        "pass_when": "written authorization on file",
+        "fail_action": "hold"
+      },
+      "position": { "x": 952, "y": 168 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_auth_hold",
+      "type": "hold",
+      "label": "Not authorized",
+      "category": "authorization",
+      "status": "idle",
+      "description": "Fail-closed stop. No report work proceeds without written authorization.",
+      "config": {
+        "stage": "authorization",
+        "badge": "HOLD",
+        "fail_closed": true
+      },
+      "position": { "x": 952, "y": 360 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_evidence",
+      "type": "case_step",
+      "label": "Evidence log",
+      "category": "report",
+      "status": "idle",
+      "description": "CASE notes and allowed-surface documentation after both gates pass. This is a case file, not a probe step.",
+      "config": {
+        "stage": "report",
+        "badge": "CASE FILE"
+      },
+      "position": { "x": 1176, "y": 168 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_report",
+      "type": "case_step",
+      "label": "Write report",
+      "category": "report",
+      "status": "idle",
+      "description": "Write the authorized disclosure report for the program. Attach only evidence already in the case file.",
+      "config": {
+        "stage": "report",
+        "badge": "REPORT"
+      },
+      "position": { "x": 1400, "y": 168 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_review",
+      "type": "decision_gate",
+      "label": "Program review",
+      "category": "report",
+      "status": "idle",
+      "description": "Program owner reviews the report package. Accept closes the case. Revise returns to write report.",
+      "config": {
+        "stage": "report",
+        "badge": "REVIEW",
+        "fail_closed": false,
+        "pass_when": "program accepts the report package"
+      },
+      "position": { "x": 1624, "y": 168 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_revise",
+      "type": "case_step",
+      "label": "Revise report",
+      "category": "report",
+      "status": "idle",
+      "description": "Revise the report from program review notes, then return to write report.",
+      "config": {
+        "stage": "report",
+        "badge": "REVISE"
+      },
+      "position": { "x": 1624, "y": 360 },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_close",
+      "type": "close",
+      "label": "Close case",
+      "category": "close",
+      "status": "idle",
+      "description": "Archive the case and complete coordinated disclosure with the program.",
+      "config": {
+        "stage": "close",
+        "badge": "CLOSE"
+      },
+      "position": { "x": 1848, "y": 168 },
+      "ports": [],
+      "result": null,
+      "error": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_intake_scope",
+      "source": "n_intake",
+      "target": "n_scope",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "open"
+    },
+    {
+      "id": "e_scope_gate",
+      "source": "n_scope",
+      "target": "n_scope_gate",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "scope recorded"
+    },
+    {
+      "id": "e_scope_pass",
+      "source": "n_scope_gate",
+      "target": "n_authorization",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "pass",
+      "kind": "pass"
+    },
+    {
+      "id": "e_scope_fail",
+      "source": "n_scope_gate",
+      "target": "n_scope_hold",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "fail closed",
+      "kind": "fail"
+    },
+    {
+      "id": "e_auth_gate",
+      "source": "n_authorization",
+      "target": "n_auth_gate",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "authorization recorded"
+    },
+    {
+      "id": "e_auth_pass",
+      "source": "n_auth_gate",
+      "target": "n_evidence",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "pass",
+      "kind": "pass"
+    },
+    {
+      "id": "e_auth_fail",
+      "source": "n_auth_gate",
+      "target": "n_auth_hold",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "fail closed",
+      "kind": "fail"
+    },
+    {
+      "id": "e_evidence_report",
+      "source": "n_evidence",
+      "target": "n_report",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "case file ready"
+    },
+    {
+      "id": "e_report_review",
+      "source": "n_report",
+      "target": "n_review",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "submit"
+    },
+    {
+      "id": "e_review_close",
+      "source": "n_review",
+      "target": "n_close",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "accept",
+      "kind": "pass"
+    },
+    {
+      "id": "e_review_revise",
+      "source": "n_review",
+      "target": "n_revise",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "revise",
+      "kind": "fail"
+    },
+    {
+      "id": "e_revise_report",
+      "source": "n_revise",
+      "target": "n_report",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "return"
+    }
+  ],
+  "metadata": {
+    "product": "LanBB",
+    "kind": "case_dag",
+    "layout": "dag",
+    "default": true,
+    "fail_closed": true,
+    "policy": {
+      "fail_closed": true,
+      "forbidden_node_kinds": ["exploit", "scan", "payload", "attack", "weaponized"],
+      "required_stages": ["intake", "scope", "authorization", "report", "close"]
+    },
+    "stages": [
+      { "id": "intake", "label": "Intake", "x": 56 },
+      { "id": "scope", "label": "Scope", "x": 280 },
+      { "id": "authorization", "label": "Authorization", "x": 728 },
+      { "id": "report", "label": "Report", "x": 1176 },
+      { "id": "close", "label": "Close", "x": 1848 }
+    ]
+  }
+}

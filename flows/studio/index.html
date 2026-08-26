@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LanBB Flow Studio</title>
+  <meta name="description" content="LanBB Flow Studio. Authorized bug-bounty CASE DAG. Fail-closed scope and authorization. Local only." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./studio.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <span class="gate"></span>
+          <span class="gate"></span>
+        </div>
+        <div>
+          <div class="brand-name">LanBB</div>
+          <div class="brand-sub">Flow Studio</div>
+        </div>
+      </div>
+      <nav class="stages" id="stageNav" aria-label="CASE stages"></nav>
+      <div class="pills">
+        <span class="pill">CASE · fail-closed</span>
+        <span class="pill dim">local · no deploy</span>
+      </div>
+    </header>
+
+    <aside class="rail">
+      <div class="kicker">Graphs</div>
+      <div id="graphList" class="graph-list"></div>
+      <p class="hint" id="loadHint">Loaded from repo files. GET does not seed.</p>
+      <div class="kicker">Policy</div>
+      <ul class="policy">
+        <li>Scope gate fail-closed</li>
+        <li>Authorization gate fail-closed</li>
+        <li>Default is the CASE DAG</li>
+        <li>Team swimlanes is a second graph</li>
+      </ul>
+      <div class="kicker">Out of scope</div>
+      <p class="warn">No exploit, scan, payload, attack, or weaponized nodes. This is a CASE file, not a probe tool.</p>
+    </aside>
+
+    <main class="stage">
+      <div class="canvas-head">
+        <div>
+          <h1 id="graphTitle">Authorized bug-bounty CASE</h1>
+          <p id="graphDesc" class="lede"></p>
+        </div>
+        <div class="legend">
+          <span><i class="sw pass"></i> pass</span>
+          <span><i class="sw fail"></i> fail closed</span>
+          <span><i class="sw gate"></i> gate</span>
+          <span><i class="sw hold"></i> hold</span>
+        </div>
+      </div>
+      <div id="emptyState" class="empty hidden">
+        <h2>No saved graphs</h2>
+        <p>GET /api/graphs returned an empty list and did not seed. Upsert the documented CASE template, or view it in memory.</p>
+        <div class="empty-actions">
+          <button id="btnUpsert" type="button">POST upsert template</button>
+          <button id="btnDefault" class="ghost" type="button">Show documented default</button>
+        </div>
+      </div>
+      <div id="viewport" class="viewport">
+        <svg id="canvas" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CASE workflow graph"></svg>
+      </div>
+    </main>
+
+    <aside class="inspector">
+      <div class="kicker">Inspector</div>
+      <h2 id="inspTitle">Select a node</h2>
+      <div id="inspMeta" class="insp-meta"></div>
+      <p id="inspBody" class="insp-body">Click a node on the CASE DAG. Gates fail closed: missing scope or authorization holds the case.</p>
+      <pre id="inspJson" class="insp-json hidden"></pre>
+    </aside>
+  </div>
+  <script src="./studio.js"></script>
+</body>
+</html>
