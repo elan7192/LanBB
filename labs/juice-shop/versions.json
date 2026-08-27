@@ -1,8 +1,8 @@
 {
   "lab": "juice-shop",
-  "hunted": "v5-hardened",
-  "wall": "v6-hardened",
-  "overlays": ["v0-stock", "v1-hardened", "v2-hardened", "v3-hardened", "v4-hardened", "v5-hardened", "v6-hardened"],
+  "hunted": "v6-hardened",
+  "wall": "v7-hardened",
+  "overlays": ["v0-stock", "v1-hardened", "v2-hardened", "v3-hardened", "v4-hardened", "v5-hardened", "v6-hardened", "v7-hardened"],
   "last_score": "0/116",
   "score": "0/116",
   "n": 0,
@@ -13,8 +13,16 @@
   "coding_challenges": "separate /snippets — not mixed into n/N",
   "fill": "live",
   "fill_url": "http://127.0.0.1:3000/api/Challenges/",
-  "fill_wall": "v5-hardened",
-  "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v5-hardened; docker_disabled=18. v5 juice read-only SKIPPED (EROFS on .well-known/csaf); tmpfs /juice-shop/data hides data/static so that wall did not apply",
+  "fill_wall": "v6-hardened",
+  "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v6-hardened; docker_disabled=18. Wall APPLIES: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (challenges.yml 1593, securityQuestions.yml 29)",
+  "applies": true,
+  "applies_reason": "working harden: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (challenges.yml 1593, securityQuestions.yml 29); v7 keeps those apply constraints plus default-deny except GET /api/Challenges/",
+  "applies_erofs": "gone",
+  "applies_readonly_rootfs": false,
+  "applies_tmpfs": "/tmp only",
+  "data_static_visible": true,
+  "data_static_challenges_yml": 1593,
+  "data_static_security_questions_yml": 29,
   "image": "bkimminich/juice-shop",
   "image_pin": "bkimminich/juice-shop@sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
   "score_url": "http://127.0.0.1:3000/api/Challenges/",
@@ -29,5 +37,5 @@
     "Insecure Deserialization",
     "XXE"
   ],
-  "note": "Hunt the current wall (v6). Loop 6 hunted v5. Fill live 0/116; docker_disabled=18. v6 is a working harden: no juice EROFS, no tmpfs over data/static. Do not invent n. Stock is v0. Each loop must raise the wall. Never live programs. Never porn programs."
+  "note": "Hunt the current wall (v7). Loop 7 hunted v6. Fill live 0/116; docker_disabled=18. v6 wall APPLIES (EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible). v7 is a working harden with the same apply constraints. Do not invent n. Do not rediscover. Stock is v0. Each loop must raise the wall. Never live programs. Never porn programs."
 }

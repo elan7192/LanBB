@@ -1,17 +1,18 @@
 # CASE report: juice-shop
 
 - Date (Taipei): 2026-08-27
-- UTC: 2026-08-27T01:01:32Z
+- UTC: 2026-08-27T01:14:41Z
 - Kind: lab
 - Lab score: 0/116
-- Fill: live GET /api/Challenges/ on v5-hardened
+- Fill: live GET /api/Challenges/ on v6-hardened
 - Authorization: local-docker
-- Hunted wall: v5-hardened
-- Current wall: v6-hardened
+- Hunted wall: v6-hardened
+- Current wall: v7-hardened
+- Applies: True (working harden: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (challenges.yml 1593, securityQuestions.yml 29); v7 keeps those apply constraints plus default-deny except GET /api/Challenges/)
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Fill live score 0/116 on v5-hardened. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Fill live score 0/116 on v6-hardened. Report path completed without an exploit PoC.
 
 ## Scope
 
@@ -38,4 +39,4 @@ Docker-off: Insecure Deserialization, XXE.
 
 ## Close path
 
-Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `v6-hardened` in `labs/juice-shop` (this loop hunted `v5-hardened`). Do not attach payloads or reproduction scripts.
+Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `v7-hardened` in `labs/juice-shop` (this loop hunted `v6-hardened`). Do not attach payloads or reproduction scripts.

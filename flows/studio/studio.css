@@ -123,6 +123,9 @@ body {
 .pill.next.dim { color: var(--muted); border-color: var(--line); }
 .pill.coding { color: #9ad0f5; border-color: rgba(154, 208, 245, 0.28); }
 .pill.coding.dim { color: var(--muted); border-color: var(--line); }
+.pill.applies { color: #7ee0a8; border-color: rgba(126, 224, 168, 0.28); }
+.pill.applies.dim { color: var(--muted); border-color: var(--line); }
+.pill.applies.miss { color: var(--coral); border-color: rgba(240, 113, 103, 0.28); }
 
 .rail, .inspector {
   background: rgba(12, 17, 24, 0.92);

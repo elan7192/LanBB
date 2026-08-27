@@ -125,6 +125,8 @@ function renderGraphList(activeId) {
       g.coding_challenges ? " · coding out of n/N" : ""
     }${
       g.docker_disabled_env != null ? " · docker-off " + escapeHtml(g.docker_disabled_env) : ""
+    }${
+      g.applies != null ? " · applies " + escapeHtml(g.applies) : ""
     }</small>`;
     btn.addEventListener("click", () => openGraph(g.id));
     box.appendChild(btn);
@@ -190,6 +192,18 @@ function graphDockerDisabled(graph) {
   const meta = (graph && graph.metadata) || {};
   const lab = meta.lab || {};
   return lab.docker_disabled_env != null ? lab.docker_disabled_env : null;
+}
+
+function graphApplies(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.applies != null ? lab.applies : null;
+}
+
+function graphAppliesReason(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.applies_reason || null;
 }
 
 function showScorePill(text, live) {
@@ -261,6 +275,24 @@ function showCodingPill(text) {
   el.classList.remove("dim");
 }
 
+function showAppliesPill(value, reason) {
+  const el = $("labApplies");
+  if (!el) return;
+  if (value == null || value === "") {
+    el.textContent = "applies —";
+    el.classList.add("dim");
+    el.classList.remove("miss");
+    el.removeAttribute("title");
+    return;
+  }
+  const on = value === true || value === "true" || value === "yes";
+  el.textContent = on ? "applies" : "applies skipped";
+  el.classList.remove("dim");
+  el.classList.toggle("miss", !on);
+  if (reason) el.setAttribute("title", String(reason));
+  else el.removeAttribute("title");
+}
+
 function showWallPill(text, live) {
   const el = $("labWall");
   if (!el) return;
@@ -298,7 +330,9 @@ async function loadLabScore(
   fillFallback,
   nextFallback,
   fillReasonFallback,
-  codingFallback
+  codingFallback,
+  appliesFallback,
+  appliesReasonFallback
 ) {
   const el = $("labScore");
   if (!el) return;
@@ -308,6 +342,7 @@ async function loadLabScore(
   if (fillFallback) showFillPill(fillFallback, fillReasonFallback);
   if (nextFallback) showNextPill(nextFallback);
   if (codingFallback) showCodingPill(codingFallback);
+  if (appliesFallback != null) showAppliesPill(appliesFallback, appliesReasonFallback);
   try {
     const data = await getJson("/api/case/score?program=juice-shop");
     const live = data && (data.score || data.last_score);
@@ -347,6 +382,13 @@ async function loadLabScore(
     } else if (!codingFallback) {
       showCodingPill(null);
     }
+    const applies = data && data.applies;
+    const appliesReason = data && data.applies_reason;
+    if (applies != null) {
+      showAppliesPill(applies, appliesReason);
+    } else if (appliesFallback == null) {
+      showAppliesPill(null);
+    }
   } catch {
     if (!fallback) showScorePill(null, false);
     if (!wallFallback) showWallPill(null, false);
@@ -354,6 +396,7 @@ async function loadLabScore(
     if (!fillFallback) showFillPill(null);
     if (!nextFallback) showNextPill(null);
     if (!codingFallback) showCodingPill(null);
+    if (appliesFallback == null) showAppliesPill(null);
   }
 }
 
@@ -386,6 +429,17 @@ function inspect(node) {
     rows.push(["Next hunt", lab.next_hunt || graphNextHunt(state.current) || "-"]);
     rows.push(["Coding challenges", lab.coding_challenges || graphCoding(state.current) || "separate /snippets — not mixed into n/N"]);
     rows.push(["Docker-disabled", String(lab.docker_disabled_env != null ? lab.docker_disabled_env : graphDockerDisabled(state.current) || "-")]);
+    rows.push(["Applies", String(lab.applies != null ? lab.applies : graphApplies(state.current) ?? "-")]);
+    rows.push(["Applies reason", lab.applies_reason || graphAppliesReason(state.current) || "-"]);
+    rows.push(["EROFS", lab.applies_erofs || "-"]);
+    rows.push(["ReadonlyRootfs", String(lab.applies_readonly_rootfs != null ? lab.applies_readonly_rootfs : "-")]);
+    rows.push(["tmpfs", lab.applies_tmpfs || "-"]);
+    rows.push([
+      "data/static",
+      lab.data_static_visible
+        ? `visible (${lab.data_static_challenges_yml || "?"}/${lab.data_static_security_questions_yml || "?"})`
+        : "-",
+    ]);
   }
   if (node.id === "n_harden" || cfg.stage === "harden") {
     rows.push(["Next wall", lab.wall || graphWall(state.current) || "-"]);
@@ -393,6 +447,8 @@ function inspect(node) {
     rows.push(["Next hunt", lab.next_hunt || graphNextHunt(state.current) || "-"]);
     rows.push(["Fill wall", lab.fill_wall || graphFillWall(state.current) || "-"]);
     rows.push(["Coding challenges", lab.coding_challenges || graphCoding(state.current) || "separate /snippets — not mixed into n/N"]);
+    rows.push(["Applies", String(lab.applies != null ? lab.applies : graphApplies(state.current) ?? "-")]);
+    rows.push(["Applies reason", lab.applies_reason || graphAppliesReason(state.current) || "-"]);
   }
   $("inspTitle").textContent = node.label;
   $("inspMeta").innerHTML = rows
@@ -657,7 +713,9 @@ function showGraph(graph, hint) {
   if (nextHunt) showNextPill(nextHunt);
   const coding = graphCoding(graph);
   if (coding) showCodingPill(coding);
-  loadLabScore(cached, wall, hunted, fill, nextHunt, graphFillReason(graph), coding);
+  const applies = graphApplies(graph);
+  if (applies != null) showAppliesPill(applies, graphAppliesReason(graph));
+  loadLabScore(cached, wall, hunted, fill, nextHunt, graphFillReason(graph), coding, applies, graphAppliesReason(graph));
 }
 
 async function openGraph(id) {

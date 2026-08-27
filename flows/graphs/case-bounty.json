@@ -1,8 +1,8 @@
 {
   "id": "case-bounty",
   "name": "Authorized bug-bounty CASE",
-  "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N last_score, hunt vs current wall, fill provenance, next hunt, and coding /snippets-out-of-n/N are first-class graph properties; Flow Studio shows them.",
-  "version": "1.6.0",
+  "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N last_score, hunt vs current wall, fill provenance, next hunt, coding /snippets-out-of-n/N, and whether the wall applies are first-class graph properties; Flow Studio shows them.",
+  "version": "1.7.0",
   "nodes": [
     {
       "id": "n_intake",
@@ -219,7 +219,7 @@
       "label": "Juice Shop lab",
       "category": "lab",
       "status": "idle",
-      "description": "In-scope local OWASP Juice Shop only. Hypothetical shop. Current wall is labs/juice-shop/versions.json. Hunted wall is the overlay this loop scored. n/N is GET /api/Challenges solved/total. Coding /snippets stay out of n/N. Not a live bounty program.",
+      "description": "In-scope local OWASP Juice Shop only. Hypothetical shop. Current wall is labs/juice-shop/versions.json. Hunted wall is the overlay this loop scored. n/N is GET /api/Challenges solved/total. Coding /snippets stay out of n/N. Applies records whether the wall is a working harden. Not a live bounty program.",
       "config": {
         "stage": "lab",
         "badge": "LAB",
@@ -318,7 +318,7 @@
       "label": "Harden lab overlay",
       "category": "harden",
       "status": "idle",
-      "description": "After the report, raise the Juice Shop lab overlay (new vN-hardened under labs/juice-shop/overlays). This is a lab wall change, not a LanBB merge.",
+      "description": "After the report, raise the Juice Shop lab overlay (new vN-hardened under labs/juice-shop/overlays). Working harden: no juice EROFS, no tmpfs over data/static. This is a lab wall change, not a LanBB merge.",
       "config": {
         "stage": "harden",
         "badge": "WALL",
@@ -648,18 +648,26 @@
     "lab": {
       "program": "juice-shop",
       "score_from": "/api/Challenges",
-      "hunted": "v5-hardened",
-      "wall": "v6-hardened",
-      "next_hunt": "v6-hardened",
+      "hunted": "v6-hardened",
+      "wall": "v7-hardened",
+      "next_hunt": "v7-hardened",
       "last_score": "0/116",
       "n": 0,
       "N": 116,
       "docker_solvable": 98,
       "docker_disabled_env": 18,
-      "coding_challenges": "separate /snippets — not mixed into n/N",
+      "coding_challenges": "separate /snippets \u2014 not mixed into n/N",
       "fill": "live",
-      "fill_wall": "v5-hardened",
-      "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v5-hardened; docker_disabled=18. v5 juice read-only SKIPPED (EROFS on .well-known/csaf); tmpfs /juice-shop/data hides data/static so that wall did not apply"
+      "fill_wall": "v6-hardened",
+      "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v6-hardened; docker_disabled=18. Wall APPLIES: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (challenges.yml 1593, securityQuestions.yml 29)",
+      "applies": true,
+      "applies_reason": "working harden: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (challenges.yml 1593, securityQuestions.yml 29); v7 keeps those apply constraints plus default-deny except GET /api/Challenges/",
+      "applies_erofs": "gone",
+      "applies_readonly_rootfs": false,
+      "applies_tmpfs": "/tmp only",
+      "data_static_visible": true,
+      "data_static_challenges_yml": 1593,
+      "data_static_security_questions_yml": 29
     },
     "score": "0/116"
   }
