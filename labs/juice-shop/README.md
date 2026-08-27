@@ -19,8 +19,9 @@ Current wall: see `versions.json` (`wall`). Hunt that overlay, then harden a **n
 | `overlays/v10-hardened/` | Older wall: working harden plus exact trailing-slash GET /api/Challenges/ only, empty-query/cookie-closed score path, leftover privacy/hidden/data HTTP routes closed |
 | `overlays/v11-hardened/` | Older wall: working harden plus Authorization/Origin/Referer closed on the score path, leftover continue-code/login/search/Baskets/nested privacy-security SPA HTTP routes closed. Edge 4m/4 failed on Fill (daemon min 6MB). |
 | `overlays/v12-hardened/` | Older wall: working harden plus extra hop/auth headers closed on the score path, leftover hacking-instructor/juicy-nft/continue-code-xss/products-queries HTTP routes closed, edge floor mem>=6m pids>=6 |
-| `overlays/v13-hardened/` | Previous wall: working harden plus leftover rewrite/identity headers closed on the score path, leftover continue-code-apply/tutorial/access_token/ftp-backup HTTP routes closed, edge floor mem>=6m pids>=6 held |
-| `overlays/v14-hardened/` | Current wall: working harden plus leftover hop/session/token headers closed on the score path, leftover continue-code-findIt-apply/fixIt-apply/snippets-fixes/2FA-enter/web3-nft HTTP routes closed, edge floor mem>=6m pids>=6 held |
+| `overlays/v13-hardened/` | Older wall: working harden plus leftover rewrite/identity headers closed on the score path, leftover continue-code-apply/tutorial/access_token/ftp-backup HTTP routes closed, edge floor mem>=6m pids>=6 held |
+| `overlays/v14-hardened/` | Previous wall: working harden plus leftover hop/session/token headers closed on the score path, leftover continue-code-findIt-apply/fixIt-apply/snippets-fixes/2FA-enter/web3-nft HTTP routes closed, edge floor mem>=6m pids>=6 held. `worker_processes auto` OOM-killed nginx (exit 137). |
+| `overlays/v15-hardened/` | Current wall: working harden plus leftover remote-user/oauth-proxy/tracing/cloud-auth headers closed on the score path, leftover web3-walletExploitAddress/2FA-SPA/ftp-quarantine/solve-server-side/coupon HTTP routes closed, `worker_processes 1` (not auto), edge floor mem>=6m pids>=6 held |
 
 ```bash
 # stock
@@ -40,9 +41,10 @@ docker compose -f labs/juice-shop/overlays/v10-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v11-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v12-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v13-hardened/docker-compose.yml up
-
-# current wall (v14)
 docker compose -f labs/juice-shop/overlays/v14-hardened/docker-compose.yml up
+
+# current wall (v15)
+docker compose -f labs/juice-shop/overlays/v15-hardened/docker-compose.yml up
 ```
 
 In-scope URL stays `http://127.0.0.1:3000`. Fail-closed: no recon/score without `programs/juice-shop/scope.md`.

@@ -48,6 +48,8 @@ def _wall_meta(root: Path) -> dict:
             "edge_floor_mem": "",
             "edge_floor_pids": "",
             "edge_floor_reason": "",
+            "worker_processes": "",
+            "worker_processes_reason": "",
             "coverage": [],
             "docker_off": [],
         }
@@ -85,6 +87,8 @@ def _wall_meta(root: Path) -> dict:
             "edge_floor_mem": str(data.get("edge_floor_mem") or ""),
             "edge_floor_pids": data.get("edge_floor_pids") if data.get("edge_floor_pids") is not None else "",
             "edge_floor_reason": str(data.get("edge_floor_reason") or ""),
+            "worker_processes": data.get("worker_processes") if data.get("worker_processes") is not None else "",
+            "worker_processes_reason": str(data.get("worker_processes_reason") or ""),
             "coverage": list(data.get("skill_pack_does_not_cover") or []),
         "docker_off": list(data.get("docker_off_not_exercised") or []),
     }
@@ -154,6 +158,8 @@ Docker-off: {off}.
 - Bind: {wall_meta["bind"] or "see overlay"}
 - Edge floor: mem {wall_meta["edge_floor_mem"] or "see versions.json"} / pids {wall_meta["edge_floor_pids"] or "see versions.json"}
 - Edge floor reason: {wall_meta["edge_floor_reason"] or "see versions.json"}
+- Worker processes: {wall_meta["worker_processes"] or "see versions.json"}
+- Worker processes reason: {wall_meta["worker_processes_reason"] or "see versions.json"}
 - Authorization: {scope.authorization or "see scope.md"}
 - Hunted wall: {wall_meta["hunted"]}
 - Current wall: {wall_meta["wall"]}

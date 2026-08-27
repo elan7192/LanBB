@@ -2,15 +2,15 @@
 program: juice-shop
 kind: lab
 authorization: local-docker
-wall: v14-hardened
-hunted: v13-hardened
+wall: v15-hardened
+hunted: v14-hardened
 ---
 
 # OWASP Juice Shop (local lab)
 
 Hypothetical in-scope shop. Not a live bounty program. Not random internet.
 
-Current wall: `labs/juice-shop/overlays/v14-hardened/` (see `labs/juice-shop/versions.json`). Loop 14 hunted v13, then raised this wall.
+Current wall: `labs/juice-shop/overlays/v15-hardened/` (see `labs/juice-shop/versions.json`). Loop 15 hunted v14, then raised this wall.
 
 ## In scope
 
