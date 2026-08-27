@@ -130,12 +130,29 @@ function renderStages(graph) {
           { id: "intake", label: "Intake" },
           { id: "scope", label: "Scope" },
           { id: "authorization", label: "Authorization" },
+          { id: "recon", label: "Recon" },
           { id: "report", label: "Report" },
           { id: "close", label: "Close" },
         ];
   $("stageNav").innerHTML = stages
     .map((s) => `<span class="stage-chip on">${escapeHtml(s.label)}</span>`)
     .join("");
+}
+
+async function loadLabScore() {
+  const el = $("labScore");
+  if (!el) return;
+  try {
+    const data = await getJson("/api/case/score?program=juice-shop");
+    if (data && data.score) {
+      el.textContent = `score ${data.score}`;
+      el.classList.remove("dim");
+      return;
+    }
+    el.textContent = "score —";
+  } catch {
+    el.textContent = "score —";
+  }
 }
 
 function inspect(node) {
@@ -406,6 +423,7 @@ function showGraph(graph, hint) {
   fitGraph(graph);
   inspect(null);
   if (hint) setHint(hint);
+  loadLabScore();
 }
 
 async function openGraph(id) {

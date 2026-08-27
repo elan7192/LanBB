@@ -1,0 +1,8 @@
+{
+  "status": "success",
+  "data": [
+    {"id": 1, "key": "restfulXssChallenge", "name": "A", "solved": false},
+    {"id": 2, "key": "loginAdminChallenge", "name": "B", "solved": false},
+    {"id": 3, "key": "scoreBoardChallenge", "name": "C", "solved": false}
+  ]
+}

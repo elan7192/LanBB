@@ -1,0 +1,161 @@
+#!/usr/bin/python3
+"""Scaffold, report path, score tally, and memory emit."""
+
+from __future__ import annotations
+
+import json
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+CASE = HERE.parent
+if str(CASE) not in sys.path:
+    sys.path.insert(0, str(CASE))
+
+import lanbb as cli  # noqa: E402
+import memory as memory_mod  # noqa: E402
+import report as report_mod  # noqa: E402
+import score as score_mod  # noqa: E402
+import scope as scope_mod  # noqa: E402
+
+
+class JuiceShopCaseTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="lanbb-case-"))
+        (self.tmp / "flows" / "graphs").mkdir(parents=True)
+        (self.tmp / "flows" / "graphs" / "case-bounty.json").write_text("{}\n")
+        (self.tmp / "README.md").write_text("LanBB\n")
+        (self.tmp / ".gitmodules").write_text("")
+
+    def test_case_new_juice_shop_layout(self):
+        dest = cli.case_new("juice-shop", self.tmp)
+        for rel in (
+            "scope.md",
+            "notes.md",
+            "recon/subdomains",
+            "findings",
+            "reports",
+            "memory",
+        ):
+            self.assertTrue((dest / rel).exists(), rel)
+        text = (dest / "scope.md").read_text(encoding="utf-8")
+        self.assertIn("127.0.0.1:3000", text)
+        self.assertIn("kind: lab", text)
+
+    def test_score_without_scope_fails(self):
+        with self.assertRaises(scope_mod.ScopeError):
+            score_mod.score_program("nope", root=self.tmp, payload={"data": []})
+
+    def test_score_fixture_is_zero_of_n(self):
+        cli.case_new("juice-shop", self.tmp)
+        payload = json.loads(
+            (HERE / "fixtures" / "challenges-fresh.json").read_text(encoding="utf-8")
+        )
+        result = score_mod.score_program(
+            "juice-shop", root=self.tmp, payload=payload
+        )
+        self.assertEqual(result["score"], "0/3")
+        self.assertEqual(result["solved"], 0)
+        self.assertEqual(result["total"], 3)
+
+    def test_report_path_works_at_zero(self):
+        cli.case_new("juice-shop", self.tmp)
+        dest = report_mod.write_report("juice-shop", self.tmp)
+        self.assertTrue(dest.is_file())
+        body = dest.read_text(encoding="utf-8")
+        self.assertIn("0/", body)
+        self.assertNotIn("PoC payload", body)
+
+    def test_memory_emit_semantic_and_episodic_not_working(self):
+        cli.case_new("juice-shop", self.tmp)
+        note = "\n".join(
+            [
+                "Loop method note one.",
+                "Defense got a higher wall.",
+                "UX kept fail-closed scope.",
+                "Score stayed 0/N without auto-pwn.",
+                "Report path still wrote a draft.",
+            ]
+        )
+        result = memory_mod.emit(
+            "juice-shop",
+            semantic=note,
+            score="0/3",
+            hardened="v1-hardened headers",
+            sha_pr="test",
+            loop=1,
+            root=self.tmp,
+        )
+        dest = self.tmp / "programs" / "juice-shop" / "memory"
+        self.assertTrue((dest / "semantic-loop-1.md").is_file())
+        epi = (dest / "episodic.csv").read_text(encoding="utf-8")
+        self.assertIn("0/3", epi)
+        self.assertGreaterEqual(epi.count("\n"), 2)
+        self.assertFalse((dest / "working.md").exists())
+        self.assertEqual(result["working"], "not-written")
+
+    def test_memory_rejects_short_semantic(self):
+        cli.case_new("juice-shop", self.tmp)
+        with self.assertRaises(memory_mod.MemoryError):
+            memory_mod.emit(
+                "juice-shop",
+                semantic="too short",
+                score="0/1",
+                hardened="none",
+                root=self.tmp,
+            )
+
+    def test_cli_refuses_missing_scope(self):
+        code = cli.main(["--root", str(self.tmp), "scope", "parse", "missing"])
+        self.assertEqual(code, 2)
+
+    def test_lab_down_score_is_unknown_zero_of_116(self):
+        cli.case_new("juice-shop", self.tmp)
+        result = score_mod.score_program(
+            "juice-shop",
+            root=self.tmp,
+            base="http://127.0.0.1:1",
+        )
+        self.assertEqual(result["score"], "0/116")
+        self.assertEqual(result["status"], "unknown")
+        self.assertEqual(result["hacking_total_master"], 116)
+        self.assertEqual(result["docker_solvable"], 98)
+
+    def test_copied_skills_exist_without_payloads(self):
+        skills = CASE / "skills"
+        names = [
+            "conducting-external-reconnaissance-with-osint",
+            "performing-web-application-vulnerability-triage",
+            "prioritizing-vulnerabilities-with-cvss-scoring",
+            "testing-api-security-with-owasp-top-10",
+            "testing-for-xss-vulnerabilities",
+            "testing-for-json-web-token-vulnerabilities",
+            "testing-for-broken-access-control",
+            "testing-for-business-logic-vulnerabilities",
+            "testing-oauth2-implementation-flaws",
+            "conducting-api-security-testing",
+            "testing-cors-misconfiguration",
+            "testing-for-open-redirect-vulnerabilities",
+            "detecting-ai-model-prompt-injection-attacks",
+        ]
+        for name in names:
+            path = skills / name / "SKILL.md"
+            self.assertTrue(path.is_file(), name)
+            text = path.read_text(encoding="utf-8")
+            self.assertIn("Apache License", text)
+            self.assertNotIn("<script>alert", text)
+            self.assertNotIn("WAITFOR DELAY", text)
+            self.assertNotIn("169.254.169.254", text)
+        forbidden = [
+            "exploiting-sql-injection-vulnerabilities",
+            "exploiting-idor-vulnerabilities",
+            "performing-ssrf-vulnerability-exploitation",
+        ]
+        for name in forbidden:
+            self.assertFalse((skills / name).exists(), name)
+
+
+if __name__ == "__main__":
+    unittest.main()

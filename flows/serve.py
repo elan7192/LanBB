@@ -17,12 +17,13 @@ import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(os.environ.get("LANBB_FLOWS_ROOT", Path(__file__).resolve().parent))
 GRAPHS = ROOT / "graphs"
 TEMPLATES = ROOT / "templates"
 STUDIO = ROOT / "studio"
+REPO_ROOT = Path(os.environ.get("LANBB_REPO_ROOT", ROOT.parent))
 DEFAULT_ID = "case-bounty"
 HOST = os.environ.get("LANBB_FLOW_HOST", "127.0.0.1")
 PORT = int(os.environ.get("LANBB_FLOW_PORT", "8765"))
@@ -101,6 +102,36 @@ def forbidden_tokens(graph: Dict[str, Any]) -> List[str]:
     return sorted({m.group(1).lower() for m in BANNED_RE.finditer(blob)})
 
 
+def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
+    """Fail-closed lab score. Missing programs/<slug>/scope.md is 400."""
+    slug = (program or "").strip().lower()
+    if not SAFE_ID.match(slug):
+        return 400, {"error": "invalid program", "fail_closed": True}
+    scope = REPO_ROOT / "programs" / slug / "scope.md"
+    if not scope.is_file():
+        return 400, {
+            "error": "missing program scope file",
+            "fail_closed": True,
+            "path": str(scope),
+        }
+    saved = REPO_ROOT / "programs" / slug / "score.json"
+    if saved.is_file():
+        data = _read_json(saved) or {}
+        data["fail_closed"] = False
+        data["available"] = True
+        return 200, data
+    versions = REPO_ROOT / "labs" / "juice-shop" / "versions.json"
+    wall = _read_json(versions) if versions.is_file() else {}
+    return 200, {
+        "program": slug,
+        "available": False,
+        "fail_closed": False,
+        "score": (wall or {}).get("last_score"),
+        "wall": (wall or {}).get("wall"),
+        "reason": "live lab not scored; last_score is the hunt result for this wall",
+    }
+
+
 def load_template() -> Dict[str, Any]:
     path = TEMPLATES / f"{DEFAULT_ID}.json"
     data = _read_json(path)
@@ -169,6 +200,12 @@ class FlowHandler(SimpleHTTPRequestHandler):
             self.send_header("Location", "/studio/index.html")
             self.send_header("Content-Length", "0")
             self.end_headers()
+            return
+        if path == "/api/case/score":
+            qs = parse_qs(parsed.query)
+            program = (qs.get("program") or ["juice-shop"])[0]
+            status, payload = case_score(program)
+            self._send(*_json_bytes(payload, status))
             return
         if path == "/api/graphs":
             # GET must not seed. Empty catalog is a valid response.
