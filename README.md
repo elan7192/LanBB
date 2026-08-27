@@ -25,10 +25,10 @@ python3 tools/case/lanbb.py scope parse juice-shop
 python3 flows/serve.py
 # http://127.0.0.1:8765/  → pick case-bounty
 
-# 4. Optional: start the current wall (v4-hardened). Do not hunt stock/v1/v2/v3 forever.
-docker compose -f labs/juice-shop/overlays/v4-hardened/docker-compose.yml up
-# previous wall: labs/juice-shop/overlays/v3-hardened/docker-compose.yml
-# older wall: labs/juice-shop/overlays/v2-hardened/docker-compose.yml
+# 4. Optional: start the current wall (v5-hardened). Do not hunt stock/v1/v2/v3/v4 forever.
+docker compose -f labs/juice-shop/overlays/v5-hardened/docker-compose.yml up
+# previous wall: labs/juice-shop/overlays/v4-hardened/docker-compose.yml
+# older wall: labs/juice-shop/overlays/v3-hardened/docker-compose.yml
 # stock pin: docker compose -f labs/juice-shop/overlays/v0-stock/docker-compose.yml up
 
 # 5. Hunt is CASE-only (scope → in-scope recon skip on loopback → report). No auto-pwn.
@@ -40,14 +40,14 @@ python3 tools/case/lanbb.py case report juice-shop
 #    docker-solvable=98 (18 disabledEnv on Docker). Coding /snippets are separate — do not mix.
 #    GET /rest/continue-code is a token only — do not forge.
 python3 tools/case/lanbb.py case score juice-shop
-# Fill unavailable on v3 overlay this loop: 0/116 honest. Do not invent n.
+# Fill unavailable on v4 overlay this loop: 0/116 honest. Do not invent n.
 
 # 7. After hunt→harden, emit Pawel memories (no working dump, no wiki)
 python3 tools/case/lanbb.py case memory emit juice-shop \
   --score 0/116 \
-  --hardened "v4-hardened: app/edge caps + broader URI WAF + GraphQL/basket/reviews/captcha/data-export closed" \
-  --semantic-file programs/juice-shop/memory/semantic-loop-4.md \
-  --loop 4
+  --hardened "v5-hardened: juice read-only + drop OPTIONS + login WAF + identity/Web3/catalog/search/info-leak closed" \
+  --semantic-file programs/juice-shop/memory/semantic-loop-5.md \
+  --loop 5
 ```
 
 Folder:
