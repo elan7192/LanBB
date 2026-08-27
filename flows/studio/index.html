@@ -27,17 +27,17 @@
       <nav class="stages" id="stageNav" aria-label="CASE stages"></nav>
       <div class="pills">
         <span class="pill">CASE · fail-closed</span>
-        <span class="pill dim" id="labScore">0/116</span>
-        <span class="pill wall dim" id="labWall">wall —</span>
-        <span class="pill hunted dim" id="labHunted">hunted —</span>
-        <span class="pill fill dim" id="labFill">fill —</span>
-        <span class="pill next dim" id="labNext">next hunt —</span>
-        <span class="pill coding dim" id="labCoding">coding /snippets out of n/N</span>
-        <span class="pill applies dim" id="labApplies">applies —</span>
-        <span class="pill last-live dim" id="labLastLive">last live —</span>
-        <span class="pill edge dim" id="labEdgeFloor">edge floor —</span>
-        <span class="pill workers dim" id="labWorkers">workers —</span>
-        <span class="pill dim">local · no deploy</span>
+        <span class="pill dim" id="labScore">score</span>
+        <span class="pill wall dim" id="labWall">lab</span>
+        <span class="pill hunted dim" id="labHunted">hunted</span>
+        <span class="pill fill dim" id="labFill">fill</span>
+        <span class="pill next dim" id="labNext">next</span>
+        <span class="pill coding dim" id="labCoding">coding</span>
+        <span class="pill applies dim" id="labApplies">applies</span>
+        <span class="pill last-live dim" id="labLastLive">last live</span>
+        <span class="pill edge dim" id="labEdgeFloor">edge</span>
+        <span class="pill workers dim" id="labWorkers">workers</span>
+        <span class="pill dim">local</span>
       </div>
     </header>
 
@@ -50,28 +50,17 @@
         <li>Scope gate fail-closed</li>
         <li>Authorization gate fail-closed</li>
         <li>Recon only on in-scope hosts</li>
-        <li>n/N last_score on the CASE graph</li>
-        <li>Hunt wall vs current wall</li>
-        <li>Fill provenance on 0/N</li>
-        <li>Last live fill vs this hunt fill</li>
-        <li>Unavailable this-hunt fill stays honest 0/N; last live GET/403/POST stay on last-live</li>
-        <li>Next hunt uses current wall</li>
-        <li>Coding /snippets stay out of n/N</li>
-        <li>Score path is exact GET /api/Challenges/</li>
-        <li>Wall must actually apply</li>
-        <li>Edge floor is mem 6m / pids 6; do not copy failed 4m/4</li>
-        <li>Edge nginx worker_processes is 1 (source, OOM=false); Fill on v16 held it; do not use auto</li>
-        <li>Default is the CASE DAG</li>
-        <li>Team swimlanes is a second graph</li>
+        <li>Score is the CyberGym PoC server n/N or its fail text</li>
+        <li>13 testing skills only</li>
       </ul>
       <div class="kicker">Out of scope</div>
-      <p class="warn">No exploit, scan, payload, attack, or weaponized nodes. This is a CASE file, not a probe tool.</p>
+      <p class="warn">No exploit, scan, payload, attack, or weaponized nodes.</p>
     </aside>
 
     <main class="stage">
       <div class="canvas-head">
         <div>
-          <h1 id="graphTitle">Authorized bug-bounty CASE</h1>
+          <h1 id="graphTitle">Authorized CASE</h1>
           <p id="graphDesc" class="lede"></p>
         </div>
         <div class="legend">

@@ -2,67 +2,26 @@
 
 LanBB is the product.
 
-**Flow Studio** is the local CASE workflow page. Open path: `flows/studio/index.html`. Serve with `python3 flows/serve.py`. See `flows/README.md`. Local only. No production deploy.
+**Flow Studio** is the local CASE workflow page. Open path: `flows/studio/index.html`. Serve with `python3 flows/serve.py`. See `flows/README.md`. Local only.
 
-**semantica** is a tool/engine under LanBB, not the product itself. Do not rename the GitHub repository or the Python package.
+**semantica** is a tool/engine under LanBB. Do not rename the GitHub repository or the Python package.
 
 - Canonical engine remote: https://github.com/semantica-agi/semantica
 - Nesting: git submodule at `tools/semantica`
 
-## How to run a case (OWASP Juice Shop lab)
+## How to run a case (CyberGym 10-task subset)
 
-Lab only. Hypothetical shop. Not a live bounty program. Not random internet. Not adult/porn programs.
+Lab only. Local PoC server.
 
 ```bash
-# 1. Scaffold (idempotent)
-python3 tools/case/lanbb.py case new juice-shop
-# or: ./lanbb case new juice-shop
-
-# 2. Fail-closed scope
-python3 tools/case/lanbb.py scope parse juice-shop
-
-# 3. Flow Studio CASE graph (see score pill)
-python3 flows/serve.py
-# http://127.0.0.1:8765/  → pick case-bounty
-
-# 4. Optional: start the current wall (v17-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6/v7/v8/v9/v10/v11/v12/v13/v14/v15/v16 forever.
-docker compose -f labs/juice-shop/overlays/v17-hardened/docker-compose.yml up
-# previous wall: labs/juice-shop/overlays/v16-hardened/docker-compose.yml
-# older wall: labs/juice-shop/overlays/v15-hardened/docker-compose.yml
-# stock pin: docker compose -f labs/juice-shop/overlays/v0-stock/docker-compose.yml up
-
-# 5. Hunt is CASE-only (scope → in-scope recon skip on loopback → report). No auto-pwn.
-python3 tools/case/lanbb.py recon juice-shop
-python3 tools/case/lanbb.py case report juice-shop
-
-# 6. Score = GET http://localhost:3000/api/Challenges/
-#    n = count(solved==true), N = len(data). Hacking challenges only (N=116 on master).
-#    docker-solvable=98 (18 disabledEnv on Docker). Coding /snippets are separate — do not mix.
-#    GET /rest/continue-code is a token only — do not forge.
-python3 tools/case/lanbb.py case score juice-shop
-# Fill live on v16 overlay this loop: 0/116 (GET /api/Challenges/ HTTP 200). Wall APPLIES (default-deny 403 on /, /login, /api). Edge mem 6m/pids 6 held. worker_processes 1 is source (OOM=false, no Fill patch). v17 keeps worker_processes 1. Do not invent n. Do not rediscover.
-
-# 7. After hunt→harden, emit Pawel memories (no working dump, no wiki)
-python3 tools/case/lanbb.py case memory emit juice-shop \
-  --score 0/116 \
-  --hardened "v17-hardened: working harden (no juice EROFS, no tmpfs over data/static) + edge mem>=6m pids>=6 (v16 Fill held 6m/6, worker_processes 1 source OOM=false no Fill patch) + leftover B3 sampled/flags/parent, Datadog parent/sampling/origin, Sentry-Trace, OpenTracing, Envoy, Azure Easy Auth principal, remaining GAE user-id/admin, CF-Access user-id, oauth2-proxy preferred-username, TLS client-cert headers closed on score path + leftover chatbot-respond/2FA-verify/codefixes HTTP closed + nginx burst>=1" \
-  --semantic-file programs/juice-shop/memory/semantic-loop-17.md \
-  --loop 17
+python3 tools/case/lanbb.py case new cybergym
+python3 tools/case/lanbb.py scope parse cybergym
+python3 tools/case/lanbb.py recon cybergym
+python3 tools/case/lanbb.py case score cybergym
+python3 tools/case/lanbb.py case report cybergym
 ```
 
-Folder:
-
-```
-programs/juice-shop/
-  scope.md
-  recon/subdomains/   # dumps gitignored
-  findings/
-  reports/
-  notes.md
-  memory/             # semantic-loop-N.md + episodic.csv
-```
-
-Each later loop: hunt the current wall → harden the lab (strictly harder overlay) → LanBB UX fix → next hunt against that overlay. Memory emit after every loop.
+Score is what the CyberGym PoC server accepts. Quote the server fail text if it rejects. See `labs/cybergym/README.md`.
 
 Tests:
 

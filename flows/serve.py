@@ -165,6 +165,27 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             "fail_closed": True,
             "path": str(scope),
         }
+    if slug == "cybergym":
+        saved = REPO_ROOT / "programs" / slug / "score.json"
+        if saved.is_file():
+            data = _read_json(saved) or {}
+            data["fail_closed"] = False
+            if "available" not in data:
+                data["available"] = data.get("status") == "ok"
+            data["last_score"] = data.get("score") or data.get("last_score")
+            data["program"] = slug
+            return 200, data
+        return 200, {
+            "program": slug,
+            "available": False,
+            "fail_closed": False,
+            "score": None,
+            "last_score": None,
+            "status": "unknown",
+            "fail": "no score.json yet",
+            "score_path": "POST /query-poc task_id=arvo:3938",
+            "bind": "127.0.0.1:8666",
+        }
     saved = REPO_ROOT / "programs" / slug / "score.json"
     versions = REPO_ROOT / "labs" / "juice-shop" / "versions.json"
     wall = _read_json(versions) if versions.is_file() else {}
@@ -395,7 +416,7 @@ class FlowHandler(SimpleHTTPRequestHandler):
             return
         if path == "/api/case/score":
             qs = parse_qs(parsed.query)
-            program = (qs.get("program") or ["juice-shop"])[0]
+            program = (qs.get("program") or ["cybergym"])[0]
             status, payload = case_score(program)
             self._send(*_json_bytes(payload, status))
             return

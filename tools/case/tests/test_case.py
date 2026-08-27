@@ -6,7 +6,9 @@ from __future__ import annotations
 import json
 import sys
 import tempfile
+import threading
 import unittest
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -43,6 +45,191 @@ class JuiceShopCaseTest(unittest.TestCase):
         text = (dest / "scope.md").read_text(encoding="utf-8")
         self.assertIn("127.0.0.1:3000", text)
         self.assertIn("kind: lab", text)
+
+    def test_case_new_cybergym_layout(self):
+        dest = cli.case_new("cybergym", self.tmp)
+        for rel in (
+            "scope.md",
+            "notes.md",
+            "recon/subdomains",
+            "findings",
+            "reports",
+            "memory",
+        ):
+            self.assertTrue((dest / rel).exists(), rel)
+        text = (dest / "scope.md").read_text(encoding="utf-8")
+        self.assertIn("127.0.0.1:8666", text)
+        self.assertIn("kind: lab", text)
+        self.assertIn("cybergym", text)
+
+    def test_cybergym_score_without_scope_fails(self):
+        with self.assertRaises(scope_mod.ScopeError):
+            score_mod.score_program("cybergym", root=self.tmp)
+
+    def test_cybergym_score_server_down_does_not_invent_n(self):
+        cli.case_new("cybergym", self.tmp)
+        result = score_mod.score_program(
+            "cybergym",
+            root=self.tmp,
+            base="http://127.0.0.1:1",
+        )
+        self.assertIsNone(result["score"])
+        self.assertEqual(result["status"], "unavailable")
+        self.assertTrue(result.get("fail"))
+        self.assertNotEqual(result["score"], "0/10")
+
+    def test_cybergym_score_query_404_does_not_invent_n(self):
+        cli.case_new("cybergym", self.tmp)
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                body = b"<title>FastAPI - Swagger UI</title>"
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_POST(self):
+                length = int(self.headers.get("Content-Length") or 0)
+                if length:
+                    self.rfile.read(length)
+                body = b'{"detail":"Record not found"}'
+                self.send_response(404)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *_args):
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            host, port = server.server_address
+            result = score_mod.score_program(
+                "cybergym",
+                root=self.tmp,
+                base=f"http://{host}:{port}",
+            )
+        finally:
+            server.shutdown()
+            server.server_close()
+        self.assertIsNone(result["score"])
+        self.assertEqual(result["status"], "rejected")
+        self.assertIn("404", result["fail"])
+        self.assertIn("Record not found", result["fail"])
+        self.assertNotEqual(result["score"], "0/10")
+
+    def test_cybergym_score_query_200_zero_accepted_is_0_of_10(self):
+        cli.case_new("cybergym", self.tmp)
+        record = {
+            "agent_id": "lanbb-case-score",
+            "task_id": "arvo:3938",
+            "vul_exit_code": 0,
+            "fix_exit_code": 0,
+        }
+        body_json = json.dumps([record]).encode("utf-8")
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                body = b"<title>FastAPI - Swagger UI</title>"
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_POST(self):
+                length = int(self.headers.get("Content-Length") or 0)
+                if length:
+                    self.rfile.read(length)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body_json)))
+                self.end_headers()
+                self.wfile.write(body_json)
+
+            def log_message(self, *_args):
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            host, port = server.server_address
+            result = score_mod.score_program(
+                "cybergym",
+                root=self.tmp,
+                base=f"http://{host}:{port}",
+            )
+        finally:
+            server.shutdown()
+            server.server_close()
+        self.assertEqual(result["score"], "0/10")
+        self.assertEqual(result["n"], 0)
+        self.assertEqual(result["query_task"], "arvo:3938")
+        self.assertEqual(result["status"], "ok")
+
+    def test_cybergym_score_query_200_accepted_is_1_of_10(self):
+        cli.case_new("cybergym", self.tmp)
+        record = {
+            "agent_id": "lanbb-case-score",
+            "task_id": "arvo:3938",
+            "vul_exit_code": 1,
+            "fix_exit_code": 0,
+        }
+        body_json = json.dumps([record]).encode("utf-8")
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                body = b"<title>FastAPI - Swagger UI</title>"
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_POST(self):
+                length = int(self.headers.get("Content-Length") or 0)
+                if length:
+                    self.rfile.read(length)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body_json)))
+                self.end_headers()
+                self.wfile.write(body_json)
+
+            def log_message(self, *_args):
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            host, port = server.server_address
+            result = score_mod.score_program(
+                "cybergym",
+                root=self.tmp,
+                base=f"http://{host}:{port}",
+            )
+        finally:
+            server.shutdown()
+            server.server_close()
+        self.assertEqual(result["score"], "1/10")
+        self.assertEqual(result["n"], 1)
+        self.assertEqual(result["query_task"], "arvo:3938")
+        self.assertEqual(result["status"], "ok")
+
+    def test_cybergym_report_path(self):
+        cli.case_new("cybergym", self.tmp)
+        dest = report_mod.write_report("cybergym", self.tmp)
+        self.assertTrue(dest.is_file())
+        body = dest.read_text(encoding="utf-8")
+        self.assertIn("cybergym", body.lower())
+        self.assertNotIn("PoC payload", body)
 
     def test_score_without_scope_fails(self):
         with self.assertRaises(scope_mod.ScopeError):

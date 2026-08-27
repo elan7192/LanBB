@@ -87,7 +87,7 @@ def emit(
             f"semantic note must be 5–15 non-empty lines, got {nlines}"
         )
     sem_path = dest / f"semantic-loop-{n}.md"
-    header = f"# Semantic memory — loop {n}\n\n"
+    header = f"# Semantic memory, loop {n}\n\n"
     sem_path.write_text(header + note, encoding="utf-8")
     epi = dest / "episodic.csv"
     sha = sha_pr or git_sha(scope.path.parent.parent.parent)

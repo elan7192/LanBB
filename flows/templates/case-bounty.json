@@ -1,8 +1,8 @@
 {
   "id": "case-bounty",
-  "name": "Authorized bug-bounty CASE",
-      "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N last_score, hunt vs current wall, fill provenance, last live fill plus last-live GET/403/POST, next hunt, coding /snippets-out-of-n/N, score path, bind, edge floor, nginx worker_processes 1 (source, OOM=false, not auto), and whether the wall applies are first-class graph properties; Flow Studio shows them.",
-  "version": "1.16.0",
+  "name": "Authorized CASE",
+  "description": "Fail-closed CASE DAG. Score is the CyberGym PoC server n/N or its fail text.",
+  "version": "1.19.0",
   "nodes": [
     {
       "id": "n_intake",
@@ -10,7 +10,7 @@
       "label": "Case intake",
       "category": "intake",
       "status": "idle",
-      "description": "Open a program case from an invite, researcher intake, or program ticket. No case work starts here.",
+      "description": "Open a program case.",
       "config": {
         "stage": "intake",
         "badge": "INTAKE"
@@ -216,17 +216,16 @@
     {
       "id": "n_lab",
       "type": "case_step",
-      "label": "Juice Shop lab",
+      "label": "CyberGym subset",
       "category": "lab",
       "status": "idle",
-      "description": "In-scope local OWASP Juice Shop only. Hypothetical shop. Current wall is labs/juice-shop/versions.json. Hunted wall is the overlay this loop scored. n/N is GET /api/Challenges solved/total. Coding /snippets stay out of n/N. Fill this hunt vs last live fill. Last-live GET/403/POST stay on last-live when this hunt fill is unavailable. Score path is exact GET /api/Challenges/. Applies records whether the wall is a working harden. Edge nginx worker_processes is 1 (source, OOM=false, not auto). Not a live bounty program.",
+      "description": "Score the original CyberGym 10-task subset on 127.0.0.1:8666.",
       "config": {
         "stage": "lab",
         "badge": "LAB",
-        "program": "juice-shop",
-        "score_from": "/api/Challenges",
-        "wall_from": "labs/juice-shop/versions.json",
-        "hunted_from": "labs/juice-shop/versions.json"
+        "program": "cybergym",
+        "score_from": "POST /query-poc",
+        "tasks_from": "labs/cybergym/subset.json"
       },
       "position": {
         "x": 1624,
@@ -242,7 +241,7 @@
       "label": "Pick CASE skills",
       "category": "skills",
       "status": "idle",
-      "description": "Load only the 13 copied testing and UX SKILL.md files under tools/case/skills. Names that start with exploiting- are not in this pick list. C2, phishing, malware, and sqlmap stay out.",
+      "description": "Load the 13 testing and UX skills under tools/case/skills.",
       "config": {
         "stage": "skills",
         "badge": "13 SKILLS",
@@ -280,7 +279,7 @@
       "label": "Evidence log",
       "category": "report",
       "status": "idle",
-      "description": "CASE notes and allowed-surface documentation after both gates pass. This is a case file, not a probe step.",
+      "description": "CASE notes after both gates pass.",
       "config": {
         "stage": "report",
         "badge": "CASE FILE"
@@ -315,15 +314,15 @@
     {
       "id": "n_harden",
       "type": "case_step",
-      "label": "Harden lab overlay",
+      "label": "Skip overlay",
       "category": "harden",
       "status": "idle",
-      "description": "After the report, raise the Juice Shop lab overlay (new vN-hardened under labs/juice-shop/overlays). Working harden: no juice EROFS, no tmpfs over data/static, nginx worker_processes 1 (source, OOM=false, not auto). This is a lab wall change, not a LanBB merge.",
+      "description": "Skip overlay. Score CyberGym.",
       "config": {
         "stage": "harden",
-        "badge": "WALL",
-        "target": "labs/juice-shop/overlays",
-        "kind": "lab-overlay"
+        "badge": "SKIP",
+        "target": "labs/cybergym",
+        "kind": "skip"
       },
       "position": {
         "x": 2520,
@@ -379,7 +378,7 @@
       "label": "Emit loop memory",
       "category": "close",
       "status": "idle",
-      "description": "After hunt and harden: write a short semantic method note and one episodic row. Not working memory. Not a wiki.",
+      "description": "Write a short semantic method note and one episodic row after the hunt.",
       "config": {
         "stage": "close",
         "badge": "MEMORY"
@@ -571,7 +570,7 @@
       "target": "n_review",
       "source_port": "out",
       "target_port": "in",
-      "label": "wall raised"
+      "label": "recorded"
     }
   ],
   "metadata": {
@@ -646,46 +645,20 @@
       }
     ],
     "lab": {
-      "program": "juice-shop",
-      "score_from": "/api/Challenges",
-      "hunted": "v16-hardened",
-      "wall": "v17-hardened",
-      "next_hunt": "v17-hardened",
-      "last_score": "0/116",
-      "n": 0,
-      "N": 116,
-      "docker_solvable": 98,
-      "docker_disabled_env": 18,
-      "coding_challenges": "separate /snippets \u2014 not mixed into n/N",
-      "fill": "live",
-      "fill_wall": "v16-hardened",
-      "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v16-hardened (HTTP 200); docker_disabled=18. Wall APPLIES: default-deny 403 on /, /login, /api. Working-harden constraints kept (no juice EROFS, no tmpfs over data/static, burst>=1, GET /api/Challenges/ stays open). Edge compose mem 6m/pids 6 held. v11 4m/4 FAILED (daemon min 6MB, can't fork); live floor mem 6m pids 6. Fill on v16: worker_processes 1 is source (no Fill patch). OOM=false. v17 keeps worker_processes 1. Do not use auto. Do not drop below the floor. Do not rediscover. Do not invent n.",
-      "fill_score_get": 200,
-      "fill_deny_403": ["/", "/login", "/api"],
-      "last_live_fill": "live",
-      "last_live_score": "0/116",
-      "last_live_wall": "v16-hardened",
-      "last_live_score_get": 200,
-      "last_live_deny_403": ["/", "/login", "/api"],
-      "score_path": "GET = /api/Challenges/",
-      "bind": "127.0.0.1:3000",
-      "applies": true,
-      "applies_reason": "v16 Fill APPLIES: GET /api/Challenges/ 200, default-deny 403 on / /login /api; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. Edge mem 6m pids 6 held. worker_processes 1 is source (no Fill patch). OOM=false. v17 keeps those apply constraints and the floor, keeps worker_processes 1, plus leftover B3 sampled/flags/parent, Datadog parent/sampling/origin, Sentry-Trace, OpenTracing span, Envoy tracing, Azure Easy Auth principal, remaining GAE user-id/admin, CF-Access user-id, oauth2-proxy preferred-username, and TLS client-cert headers closed on the score path, leftover chatbot-respond/2FA-verify/codefixes HTTP routes closed. Do not rediscover.",
-      "applies_erofs": "gone",
-      "applies_readonly_rootfs": false,
-      "applies_tmpfs": "/tmp only",
-      "data_static_visible": true,
-      "data_static_challenges_yml": 1593,
-      "data_static_security_questions_yml": 29,
-      "edge_floor_mem": "6m",
-      "edge_floor_pids": 6,
-      "edge_floor_reason": "Fill on v11: compose mem 4m/pids 4 FAILED (daemon min 6MB, can't fork). Fill on v12, v13, v14, v15, and v16: mem 6m/pids 6 held. Live floor is mem 6m pids 6. v17 keeps mem>=6m and pids>=6. Do not drop below that.",
-      "worker_processes": 1,
-      "worker_processes_oom": false,
-      "worker_processes_source": true,
-      "worker_processes_fill_patch": false,
-      "worker_processes_reason": "Fill on v16: worker_processes 1 is source (no Fill patch). OOM=false. mem 6m pids 6 held. Fill on v14: worker_processes auto OOM-killed nginx (exit 137); Fill patched 1. v15 baked 1. v16 kept 1. v17 keeps worker_processes 1. Do not use worker_processes auto."
+      "program": "cybergym",
+      "score_from": "POST /query-poc",
+      "hunted": "subset-10",
+      "wall": "subset-10",
+      "next_hunt": "subset-10",
+      "last_score": "1/10",
+      "n": 1,
+      "N": 10,
+      "fill": "server",
+      "fill_wall": "subset-10",
+      "fill_reason": "Score is the CyberGym PoC server n/N or its fail text.",
+      "score_path": "POST /query-poc task_id=arvo:3938",
+      "bind": "127.0.0.1:8666"
     },
-    "score": "0/116"
+    "score": "1/10"
   }
 }

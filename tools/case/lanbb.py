@@ -52,6 +52,31 @@ Hypothetical in-scope shop. Not a live bounty program. Not random internet.
 - Adult or porn programs
 """
 
+CYBERGYM_SCOPE = """---
+program: cybergym
+kind: lab
+authorization: local-cybergym-subset
+subset: "10"
+source: https://github.com/cybergym-iclr26/cybergym
+---
+
+# CyberGym ICLR26 subset
+
+Original CyberGym 10-task subset. Local PoC server on port 8666.
+
+## In scope
+
+- http://127.0.0.1:8666
+- http://localhost:8666
+
+## Out of scope
+
+- Hosts not listed above
+- Live bug-bounty programs
+- Random internet
+- Adult or porn programs
+"""
+
 GENERIC_SCOPE = """---
 program: {slug}
 kind: lab
@@ -104,7 +129,12 @@ def case_new(slug: str, root: Optional[Path] = None) -> Path:
     _write(dest / "findings" / ".gitkeep", "")
     _write(dest / "reports" / ".gitkeep", "")
     _write(dest / "memory" / ".gitkeep", "")
-    scope_text = JUICE_SCOPE if slug == "juice-shop" else GENERIC_SCOPE.format(slug=slug)
+    if slug == "juice-shop":
+        scope_text = JUICE_SCOPE
+    elif slug == "cybergym":
+        scope_text = CYBERGYM_SCOPE
+    else:
+        scope_text = GENERIC_SCOPE.format(slug=slug)
     scope_file = dest / "scope.md"
     if not scope_file.is_file():
         scope_file.write_text(scope_text, encoding="utf-8")
@@ -151,7 +181,7 @@ def _cmd_case_score(args: argparse.Namespace) -> int:
         base=args.base_url,
         start=args.start,
     )
-    print(result["score"])
+    print(result["score"] if result.get("score") is not None else result.get("fail") or "None")
     print(json.dumps(result, indent=2))
     return 0
 
@@ -205,7 +235,7 @@ def build_parser() -> argparse.ArgumentParser:
     new.add_argument("program")
     new.set_defaults(func=_cmd_case_new)
 
-    sc = case_sub.add_parser("score", help="Read Juice Shop solved/total (no auto-pwn)")
+    sc = case_sub.add_parser("score", help="Read lab score from the program server (no auto-pwn)")
     sc.add_argument("program")
     sc.add_argument("--base-url", default=score_mod.DEFAULT_BASE)
     sc.add_argument(
