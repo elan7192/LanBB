@@ -1,6 +1,6 @@
 # v6-hardened
 
-Stricter than `v5-hardened`. Next hunt must use this wall, not v5.
+Stricter than `v5-hardened`. Previous wall. Next hunt must use `v7-hardened`, not v6.
 
 This overlay is a **working harden** that actually applies. Fill found v5 juice `read_only` SKIPPED (EROFS on `.well-known/csaf`) and `tmpfs /juice-shop/data` hiding `data/static`, so those v5 container locks did not apply. v6 does not copy them.
 

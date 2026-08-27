@@ -17,4 +17,6 @@ Loop 5 hunted `v4-hardened`. Fill live score **0/116** (GET `/api/Challenges/`, 
 
 Loop 6 hunted `v5-hardened`. Fill live score **0/116** (GET `/api/Challenges/`, docker_disabled=18). v5 juice read-only SKIPPED (EROFS on `.well-known/csaf`); tmpfs `/juice-shop/data` hid `data/static`. Report path still wrote. Wall is now `v6-hardened` (working harden: no juice EROFS, no tmpfs over data/static; login closed; GET/HEAD only; SPA/static leak closed; nginx `limit_req` burst>=1).
 
+Loop 7 hunted `v6-hardened`. Fill **unavailable** (GET `/api/Challenges/` connection refused; docker not installed). Honest score **0/116**. Report path still wrote. Wall is now `v7-hardened` (working harden: no juice EROFS, no tmpfs over data/static; default-deny unmatched GET/HEAD except the score harness; leftover SPA/JS and remaining `/api` `/rest` closed; nginx `limit_req` burst>=1).
+
 Coverage honesty: the 13-skill pack does not cover Cryptographic Issues, Miscellaneous, Security Misconfiguration, Security through Obscurity. Docker-off: Insecure Deserialization, XXE.

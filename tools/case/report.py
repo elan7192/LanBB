@@ -32,6 +32,8 @@ def _wall_meta(root: Path) -> dict:
             "score": "0/N",
             "fill": "unknown",
             "fill_wall": "unknown",
+            "applies": None,
+            "applies_reason": "",
             "coverage": [],
             "docker_off": [],
         }
@@ -43,9 +45,11 @@ def _wall_meta(root: Path) -> dict:
         "wall": str(data.get("wall") or "unknown"),
         "hunted": hunted,
         "score": str(data.get("last_score") or data.get("score") or "0/N"),
-        "fill": str(data.get("fill") or "unknown"),
-        "fill_wall": str(data.get("fill_wall") or hunted),
-        "coverage": list(data.get("skill_pack_does_not_cover") or []),
+            "fill": str(data.get("fill") or "unknown"),
+            "fill_wall": str(data.get("fill_wall") or hunted),
+            "applies": data.get("applies"),
+            "applies_reason": str(data.get("applies_reason") or ""),
+            "coverage": list(data.get("skill_pack_does_not_cover") or []),
         "docker_off": list(data.get("docker_off_not_exercised") or []),
     }
 
@@ -95,6 +99,7 @@ Docker-off: {off}.
 - Authorization: {scope.authorization or "see scope.md"}
 - Hunted wall: {wall_meta["hunted"]}
 - Current wall: {wall_meta["wall"]}
+- Applies: {wall_meta["applies"]} ({wall_meta["applies_reason"] or "see versions.json"})
 
 ## Judgment
 
