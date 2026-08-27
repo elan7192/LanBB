@@ -1,8 +1,8 @@
 {
   "id": "case-bounty",
   "name": "Authorized bug-bounty CASE",
-  "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N last_score, hunt vs current wall, fill provenance, and next hunt are first-class graph properties; Flow Studio shows all four.",
-  "version": "1.5.0",
+  "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N last_score, hunt vs current wall, fill provenance, next hunt, and coding /snippets-out-of-n/N are first-class graph properties; Flow Studio shows them.",
+  "version": "1.6.0",
   "nodes": [
     {
       "id": "n_intake",
@@ -219,7 +219,7 @@
       "label": "Juice Shop lab",
       "category": "lab",
       "status": "idle",
-      "description": "In-scope local OWASP Juice Shop only. Hypothetical shop. Current wall is labs/juice-shop/versions.json. Hunted wall is the overlay this loop scored. Not a live bounty program.",
+      "description": "In-scope local OWASP Juice Shop only. Hypothetical shop. Current wall is labs/juice-shop/versions.json. Hunted wall is the overlay this loop scored. n/N is GET /api/Challenges solved/total. Coding /snippets stay out of n/N. Not a live bounty program.",
       "config": {
         "stage": "lab",
         "badge": "LAB",
@@ -648,17 +648,18 @@
     "lab": {
       "program": "juice-shop",
       "score_from": "/api/Challenges",
-      "hunted": "v4-hardened",
-      "wall": "v5-hardened",
-      "next_hunt": "v5-hardened",
+      "hunted": "v5-hardened",
+      "wall": "v6-hardened",
+      "next_hunt": "v6-hardened",
       "last_score": "0/116",
       "n": 0,
       "N": 116,
       "docker_solvable": 98,
       "docker_disabled_env": 18,
+      "coding_challenges": "separate /snippets — not mixed into n/N",
       "fill": "live",
-      "fill_wall": "v4-hardened",
-      "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v4-hardened; docker_disabled=18"
+      "fill_wall": "v5-hardened",
+      "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v5-hardened; docker_disabled=18. v5 juice read-only SKIPPED (EROFS on .well-known/csaf); tmpfs /juice-shop/data hides data/static so that wall did not apply"
     },
     "score": "0/116"
   }

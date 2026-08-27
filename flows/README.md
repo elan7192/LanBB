@@ -16,7 +16,7 @@ Persisted as files in `flows/graphs/*.json`.
 
 | File | Role |
 | --- | --- |
-| `graphs/case-bounty.json` | Default. Authorized CASE DAG: intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N `last_score`, hunt vs current `wall`, fill provenance, and `next_hunt` are first-class graph properties; the studio pills show all four. |
+| `graphs/case-bounty.json` | Default. Authorized CASE DAG: intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N `last_score`, hunt vs current `wall`, fill provenance, `next_hunt`, and coding `/snippets` out of n/N are first-class graph properties; the studio pills show them. |
 | `graphs/team-swimlanes.json` | Second saved graph. Team lanes (lead, lanbb, wiki freeze). Not the default. |
 | `templates/case-bounty.json` | Documented template used when the catalog is empty. |
 

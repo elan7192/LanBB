@@ -121,6 +121,10 @@ function renderGraphList(activeId) {
       g.fill ? " · fill " + escapeHtml(g.fill) : ""
     }${g.fill_wall ? " · fill-wall " + escapeHtml(g.fill_wall) : ""}${
       g.next_hunt ? " · next " + escapeHtml(g.next_hunt) : ""
+    }${
+      g.coding_challenges ? " · coding out of n/N" : ""
+    }${
+      g.docker_disabled_env != null ? " · docker-off " + escapeHtml(g.docker_disabled_env) : ""
     }</small>`;
     btn.addEventListener("click", () => openGraph(g.id));
     box.appendChild(btn);
@@ -174,6 +178,18 @@ function graphNextHunt(graph) {
   const meta = (graph && graph.metadata) || {};
   const lab = meta.lab || {};
   return lab.next_hunt || lab.wall || null;
+}
+
+function graphCoding(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.coding_challenges || null;
+}
+
+function graphDockerDisabled(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.docker_disabled_env != null ? lab.docker_disabled_env : null;
 }
 
 function showScorePill(text, live) {
@@ -233,6 +249,18 @@ function showNextPill(text) {
   el.classList.remove("dim");
 }
 
+function showCodingPill(text) {
+  const el = $("labCoding");
+  if (!el) return;
+  if (!text) {
+    el.textContent = "coding /snippets out of n/N";
+    el.classList.add("dim");
+    return;
+  }
+  el.textContent = String(text);
+  el.classList.remove("dim");
+}
+
 function showWallPill(text, live) {
   const el = $("labWall");
   if (!el) return;
@@ -269,7 +297,8 @@ async function loadLabScore(
   huntedFallback,
   fillFallback,
   nextFallback,
-  fillReasonFallback
+  fillReasonFallback,
+  codingFallback
 ) {
   const el = $("labScore");
   if (!el) return;
@@ -278,6 +307,7 @@ async function loadLabScore(
   if (huntedFallback) showHuntedPill(huntedFallback);
   if (fillFallback) showFillPill(fillFallback, fillReasonFallback);
   if (nextFallback) showNextPill(nextFallback);
+  if (codingFallback) showCodingPill(codingFallback);
   try {
     const data = await getJson("/api/case/score?program=juice-shop");
     const live = data && (data.score || data.last_score);
@@ -311,12 +341,19 @@ async function loadLabScore(
     } else if (!nextFallback) {
       showNextPill(null);
     }
+    const coding = data && data.coding_challenges;
+    if (coding) {
+      showCodingPill(coding);
+    } else if (!codingFallback) {
+      showCodingPill(null);
+    }
   } catch {
     if (!fallback) showScorePill(null, false);
     if (!wallFallback) showWallPill(null, false);
     if (!huntedFallback) showHuntedPill(null);
     if (!fillFallback) showFillPill(null);
     if (!nextFallback) showNextPill(null);
+    if (!codingFallback) showCodingPill(null);
   }
 }
 
@@ -347,12 +384,15 @@ function inspect(node) {
     rows.push(["Fill wall", lab.fill_wall || graphFillWall(state.current) || "-"]);
     rows.push(["Fill reason", lab.fill_reason || graphFillReason(state.current) || "-"]);
     rows.push(["Next hunt", lab.next_hunt || graphNextHunt(state.current) || "-"]);
+    rows.push(["Coding challenges", lab.coding_challenges || graphCoding(state.current) || "separate /snippets — not mixed into n/N"]);
+    rows.push(["Docker-disabled", String(lab.docker_disabled_env != null ? lab.docker_disabled_env : graphDockerDisabled(state.current) || "-")]);
   }
   if (node.id === "n_harden" || cfg.stage === "harden") {
     rows.push(["Next wall", lab.wall || graphWall(state.current) || "-"]);
     rows.push(["Hunted", lab.hunted || graphHunted(state.current) || "-"]);
     rows.push(["Next hunt", lab.next_hunt || graphNextHunt(state.current) || "-"]);
     rows.push(["Fill wall", lab.fill_wall || graphFillWall(state.current) || "-"]);
+    rows.push(["Coding challenges", lab.coding_challenges || graphCoding(state.current) || "separate /snippets — not mixed into n/N"]);
   }
   $("inspTitle").textContent = node.label;
   $("inspMeta").innerHTML = rows
@@ -615,7 +655,9 @@ function showGraph(graph, hint) {
   if (fill) showFillPill(fill, graphFillReason(graph));
   const nextHunt = graphNextHunt(graph);
   if (nextHunt) showNextPill(nextHunt);
-  loadLabScore(cached, wall, hunted, fill, nextHunt, graphFillReason(graph));
+  const coding = graphCoding(graph);
+  if (coding) showCodingPill(coding);
+  loadLabScore(cached, wall, hunted, fill, nextHunt, graphFillReason(graph), coding);
 }
 
 async function openGraph(id) {

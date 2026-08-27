@@ -10,8 +10,9 @@ Current wall: see `versions.json` (`wall`). Hunt that overlay, then harden a **n
 | `overlays/v1-hardened/` | Older wall: security headers, login rate limit, extra-file path closed |
 | `overlays/v2-hardened/` | Older wall: v1 plus image pin, stronger headers, broader rate limits, WAF-ish query block, extra surfaces closed |
 | `overlays/v3-hardened/` | Older wall: v2 plus method allowlist, URI WAF, cookie flags, COEP/HSTS, read-only edge, upload/PII/chatbot/B2B/snippets closed |
-| `overlays/v4-hardened/` | Previous wall: v3 plus app/edge caps, broader URI WAF, GraphQL/basket/reviews/captcha/data-export closed |
-| `overlays/v5-hardened/` | Current wall: v4 plus juice read-only, drop OPTIONS, login WAF, identity/Web3/catalog/search/info-leak closed |
+| `overlays/v4-hardened/` | Older wall: v3 plus app/edge caps, broader URI WAF, GraphQL/basket/reviews/captcha/data-export closed |
+| `overlays/v5-hardened/` | Previous wall: v4 plus juice read-only, drop OPTIONS, login WAF, identity/Web3/catalog/search/info-leak closed |
+| `overlays/v6-hardened/` | Current wall: working harden (no juice EROFS, no tmpfs over data/static) plus login closed, GET/HEAD only, SPA/static leak closed |
 
 ```bash
 # stock
@@ -22,9 +23,10 @@ docker compose -f labs/juice-shop/overlays/v1-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v2-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v3-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v4-hardened/docker-compose.yml up
-
-# current wall (v5)
 docker compose -f labs/juice-shop/overlays/v5-hardened/docker-compose.yml up
+
+# current wall (v6)
+docker compose -f labs/juice-shop/overlays/v6-hardened/docker-compose.yml up
 ```
 
 In-scope URL stays `http://127.0.0.1:3000`. Fail-closed: no recon/score without `programs/juice-shop/scope.md`.
