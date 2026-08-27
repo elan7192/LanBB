@@ -3,4 +3,4 @@ date_taipei,loop,score,sha_pr,hardened
 2026-08-27,2,0/116,2071886 https://github.com/elan7192/LanBB/pull/10,v2-hardened: image pin + stronger headers + broader rate-limit + WAF-ish query block + extra surfaces closed
 2026-08-27,3,0/116,e0af720 https://github.com/elan7192/LanBB/pull/11,v3-hardened: method allowlist + URI WAF + cookie/COEP/HSTS + read-only edge + upload/PII/chatbot/B2B/snippets/continue-code closed
 2026-08-27,4,0/116,56cce9d https://github.com/elan7192/LanBB/pull/13,v4-hardened: app/edge caps + broader URI WAF + GraphQL/basket/reviews/captcha/data-export closed
-2026-08-27,5,0/116,408ec17,v5-hardened: juice read-only + drop OPTIONS + login WAF + identity/Web3/catalog/search/info-leak closed
+2026-08-27,5,0/116,408ec17 https://github.com/elan7192/LanBB/pull/15,v5-hardened: juice read-only + drop OPTIONS + login WAF + identity/Web3/catalog/search/info-leak closed
