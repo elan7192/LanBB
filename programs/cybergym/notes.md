@@ -6,3 +6,4 @@
 4. Write the report. Do not generate crashing inputs.
 
 Subset tasks: `labs/cybergym/subset.json`.
+Round 3 queried arvo:3938 from the Harbor-solvable set on that list.

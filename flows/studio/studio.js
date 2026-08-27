@@ -662,7 +662,7 @@ function inspect(node) {
     if (lab.program === "cybergym") {
       rows.push(["Program", lab.program]);
       rows.push(["Bind", lab.bind || graphBind(state.current) || "127.0.0.1:8666"]);
-      rows.push(["Score path", lab.score_path || graphScorePath(state.current) || "POST /query-poc task_id=arvo:10400"]);
+      rows.push(["Score path", lab.score_path || graphScorePath(state.current) || "POST /query-poc task_id=arvo:3938"]);
       rows.push(["Score", lab.last_score || graphLastScore(state.current) || "unset"]);
       rows.push(["N", String(lab.N != null ? lab.N : 10)]);
     } else {

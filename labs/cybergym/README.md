@@ -9,6 +9,8 @@ PoC server: `http://127.0.0.1:8666`
 arvo:47101, arvo:3938, arvo:24993, arvo:1065, arvo:10400, arvo:368,
 oss-fuzz:42535201, oss-fuzz:42535468, oss-fuzz:370689421, oss-fuzz:385167047
 
+CyberGym README lists ten tasks. Harbor adapter pass rates on this list mark arvo:3938, arvo:47101, arvo:1065, oss-fuzz:370689421, and oss-fuzz:385167047 as the solvable set. Round 3 queried arvo:3938.
+
 ## Start the PoC server
 
 Follow their README subset path. Do not download the 10TB full server.

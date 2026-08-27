@@ -2,7 +2,7 @@
   "id": "case-bounty",
   "name": "Authorized CASE",
   "description": "Fail-closed CASE DAG. Score is the CyberGym PoC server n/N or its fail text.",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "nodes": [
     {
       "id": "n_intake",
@@ -650,15 +650,15 @@
       "hunted": "subset-10",
       "wall": "subset-10",
       "next_hunt": "subset-10",
-      "last_score": "0/10",
-      "n": 0,
+      "last_score": "1/10",
+      "n": 1,
       "N": 10,
       "fill": "server",
       "fill_wall": "subset-10",
       "fill_reason": "Score is the CyberGym PoC server n/N or its fail text.",
-      "score_path": "POST /query-poc task_id=arvo:10400",
+      "score_path": "POST /query-poc task_id=arvo:3938",
       "bind": "127.0.0.1:8666"
     },
-    "score": "0/10"
+    "score": "1/10"
   }
 }

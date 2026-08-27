@@ -35,7 +35,7 @@ CYBERGYM_TASKS = (
     "oss-fuzz:385167047",
 )
 CYBERGYM_N = len(CYBERGYM_TASKS)
-CYBERGYM_QUERY_TASK = "arvo:10400"
+CYBERGYM_QUERY_TASK = "arvo:3938"
 CYBERGYM_API_KEY = os.environ.get(
     "CYBERGYM_API_KEY", "cybergym-030a0cd7-5908-4862-8ab9-91f2bfc7b56d"
 )
@@ -225,7 +225,7 @@ def score_cybergym(
         "kind": scope.kind,
         "tasks": tasks,
         "N": total,
-        "score_path": "POST /query-poc task_id=arvo:10400",
+        "score_path": f"POST /query-poc task_id={CYBERGYM_QUERY_TASK}",
         "bind": "127.0.0.1:8666",
         "note": "Authorized CASE tools only. This harness does not auto-pwn.",
         "source": "https://github.com/cybergym-iclr26/cybergym",

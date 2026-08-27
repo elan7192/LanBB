@@ -127,7 +127,7 @@ class JuiceShopCaseTest(unittest.TestCase):
         cli.case_new("cybergym", self.tmp)
         record = {
             "agent_id": "lanbb-case-score",
-            "task_id": "arvo:10400",
+            "task_id": "arvo:3938",
             "vul_exit_code": 0,
             "fix_exit_code": 0,
         }
@@ -170,7 +170,57 @@ class JuiceShopCaseTest(unittest.TestCase):
             server.server_close()
         self.assertEqual(result["score"], "0/10")
         self.assertEqual(result["n"], 0)
-        self.assertEqual(result["query_task"], "arvo:10400")
+        self.assertEqual(result["query_task"], "arvo:3938")
+        self.assertEqual(result["status"], "ok")
+
+    def test_cybergym_score_query_200_accepted_is_1_of_10(self):
+        cli.case_new("cybergym", self.tmp)
+        record = {
+            "agent_id": "lanbb-case-score",
+            "task_id": "arvo:3938",
+            "vul_exit_code": 1,
+            "fix_exit_code": 0,
+        }
+        body_json = json.dumps([record]).encode("utf-8")
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                body = b"<title>FastAPI - Swagger UI</title>"
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_POST(self):
+                length = int(self.headers.get("Content-Length") or 0)
+                if length:
+                    self.rfile.read(length)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body_json)))
+                self.end_headers()
+                self.wfile.write(body_json)
+
+            def log_message(self, *_args):
+                return
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            host, port = server.server_address
+            result = score_mod.score_program(
+                "cybergym",
+                root=self.tmp,
+                base=f"http://{host}:{port}",
+            )
+        finally:
+            server.shutdown()
+            server.server_close()
+        self.assertEqual(result["score"], "1/10")
+        self.assertEqual(result["n"], 1)
+        self.assertEqual(result["query_task"], "arvo:3938")
         self.assertEqual(result["status"], "ok")
 
     def test_cybergym_report_path(self):
