@@ -43,7 +43,7 @@ programs/juice-shop/
 
 ## Lab wall
 
-Stock Juice Shop is `labs/juice-shop/overlays/v0-stock/`. Hardening loops add `v1-hardened`, `v2-hardened`, `v3-hardened`, `v4-hardened`, `v5-hardened`, `v6-hardened`, `v7-hardened`, … Current wall is `labs/juice-shop/versions.json` (`wall`). `hunted` is the overlay the last loop scored. Never live programs. Never porn programs.
+Stock Juice Shop is `labs/juice-shop/overlays/v0-stock/`. Hardening loops add `v1-hardened`, `v2-hardened`, `v3-hardened`, `v4-hardened`, `v5-hardened`, `v6-hardened`, `v7-hardened`, `v8-hardened`, … Current wall is `labs/juice-shop/versions.json` (`wall`). `hunted` is the overlay the last loop scored. Never live programs. Never porn programs.
 
 ## Tests
 

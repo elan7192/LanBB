@@ -1,8 +1,8 @@
 # v7-hardened
 
-Stricter than `v6-hardened`. Next hunt must use this wall, not v6.
+Stricter than `v6-hardened`. Previous wall. Next hunt must use `v8-hardened`, not v7.
 
-This overlay is a **working harden** that actually applies. Fill on v6 confirmed EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (`challenges.yml` 1593, `securityQuestions.yml` 29). v7 keeps those apply constraints. v5 juice `read_only` EROFS-skipped `.well-known/csaf` and `tmpfs /juice-shop/data` hid `data/static`. v7 does not copy those skipped locks.
+This overlay is a **working harden** that actually applies. Fill on v7 scored live 0/116 (GET `/api/Challenges/` HTTP 200). Wall APPLIES: default-deny 403 on `/`, `/ftp`, `/api`, `/rest`, `/login`, `/assets`, `/snippets`, `/graphql`; POST on the score path 405. Fill on v6 had already confirmed EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. v7 keeps those apply constraints. v5 juice `read_only` EROFS-skipped `.well-known/csaf` and `tmpfs /juice-shop/data` hid `data/static`. v7 does not copy those skipped locks.
 
 Keeps from v6 what actually applied:
 

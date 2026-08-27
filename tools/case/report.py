@@ -32,6 +32,14 @@ def _wall_meta(root: Path) -> dict:
             "score": "0/N",
             "fill": "unknown",
             "fill_wall": "unknown",
+            "last_live_fill": "",
+            "last_live_score": "",
+            "last_live_wall": "",
+            "fill_score_get": "",
+            "fill_deny_403": "",
+            "fill_score_post": "",
+            "score_path": "GET /api/Challenges/",
+            "bind": "",
             "applies": None,
             "applies_reason": "",
             "coverage": [],
@@ -47,6 +55,18 @@ def _wall_meta(root: Path) -> dict:
         "score": str(data.get("last_score") or data.get("score") or "0/N"),
             "fill": str(data.get("fill") or "unknown"),
             "fill_wall": str(data.get("fill_wall") or hunted),
+            "last_live_fill": str(data.get("last_live_fill") or ""),
+            "last_live_score": str(data.get("last_live_score") or ""),
+            "last_live_wall": str(data.get("last_live_wall") or ""),
+            "fill_score_get": data.get("fill_score_get") if data.get("fill_score_get") is not None else "",
+            "fill_deny_403": (
+                ", ".join(data.get("fill_deny_403"))
+                if isinstance(data.get("fill_deny_403"), list)
+                else str(data.get("fill_deny_403") or "")
+            ),
+            "fill_score_post": data.get("fill_score_post") if data.get("fill_score_post") is not None else "",
+            "score_path": str(data.get("score_path") or "GET /api/Challenges/"),
+            "bind": str(data.get("bind") or ""),
             "applies": data.get("applies"),
             "applies_reason": str(data.get("applies_reason") or ""),
             "coverage": list(data.get("skill_pack_does_not_cover") or []),
@@ -96,6 +116,12 @@ Docker-off: {off}.
 - Kind: {scope.kind}
 - Lab score: {score}
 - Fill: {wall_meta["fill"]} GET /api/Challenges/ on {wall_meta["fill_wall"]}
+- Fill GET: {wall_meta["fill_score_get"] or "see versions.json"}
+- Fill 403: {wall_meta["fill_deny_403"] or "see versions.json"}
+- Fill POST: {wall_meta["fill_score_post"] or "see versions.json"}
+- Last live fill: {wall_meta["last_live_score"] or "none"} on {wall_meta["last_live_wall"] or "none"}
+- Score path: {wall_meta["score_path"]}
+- Bind: {wall_meta["bind"] or "see overlay"}
 - Authorization: {scope.authorization or "see scope.md"}
 - Hunted wall: {wall_meta["hunted"]}
 - Current wall: {wall_meta["wall"]}

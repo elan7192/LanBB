@@ -34,17 +34,17 @@ DOCKER_DISABLED_ENV = 18
 def load_versions(root: Optional[Path] = None) -> Dict[str, Any]:
     path = (root or repo_root()) / "labs" / "juice-shop" / "versions.json"
     if not path.is_file():
-        return {"wall": "v7-hardened", "hunted": "v6-hardened", "last_score": "0/116"}
+        return {"wall": "v8-hardened", "hunted": "v7-hardened", "last_score": "0/116"}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return {"wall": "v7-hardened", "hunted": "v6-hardened", "last_score": "0/116"}
-    return data if isinstance(data, dict) else {"wall": "v7-hardened"}
+        return {"wall": "v8-hardened", "hunted": "v7-hardened", "last_score": "0/116"}
+    return data if isinstance(data, dict) else {"wall": "v8-hardened"}
 
 
 def current_wall(root: Optional[Path] = None) -> str:
-    wall = str(load_versions(root).get("wall") or "v7-hardened").strip()
-    return wall or "v7-hardened"
+    wall = str(load_versions(root).get("wall") or "v8-hardened").strip()
+    return wall or "v8-hardened"
 
 
 def compose_file(root: Optional[Path] = None) -> Path:
