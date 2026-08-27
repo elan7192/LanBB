@@ -34,17 +34,17 @@ DOCKER_DISABLED_ENV = 18
 def load_versions(root: Optional[Path] = None) -> Dict[str, Any]:
     path = (root or repo_root()) / "labs" / "juice-shop" / "versions.json"
     if not path.is_file():
-        return {"wall": "v11-hardened", "hunted": "v10-hardened", "last_score": "0/116"}
+        return {"wall": "v12-hardened", "hunted": "v11-hardened", "last_score": "0/116"}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return {"wall": "v11-hardened", "hunted": "v10-hardened", "last_score": "0/116"}
-    return data if isinstance(data, dict) else {"wall": "v11-hardened"}
+        return {"wall": "v12-hardened", "hunted": "v11-hardened", "last_score": "0/116"}
+    return data if isinstance(data, dict) else {"wall": "v12-hardened"}
 
 
 def current_wall(root: Optional[Path] = None) -> str:
-    wall = str(load_versions(root).get("wall") or "v11-hardened").strip()
-    return wall or "v11-hardened"
+    wall = str(load_versions(root).get("wall") or "v12-hardened").strip()
+    return wall or "v12-hardened"
 
 
 def compose_file(root: Optional[Path] = None) -> Path:
@@ -193,6 +193,9 @@ def score_program(
         "applies_erofs": versions.get("applies_erofs") or "",
         "applies_readonly_rootfs": versions.get("applies_readonly_rootfs"),
         "applies_tmpfs": versions.get("applies_tmpfs") or "",
+        "edge_floor_mem": versions.get("edge_floor_mem") or "",
+        "edge_floor_pids": versions.get("edge_floor_pids"),
+        "edge_floor_reason": versions.get("edge_floor_reason") or "",
     }
     if payload is None:
         try:
