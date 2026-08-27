@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lanbb.dev/schemas/audited-task-contract/v1.json",
+  "title": "Audited Task Contract",
+  "description": "Shared state for multi-agent harnesses (D4). May contain structured task facts; must not contain transcripts, secrets, raw tool dumps, or subjective adjectives.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["objective", "phase", "state_version"],
+  "properties": {
+    "objective": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "description": "Concrete task goal."
+    },
+    "acceptance_checks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "description": "Verifiable checks that must pass before state advances."
+    },
+    "write_scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "description": "Paths or components executors may modify."
+    },
+    "accepted_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{7,40}$",
+      "description": "Git commit SHA accepted by the auditor."
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["decision", "evidence"],
+        "properties": {
+          "decision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      },
+      "description": "Locked choices with supporting evidence."
+    },
+    "failed_approaches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["approach", "reason"],
+        "properties": {
+          "approach": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      },
+      "description": "Rejected paths so executors do not retry them."
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      },
+      "description": "External or unresolved impediments."
+    },
+    "phase": {
+      "type": "string",
+      "enum": ["plan", "execute", "audit", "complete", "blocked"],
+      "description": "Current workflow phase."
+    },
+    "state_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Monotonic contract revision; increment when the auditor advances state."
+    }
+  }
+}
