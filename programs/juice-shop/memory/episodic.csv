@@ -5,4 +5,4 @@ date_taipei,loop,score,sha_pr,hardened
 2026-08-27,4,0/116,56cce9d https://github.com/elan7192/LanBB/pull/13,v4-hardened: app/edge caps + broader URI WAF + GraphQL/basket/reviews/captcha/data-export closed
 2026-08-27,5,0/116,408ec17 https://github.com/elan7192/LanBB/pull/15,v5-hardened: juice read-only + drop OPTIONS + login WAF + identity/Web3/catalog/search/info-leak closed + nginx burst>=1
 2026-08-27,6,0/116,62c155d https://github.com/elan7192/LanBB/pull/16,v6-hardened: working harden (no juice EROFS, no tmpfs over data/static) + login closed + GET/HEAD only + SPA/static leak closed + nginx burst>=1
-2026-08-27,7,0/116,ce2d5e9,v7-hardened: working harden (no juice EROFS, no tmpfs over data/static) + default-deny edge except GET /api/Challenges/ + leftover SPA/JS + remaining /api /rest closed + nginx burst>=1
+2026-08-27,7,0/116,32e5bbe https://github.com/elan7192/LanBB/pull/17,v7-hardened: working harden (no juice EROFS, no tmpfs over data/static) + default-deny edge except GET /api/Challenges/ + leftover SPA/JS + remaining /api /rest closed + nginx burst>=1
