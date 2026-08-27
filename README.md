@@ -25,10 +25,10 @@ python3 tools/case/lanbb.py scope parse juice-shop
 python3 flows/serve.py
 # http://127.0.0.1:8765/  → pick case-bounty
 
-# 4. Optional: start the current wall (v12-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6/v7/v8/v9/v10/v11 forever.
-docker compose -f labs/juice-shop/overlays/v12-hardened/docker-compose.yml up
-# previous wall: labs/juice-shop/overlays/v11-hardened/docker-compose.yml
-# older wall: labs/juice-shop/overlays/v10-hardened/docker-compose.yml
+# 4. Optional: start the current wall (v13-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6/v7/v8/v9/v10/v11/v12 forever.
+docker compose -f labs/juice-shop/overlays/v13-hardened/docker-compose.yml up
+# previous wall: labs/juice-shop/overlays/v12-hardened/docker-compose.yml
+# older wall: labs/juice-shop/overlays/v11-hardened/docker-compose.yml
 # stock pin: docker compose -f labs/juice-shop/overlays/v0-stock/docker-compose.yml up
 
 # 5. Hunt is CASE-only (scope → in-scope recon skip on loopback → report). No auto-pwn.
@@ -40,14 +40,14 @@ python3 tools/case/lanbb.py case report juice-shop
 #    docker-solvable=98 (18 disabledEnv on Docker). Coding /snippets are separate — do not mix.
 #    GET /rest/continue-code is a token only — do not forge.
 python3 tools/case/lanbb.py case score juice-shop
-# Fill live on v11 overlay this loop: 0/116 (GET /api/Challenges/ HTTP 200). Wall APPLIES (default-deny 403 on /, /login, /api). Edge 4m/4 FAILED; live floor 6m/6. Do not invent n. Do not rediscover.
+# Fill live on v12 overlay this loop: 0/116 (GET /api/Challenges/ HTTP 200). Wall APPLIES (default-deny 403 on /, /login, /api). Edge mem 6m/pids 6 held. Do not invent n. Do not rediscover.
 
 # 7. After hunt→harden, emit Pawel memories (no working dump, no wiki)
 python3 tools/case/lanbb.py case memory emit juice-shop \
   --score 0/116 \
-  --hardened "v12-hardened: working harden (no juice EROFS, no tmpfs over data/static) + edge mem>=6m pids>=6 (v11 4m/4 failed) + extra hop/auth headers closed on score path + leftover hacking-instructor/juicy-nft/continue-code-xss/products-queries HTTP closed + nginx burst>=1" \
-  --semantic-file programs/juice-shop/memory/semantic-loop-12.md \
-  --loop 12
+  --hardened "v13-hardened: working harden (no juice EROFS, no tmpfs over data/static) + edge mem>=6m pids>=6 (v12 Fill held 6m/6) + leftover rewrite/identity headers closed on score path + leftover continue-code-apply/tutorial/access_token/ftp-backup HTTP closed + nginx burst>=1" \
+  --semantic-file programs/juice-shop/memory/semantic-loop-13.md \
+  --loop 13
 ```
 
 Folder:
