@@ -96,11 +96,11 @@ class GraphFilesTest(unittest.TestCase):
         self.assertIn("last_score", graph["metadata"]["lab"])
         self.assertEqual(graph["metadata"]["lab"]["last_score"], graph["metadata"]["score"])
         self.assertRegex(graph["metadata"]["score"], r"^\d+/\d+$")
-        self.assertEqual(graph["metadata"]["lab"]["wall"], "v3-hardened")
-        self.assertEqual(graph["metadata"]["lab"]["hunted"], "v2-hardened")
-        self.assertEqual(graph["metadata"]["lab"].get("fill"), "live")
+        self.assertEqual(graph["metadata"]["lab"]["wall"], "v4-hardened")
+        self.assertEqual(graph["metadata"]["lab"]["hunted"], "v3-hardened")
+        self.assertEqual(graph["metadata"]["lab"].get("fill"), "unavailable")
         self.assertEqual(graph["metadata"]["lab"].get("docker_disabled_env"), 18)
-        self.assertEqual(graph["version"], "1.3.0")
+        self.assertEqual(graph["version"], "1.4.0")
         report_to_harden = [
             e for e in graph["edges"] if e["source"] == "n_report" and e["target"] == "n_harden"
         ]
@@ -130,12 +130,20 @@ class GraphFilesTest(unittest.TestCase):
         self.assertIn('href="./studio.css"', html)
         self.assertIn('id="labScore"', html)
         self.assertIn('id="labWall"', html)
+        self.assertIn('id="labHunted"', html)
+        self.assertIn('id="labFill"', html)
         self.assertIn("Hunt wall vs current wall", html)
+        self.assertIn("Fill provenance on 0/N", html)
+        css = (ROOT / "studio" / "studio.css").read_text(encoding="utf-8")
+        self.assertIn(".insp-json.hidden", css)
+        self.assertIn(".pill.hunted", css)
+        self.assertIn(".pill.fill.miss", css)
         template = json.loads((ROOT / "templates" / "case-bounty.json").read_text())
         self.assertEqual(template["id"], "case-bounty")
         self.assertTrue(template["metadata"]["default"])
-        self.assertEqual(template["metadata"]["lab"]["wall"], "v3-hardened")
-        self.assertEqual(template["metadata"]["lab"]["hunted"], "v2-hardened")
+        self.assertEqual(template["metadata"]["lab"]["wall"], "v4-hardened")
+        self.assertEqual(template["metadata"]["lab"]["hunted"], "v3-hardened")
+        self.assertEqual(template["metadata"]["lab"].get("fill"), "unavailable")
 
 
 class ApiTest(unittest.TestCase):
@@ -182,9 +190,10 @@ class ApiTest(unittest.TestCase):
         status, listed = get(f"{self.base}/api/graphs")
         self.assertEqual(len(listed["graphs"]), 1)
         self.assertEqual(listed["graphs"][0]["id"], "case-bounty")
-        self.assertEqual(listed["graphs"][0].get("wall"), "v3-hardened")
-        self.assertEqual(listed["graphs"][0].get("hunted"), "v2-hardened")
+        self.assertEqual(listed["graphs"][0].get("wall"), "v4-hardened")
+        self.assertEqual(listed["graphs"][0].get("hunted"), "v3-hardened")
         self.assertEqual(listed["graphs"][0].get("last_score"), "0/116")
+        self.assertEqual(listed["graphs"][0].get("fill"), "unavailable")
 
     def test_rejects_banned_nodes(self):
         post(f"{self.base}/api/graphs", {"upsert_template": True})
@@ -227,16 +236,17 @@ class ApiTest(unittest.TestCase):
         versions = self.tmp / "labs" / "juice-shop" / "versions.json"
         versions.parent.mkdir(parents=True)
         versions.write_text(
-            '{"wall":"v3-hardened","hunted":"v2-hardened","last_score":"0/116","n":0,"N":116,"fill":"live","docker_disabled_env":18}\n'
+            '{"wall":"v4-hardened","hunted":"v3-hardened","last_score":"0/116","n":0,"N":116,"fill":"unavailable","fill_wall":"v3-hardened","docker_disabled_env":18}\n'
         )
         status, data = get(f"{self.base}/api/case/score?program=juice-shop")
         self.assertEqual(status, 200)
         self.assertEqual(data["score"], "0/116")
         self.assertEqual(data.get("last_score"), "0/116")
-        self.assertEqual(data.get("wall"), "v3-hardened")
-        self.assertEqual(data.get("hunted"), "v2-hardened")
-        self.assertEqual(data.get("fill"), "live")
+        self.assertEqual(data.get("wall"), "v4-hardened")
+        self.assertEqual(data.get("hunted"), "v3-hardened")
+        self.assertEqual(data.get("fill"), "unavailable")
         self.assertEqual(data.get("docker_disabled_env"), 18)
+        self.assertIn("unavailable", data.get("reason") or "")
 
 
 def get_status(url: str):

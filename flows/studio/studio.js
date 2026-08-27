@@ -117,6 +117,8 @@ function renderGraphList(activeId) {
       g.default ? " · default" : ""
     }${g.last_score ? " · " + escapeHtml(g.last_score) : ""}${
       g.wall ? " · " + escapeHtml(g.wall) : ""
+    }${g.hunted ? " · hunted " + escapeHtml(g.hunted) : ""}${
+      g.fill ? " · fill " + escapeHtml(g.fill) : ""
     }</small>`;
     btn.addEventListener("click", () => openGraph(g.id));
     box.appendChild(btn);
@@ -148,6 +150,12 @@ function graphHunted(graph) {
   return lab.hunted || null;
 }
 
+function graphFill(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.fill || null;
+}
+
 function showScorePill(text, live) {
   const el = $("labScore");
   if (!el) return;
@@ -159,6 +167,35 @@ function showScorePill(text, live) {
   const nN = String(text).replace(/^score\s+/i, "");
   el.textContent = nN;
   el.classList.toggle("dim", !live);
+}
+
+function showHuntedPill(text) {
+  const el = $("labHunted");
+  if (!el) return;
+  if (!text) {
+    el.textContent = "hunted —";
+    el.classList.add("dim");
+    return;
+  }
+  el.textContent = "hunted " + String(text);
+  el.classList.remove("dim");
+}
+
+function showFillPill(text) {
+  const el = $("labFill");
+  if (!el) return;
+  const value = text ? String(text) : "";
+  if (!value) {
+    el.textContent = "fill —";
+    el.classList.add("dim");
+    el.classList.remove("live", "miss");
+    return;
+  }
+  el.textContent = "fill " + value;
+  el.classList.remove("dim");
+  const live = value === "live";
+  el.classList.toggle("live", live);
+  el.classList.toggle("miss", !live);
 }
 
 function showWallPill(text, live) {
@@ -191,11 +228,13 @@ function renderStages(graph) {
     .join("");
 }
 
-async function loadLabScore(fallback, wallFallback) {
+async function loadLabScore(fallback, wallFallback, huntedFallback, fillFallback) {
   const el = $("labScore");
   if (!el) return;
   if (fallback) showScorePill(fallback, false);
   if (wallFallback) showWallPill(wallFallback, false);
+  if (huntedFallback) showHuntedPill(huntedFallback);
+  if (fillFallback) showFillPill(fillFallback);
   try {
     const data = await getJson("/api/case/score?program=juice-shop");
     const live = data && (data.score || data.last_score);
@@ -210,9 +249,23 @@ async function loadLabScore(fallback, wallFallback) {
     } else if (!wallFallback) {
       showWallPill(null, false);
     }
+    const hunted = data && data.hunted;
+    if (hunted) {
+      showHuntedPill(hunted);
+    } else if (!huntedFallback) {
+      showHuntedPill(null);
+    }
+    const fill = data && data.fill;
+    if (fill) {
+      showFillPill(fill);
+    } else if (!fillFallback) {
+      showFillPill(null);
+    }
   } catch {
     if (!fallback) showScorePill(null, false);
     if (!wallFallback) showWallPill(null, false);
+    if (!huntedFallback) showHuntedPill(null);
+    if (!fillFallback) showFillPill(null);
   }
 }
 
@@ -239,6 +292,11 @@ function inspect(node) {
     rows.push(["Wall", lab.wall || graphWall(state.current) || "-"]);
     rows.push(["Hunted", lab.hunted || graphHunted(state.current) || "-"]);
     rows.push(["Score", lab.last_score || graphLastScore(state.current) || "-"]);
+    rows.push(["Fill", lab.fill || graphFill(state.current) || "-"]);
+  }
+  if (node.id === "n_harden" || cfg.stage === "harden") {
+    rows.push(["Next wall", lab.wall || graphWall(state.current) || "-"]);
+    rows.push(["Hunted", lab.hunted || graphHunted(state.current) || "-"]);
   }
   $("inspTitle").textContent = node.label;
   $("inspMeta").innerHTML = rows
@@ -495,7 +553,11 @@ function showGraph(graph, hint) {
   if (cached) showScorePill(cached, false);
   const wall = graphWall(graph);
   if (wall) showWallPill(wall, false);
-  loadLabScore(cached, wall);
+  const hunted = graphHunted(graph);
+  if (hunted) showHuntedPill(hunted);
+  const fill = graphFill(graph);
+  if (fill) showFillPill(fill);
+  loadLabScore(cached, wall, hunted, fill);
 }
 
 async function openGraph(id) {
