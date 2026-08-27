@@ -117,7 +117,7 @@ function renderGraphList(activeId) {
       g.default ? " · default" : ""
     }${g.last_score ? " · " + escapeHtml(g.last_score) : ""}${
       g.wall ? " · " + escapeHtml(g.wall) : ""
-    }</small>`;
+    }${g.fill ? " · fill " + escapeHtml(g.fill) : ""}</small>`;
     btn.addEventListener("click", () => openGraph(g.id));
     box.appendChild(btn);
   });
@@ -148,6 +148,12 @@ function graphHunted(graph) {
   return lab.hunted || null;
 }
 
+function graphFill(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.fill || null;
+}
+
 function showScorePill(text, live) {
   const el = $("labScore");
   if (!el) return;
@@ -173,6 +179,19 @@ function showWallPill(text, live) {
   el.classList.toggle("dim", !live);
 }
 
+function showFillPill(text, live) {
+  const el = $("labFill");
+  if (!el) return;
+  if (!text) {
+    el.textContent = "fill —";
+    el.classList.add("dim");
+    return;
+  }
+  const value = String(text).replace(/^fill\s+/i, "");
+  el.textContent = "fill " + value;
+  el.classList.toggle("dim", !live || value === "unknown");
+}
+
 function renderStages(graph) {
   const meta = graph.metadata || {};
   const stages =
@@ -191,11 +210,12 @@ function renderStages(graph) {
     .join("");
 }
 
-async function loadLabScore(fallback, wallFallback) {
+async function loadLabScore(fallback, wallFallback, fillFallback) {
   const el = $("labScore");
   if (!el) return;
   if (fallback) showScorePill(fallback, false);
   if (wallFallback) showWallPill(wallFallback, false);
+  if (fillFallback) showFillPill(fillFallback, fillFallback === "live");
   try {
     const data = await getJson("/api/case/score?program=juice-shop");
     const live = data && (data.score || data.last_score);
@@ -210,9 +230,16 @@ async function loadLabScore(fallback, wallFallback) {
     } else if (!wallFallback) {
       showWallPill(null, false);
     }
+    const fill = data && data.fill;
+    if (fill) {
+      showFillPill(fill, fill === "live" && Boolean(data.available));
+    } else if (!fillFallback) {
+      showFillPill(null, false);
+    }
   } catch {
     if (!fallback) showScorePill(null, false);
     if (!wallFallback) showWallPill(null, false);
+    if (!fillFallback) showFillPill(null, false);
   }
 }
 
@@ -239,6 +266,10 @@ function inspect(node) {
     rows.push(["Wall", lab.wall || graphWall(state.current) || "-"]);
     rows.push(["Hunted", lab.hunted || graphHunted(state.current) || "-"]);
     rows.push(["Score", lab.last_score || graphLastScore(state.current) || "-"]);
+    rows.push(["Fill", lab.fill || graphFill(state.current) || "-"]);
+    if (lab.docker_disabled_env != null) {
+      rows.push(["docker_disabled", String(lab.docker_disabled_env)]);
+    }
   }
   $("inspTitle").textContent = node.label;
   $("inspMeta").innerHTML = rows
@@ -495,7 +526,9 @@ function showGraph(graph, hint) {
   if (cached) showScorePill(cached, false);
   const wall = graphWall(graph);
   if (wall) showWallPill(wall, false);
-  loadLabScore(cached, wall);
+  const fill = graphFill(graph);
+  if (fill) showFillPill(fill, fill === "live");
+  loadLabScore(cached, wall, fill);
 }
 
 async function openGraph(id) {

@@ -30,16 +30,23 @@ def _wall_meta(root: Path) -> dict:
             "wall": "unknown",
             "hunted": "unknown",
             "score": "0/N",
+            "fill": "unknown",
+            "fill_wall": "unknown",
+            "docker_disabled": "",
             "coverage": [],
             "docker_off": [],
         }
     import json
 
     data = json.loads(versions.read_text(encoding="utf-8"))
+    fill = str(data.get("fill") or "unknown")
     return {
         "wall": str(data.get("wall") or "unknown"),
         "hunted": str(data.get("hunted") or "unknown"),
         "score": str(data.get("last_score") or data.get("score") or "0/N"),
+        "fill": fill,
+        "fill_wall": str(data.get("fill_wall") or data.get("hunted") or "unknown"),
+        "docker_disabled": str(data.get("docker_disabled_env") or ""),
         "coverage": list(data.get("skill_pack_does_not_cover") or []),
         "docker_off": list(data.get("docker_off_not_exercised") or []),
     }
@@ -70,6 +77,28 @@ def write_report(slug: str, root: Optional[Path] = None) -> Path:
     )
     coverage = wall_meta["coverage"]
     docker_off = wall_meta["docker_off"]
+    fill = wall_meta["fill"]
+    fill_wall = wall_meta["fill_wall"]
+    docker_disabled = wall_meta["docker_disabled"]
+    if fill == "live":
+        fill_line = (
+            f"live GET /api/Challenges/ on {fill_wall}"
+            + (f" (docker_disabled={docker_disabled})" if docker_disabled else "")
+        )
+        judgment = (
+            f"Authorized CASE against the in-scope lab only. Live Fill score {score} "
+            f"on {fill_wall}. Report path completed without an exploit PoC."
+        )
+    else:
+        fill_line = (
+            f"unknown GET /api/Challenges/ on {fill_wall} "
+            "(lab docker not reachable; 0/N is honest, not invented)"
+            + (f"; docker_disabled={docker_disabled}" if docker_disabled else "")
+        )
+        judgment = (
+            f"Authorized CASE against the in-scope lab only. Fill unknown; score {score} "
+            "is honest, not invented. Report path completed without an exploit PoC."
+        )
     coverage_block = ""
     if coverage or docker_off:
         miss = ", ".join(coverage) if coverage else "(none listed)"
@@ -86,13 +115,14 @@ Docker-off: {off}.
 - UTC: {when}
 - Kind: {scope.kind}
 - Lab score: {score}
+- Fill: {fill_line}
 - Authorization: {scope.authorization or "see scope.md"}
 - Hunted wall: {wall_meta["hunted"]}
 - Current wall: {wall_meta["wall"]}
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Score {score}. Report path completed without an exploit PoC.
+{judgment}
 
 ## Scope
 

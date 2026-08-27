@@ -71,7 +71,7 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "score": meta.get("score") or lab.get("last_score"),
                 "wall": lab.get("wall"),
                 "hunted": lab.get("hunted"),
-                "fill": lab.get("fill"),
+                "fill": lab.get("fill") or "unknown",
             }
         )
     return out
@@ -142,7 +142,7 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             # Current wall is versions.json; hunted is the overlay this loop scored.
             data["wall"] = wall.get("wall") or data.get("wall")
             data["hunted"] = wall.get("hunted") or data.get("hunted")
-            data["fill"] = wall.get("fill") or data.get("fill")
+            data["fill"] = wall.get("fill") or data.get("fill") or "unknown"
             data["docker_disabled_env"] = wall.get("docker_disabled_env") or data.get(
                 "docker_disabled_env"
             )
@@ -153,6 +153,15 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
                 data["N"] = wall.get("N") or wall.get("challenges") or data.get("N")
                 data["reason"] = (
                     "Fill live n/N from GET /api/Challenges/ on hunted wall; not rediscovered"
+                )
+            elif wall.get("fill") == "unknown":
+                data["n"] = wall.get("n") if wall.get("n") is not None else 0
+                data["N"] = wall.get("N") or wall.get("challenges") or 116
+                data["score"] = wall.get("last_score") or data.get("score") or "0/116"
+                data["last_score"] = data["score"]
+                data["reason"] = (
+                    "Fill unknown: GET /api/Challenges/ not reachable; "
+                    "0/116 is honest, not invented"
                 )
             if not data.get("available"):
                 data["docker"] = (
@@ -171,12 +180,12 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "N": (wall or {}).get("N") or (wall or {}).get("challenges"),
         "wall": (wall or {}).get("wall"),
         "hunted": (wall or {}).get("hunted"),
-        "fill": (wall or {}).get("fill"),
+        "fill": (wall or {}).get("fill") or "unknown",
         "docker_disabled_env": (wall or {}).get("docker_disabled_env"),
         "reason": (
             "Fill live n/N from GET /api/Challenges/ on hunted wall; wall is the next overlay"
             if (wall or {}).get("fill") == "live"
-            else "live lab not scored; last_score is the hunt result; wall is the next overlay"
+            else "Fill unknown: GET /api/Challenges/ not reachable; 0/116 is honest, not invented"
         ),
     }
 

@@ -115,6 +115,8 @@ body {
 .pill.dim { color: var(--muted); border-color: var(--line); }
 .pill.wall { color: var(--gold); border-color: rgba(228, 184, 74, 0.28); }
 .pill.wall.dim { color: var(--muted); border-color: var(--line); }
+.pill.fill { color: var(--violet); border-color: rgba(196, 181, 253, 0.28); }
+.pill.fill.dim { color: var(--muted); border-color: var(--line); }
 
 .rail, .inspector {
   background: rgba(12, 17, 24, 0.92);

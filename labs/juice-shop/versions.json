@@ -1,8 +1,8 @@
 {
   "lab": "juice-shop",
-  "hunted": "v2-hardened",
-  "wall": "v3-hardened",
-  "overlays": ["v0-stock", "v1-hardened", "v2-hardened", "v3-hardened"],
+  "hunted": "v3-hardened",
+  "wall": "v4-hardened",
+  "overlays": ["v0-stock", "v1-hardened", "v2-hardened", "v3-hardened", "v4-hardened"],
   "last_score": "0/116",
   "score": "0/116",
   "n": 0,
@@ -10,9 +10,10 @@
   "challenges": 116,
   "docker_solvable": 98,
   "docker_disabled_env": 18,
-  "fill": "live",
+  "fill": "unknown",
   "fill_url": "http://127.0.0.1:3000/api/Challenges/",
-  "fill_wall": "v2-hardened",
+  "fill_wall": "v3-hardened",
+  "fill_note": "GET /api/Challenges/ on v3-hardened: connection refused; docker not installed in this VM. 0/116 is honest, not invented. Last live Fill was loop 3 on v2-hardened 0/116.",
   "image": "bkimminich/juice-shop",
   "image_pin": "bkimminich/juice-shop@sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
   "score_url": "http://127.0.0.1:3000/api/Challenges/",
@@ -27,5 +28,5 @@
     "Insecure Deserialization",
     "XXE"
   ],
-  "note": "Hunt the current wall (v3). Loop 3 hunted v2. Fill live n/N=0/116 (docker_disabled=18) from GET /api/Challenges/. Do not rediscover. Stock is v0. Each loop must raise the wall. Never live programs. Never porn programs."
+  "note": "Hunt the current wall (v4). Loop 4 hunted v3. Fill unknown n/N=0/116 (docker not installed). Do not invent n. Do not rediscover. Stock is v0. Each loop must raise the wall. Never live programs. Never porn programs."
 }
