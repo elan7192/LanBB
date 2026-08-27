@@ -9,13 +9,7 @@ LanBB is the product.
 - Canonical engine remote: https://github.com/semantica-agi/semantica
 - Nesting: git submodule at `tools/semantica`
 
-**Headlong stub** lives at `tools/headlong/`. Run one think-run-FINAL cycle:
-
-```bash
-python3 tools/headlong/loop.py cycle --task "Print 6 times 7 as a single integer."
-```
-
-See `tools/headlong/README.md`.
+**Headlong** notes live at `tools/headlong/`. Round 2 ran `bin/shellm` from a throwaway clone. `llm` exited 1: `ANTHROPIC_API_KEY is not set`. See `tools/headlong/proof/shellm-fail.md`.
 
 ## How to run a case (OWASP Juice Shop lab)
 

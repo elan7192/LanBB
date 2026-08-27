@@ -1,26 +1,27 @@
-# Headlong stub
+# Headlong note
 
 Cites [laude-institute/headlong](https://github.com/laude-institute/headlong)
 and [andyk/headlong](https://github.com/andyk/headlong).
-Keeps a thin think-run-FINAL loop inside LanBB.
-Leaves those trees out of this repo.
+Keeps a thin observe/tick helper and a cycle fail log.
+The harness clone stays outside this repo (`/tmp/headlong-sandbox` on the agent VM).
 
-A human message lands as an observation on one jsonl trajectory.
-`cycle` writes bash, runs it in `.run/sandbox`, and reads `FINAL`.
-Stops on FINAL, on a repeated think fingerprint, or after three rounds.
+## Real cycle (2026-08-27)
 
-## One cycle
+Ran `bin/shellm` from a throwaway clone. Tiny task: print the word ping.
 
 ```bash
-python3 tools/headlong/loop.py cycle \
-  --task "Print 6 times 7 as a single integer." \
-  --proof tools/headlong/proof/cycle-1.md
+git clone --depth 1 https://github.com/laude-institute/headlong.git /tmp/headlong-sandbox
+export HEADLONG_HOME=/tmp/headlong-state
+export PATH="/tmp/headlong-sandbox/bin:$PATH"
+cd /tmp/headlong-sandbox
+shellm --env local --max-iterations 1 --here "Print the word ping."
 ```
 
-The default toy prints `42`. Pass `--think-file` to supply the bash yourself.
-The stub has no LLM.
+`llm` exited 1: `ANTHROPIC_API_KEY is not set`.
+`shellm` exited 1 with the same error. No think bash. No run. No FINAL.
+Log: [proof/shellm-fail.md](proof/shellm-fail.md).
 
-## Observe / tick
+## Observe / tick helper
 
 ```bash
 python3 tools/headlong/loop.py observe "a ping"
