@@ -272,6 +272,9 @@ button.ghost {
 .empty.hidden {
   display: none !important;
 }
+.insp-json.hidden {
+  display: none !important;
+}
 
 .insp-meta {
   display: grid;
