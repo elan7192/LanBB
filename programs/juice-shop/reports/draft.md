@@ -1,18 +1,18 @@
 # CASE report: juice-shop
 
 - Date (Taipei): 2026-08-27
-- UTC: 2026-08-27T01:09:51Z
+- UTC: 2026-08-27T01:14:41Z
 - Kind: lab
 - Lab score: 0/116
-- Fill: unavailable GET /api/Challenges/ on v6-hardened
+- Fill: live GET /api/Challenges/ on v6-hardened
 - Authorization: local-docker
 - Hunted wall: v6-hardened
 - Current wall: v7-hardened
-- Applies: True (working harden: no juice EROFS, no tmpfs over data/static; edge default-deny except GET /api/Challenges/)
+- Applies: True (working harden: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (challenges.yml 1593, securityQuestions.yml 29); v7 keeps those apply constraints plus default-deny except GET /api/Challenges/)
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Fill unavailable score 0/116 on v6-hardened. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Fill live score 0/116 on v6-hardened. Report path completed without an exploit PoC.
 
 ## Scope
 

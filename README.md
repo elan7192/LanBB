@@ -40,7 +40,7 @@ python3 tools/case/lanbb.py case report juice-shop
 #    docker-solvable=98 (18 disabledEnv on Docker). Coding /snippets are separate — do not mix.
 #    GET /rest/continue-code is a token only — do not forge.
 python3 tools/case/lanbb.py case score juice-shop
-# Fill unavailable on v6 overlay this loop: 0/116 (docker not installed). Do not invent n. Do not rediscover.
+# Fill live on v6 overlay this loop: 0/116 (docker_disabled=18). Wall APPLIES (EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible). Do not invent n. Do not rediscover.
 
 # 7. After hunt→harden, emit Pawel memories (no working dump, no wiki)
 python3 tools/case/lanbb.py case memory emit juice-shop \

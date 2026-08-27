@@ -431,6 +431,15 @@ function inspect(node) {
     rows.push(["Docker-disabled", String(lab.docker_disabled_env != null ? lab.docker_disabled_env : graphDockerDisabled(state.current) || "-")]);
     rows.push(["Applies", String(lab.applies != null ? lab.applies : graphApplies(state.current) ?? "-")]);
     rows.push(["Applies reason", lab.applies_reason || graphAppliesReason(state.current) || "-"]);
+    rows.push(["EROFS", lab.applies_erofs || "-"]);
+    rows.push(["ReadonlyRootfs", String(lab.applies_readonly_rootfs != null ? lab.applies_readonly_rootfs : "-")]);
+    rows.push(["tmpfs", lab.applies_tmpfs || "-"]);
+    rows.push([
+      "data/static",
+      lab.data_static_visible
+        ? `visible (${lab.data_static_challenges_yml || "?"}/${lab.data_static_security_questions_yml || "?"})`
+        : "-",
+    ]);
   }
   if (node.id === "n_harden" || cfg.stage === "harden") {
     rows.push(["Next wall", lab.wall || graphWall(state.current) || "-"]);

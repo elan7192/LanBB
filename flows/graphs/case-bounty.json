@@ -657,11 +657,17 @@
       "docker_solvable": 98,
       "docker_disabled_env": 18,
       "coding_challenges": "separate /snippets \u2014 not mixed into n/N",
-      "fill": "unavailable",
+      "fill": "live",
       "fill_wall": "v6-hardened",
-      "fill_reason": "Fill unavailable: GET /api/Challenges/ connection refused on v6-hardened (docker not installed). Honest score 0/116. Working harden: no juice EROFS, no tmpfs over data/static",
+      "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v6-hardened; docker_disabled=18. Wall APPLIES: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (challenges.yml 1593, securityQuestions.yml 29)",
       "applies": true,
-      "applies_reason": "working harden: no juice EROFS, no tmpfs over data/static; edge default-deny except GET /api/Challenges/"
+      "applies_reason": "working harden: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (challenges.yml 1593, securityQuestions.yml 29); v7 keeps those apply constraints plus default-deny except GET /api/Challenges/",
+      "applies_erofs": "gone",
+      "applies_readonly_rootfs": false,
+      "applies_tmpfs": "/tmp only",
+      "data_static_visible": true,
+      "data_static_challenges_yml": 1593,
+      "data_static_security_questions_yml": 29
     },
     "score": "0/116"
   }

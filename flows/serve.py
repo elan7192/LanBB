@@ -175,6 +175,18 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
                 "applies"
             )
             data["applies_reason"] = wall.get("applies_reason") or data.get("applies_reason")
+            data["applies_erofs"] = wall.get("applies_erofs") or data.get("applies_erofs")
+            data["applies_readonly_rootfs"] = (
+                wall.get("applies_readonly_rootfs")
+                if wall.get("applies_readonly_rootfs") is not None
+                else data.get("applies_readonly_rootfs")
+            )
+            data["applies_tmpfs"] = wall.get("applies_tmpfs") or data.get("applies_tmpfs")
+            data["data_static_visible"] = (
+                wall.get("data_static_visible")
+                if wall.get("data_static_visible") is not None
+                else data.get("data_static_visible")
+            )
             data["last_score"] = wall.get("last_score") or data.get("last_score")
             data["score"] = data.get("last_score") or data.get("score")
             data["n"] = wall.get("n") if wall.get("n") is not None else data.get("n")
@@ -205,6 +217,10 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "docker_disabled_env": (wall or {}).get("docker_disabled_env"),
         "applies": (wall or {}).get("applies"),
         "applies_reason": (wall or {}).get("applies_reason"),
+        "applies_erofs": (wall or {}).get("applies_erofs"),
+        "applies_readonly_rootfs": (wall or {}).get("applies_readonly_rootfs"),
+        "applies_tmpfs": (wall or {}).get("applies_tmpfs"),
+        "data_static_visible": (wall or {}).get("data_static_visible"),
         "reason": (wall or {}).get("fill_reason") or _fill_reason(wall or {}),
     }
 

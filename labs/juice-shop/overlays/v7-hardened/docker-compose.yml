@@ -10,8 +10,9 @@ services:
     mem_limit: 192m
     pids_limit: 64
     cpus: "0.50"
-    # Working harden: juice root stays writable. v5 read_only EROFS-skipped .well-known/csaf.
-    # Do not tmpfs /juice-shop/data — that hides data/static so the wall does not apply.
+    # Working harden that actually applies (Fill on v6: EROFS_GONE, ReadonlyRootfs=false).
+    # Juice root stays writable. Do not set read_only. v5 EROFS-skipped .well-known/csaf.
+    # tmpfs=/tmp only. Do not tmpfs /juice-shop/data — that hides data/static.
     tmpfs:
       - /tmp:size=8m
     environment:

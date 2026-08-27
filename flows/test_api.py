@@ -98,12 +98,13 @@ class GraphFilesTest(unittest.TestCase):
         self.assertRegex(graph["metadata"]["score"], r"^\d+/\d+$")
         self.assertEqual(graph["metadata"]["lab"]["wall"], "v7-hardened")
         self.assertEqual(graph["metadata"]["lab"]["hunted"], "v6-hardened")
-        self.assertEqual(graph["metadata"]["lab"].get("fill"), "unavailable")
+        self.assertEqual(graph["metadata"]["lab"].get("fill"), "live")
         self.assertEqual(graph["metadata"]["lab"].get("fill_wall"), "v6-hardened")
         self.assertEqual(graph["metadata"]["lab"].get("next_hunt"), "v7-hardened")
         self.assertEqual(graph["metadata"]["lab"].get("docker_disabled_env"), 18)
         self.assertIn("snippets", graph["metadata"]["lab"].get("coding_challenges") or "")
         self.assertTrue(graph["metadata"]["lab"].get("applies") is True)
+        self.assertIn("EROFS_GONE", graph["metadata"]["lab"].get("fill_reason") or "")
         self.assertEqual(graph["version"], "1.7.0")
         report_to_harden = [
             e for e in graph["edges"] if e["source"] == "n_report" and e["target"] == "n_harden"
@@ -156,9 +157,10 @@ class GraphFilesTest(unittest.TestCase):
         self.assertTrue(template["metadata"]["default"])
         self.assertEqual(template["metadata"]["lab"]["wall"], "v7-hardened")
         self.assertEqual(template["metadata"]["lab"]["hunted"], "v6-hardened")
-        self.assertEqual(template["metadata"]["lab"].get("fill"), "unavailable")
+        self.assertEqual(template["metadata"]["lab"].get("fill"), "live")
         self.assertEqual(template["metadata"]["lab"].get("next_hunt"), "v7-hardened")
         self.assertTrue(template["metadata"]["lab"].get("applies") is True)
+        self.assertIn("EROFS_GONE", template["metadata"]["lab"].get("fill_reason") or "")
 
 
 class ApiTest(unittest.TestCase):
@@ -208,7 +210,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(listed["graphs"][0].get("wall"), "v7-hardened")
         self.assertEqual(listed["graphs"][0].get("hunted"), "v6-hardened")
         self.assertEqual(listed["graphs"][0].get("last_score"), "0/116")
-        self.assertEqual(listed["graphs"][0].get("fill"), "unavailable")
+        self.assertEqual(listed["graphs"][0].get("fill"), "live")
         self.assertEqual(listed["graphs"][0].get("fill_wall"), "v6-hardened")
         self.assertEqual(listed["graphs"][0].get("next_hunt"), "v7-hardened")
         self.assertIn("snippets", listed["graphs"][0].get("coding_challenges") or "")
@@ -255,7 +257,7 @@ class ApiTest(unittest.TestCase):
         versions = self.tmp / "labs" / "juice-shop" / "versions.json"
         versions.parent.mkdir(parents=True)
         versions.write_text(
-            '{"wall":"v7-hardened","hunted":"v6-hardened","last_score":"0/116","n":0,"N":116,"fill":"unavailable","fill_wall":"v6-hardened","fill_reason":"Fill unavailable: GET /api/Challenges/ connection refused on v6-hardened (docker not installed). Honest score 0/116. Working harden: no juice EROFS, no tmpfs over data/static","docker_disabled_env":18,"coding_challenges":"separate /snippets — not mixed into n/N","applies":true,"applies_reason":"working harden: no juice EROFS, no tmpfs over data/static; edge default-deny except GET /api/Challenges/"}\n'
+            '{"wall":"v7-hardened","hunted":"v6-hardened","last_score":"0/116","n":0,"N":116,"fill":"live","fill_wall":"v6-hardened","fill_reason":"Fill live 0/116 from GET /api/Challenges/ on v6-hardened; docker_disabled=18. Wall APPLIES: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (challenges.yml 1593, securityQuestions.yml 29)","docker_disabled_env":18,"coding_challenges":"separate /snippets — not mixed into n/N","applies":true,"applies_reason":"working harden: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible","applies_erofs":"gone","applies_readonly_rootfs":false,"applies_tmpfs":"/tmp only","data_static_visible":true,"data_static_challenges_yml":1593,"data_static_security_questions_yml":29}\n'
         )
         status, data = get(f"{self.base}/api/case/score?program=juice-shop")
         self.assertEqual(status, 200)
@@ -263,14 +265,14 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(data.get("last_score"), "0/116")
         self.assertEqual(data.get("wall"), "v7-hardened")
         self.assertEqual(data.get("hunted"), "v6-hardened")
-        self.assertEqual(data.get("fill"), "unavailable")
+        self.assertEqual(data.get("fill"), "live")
         self.assertEqual(data.get("fill_wall"), "v6-hardened")
         self.assertEqual(data.get("next_hunt"), "v7-hardened")
         self.assertEqual(data.get("docker_disabled_env"), 18)
         self.assertIn("snippets", data.get("coding_challenges") or "")
         self.assertTrue(data.get("applies") is True)
-        self.assertIn("unavailable", data.get("reason") or "")
-        self.assertIn("docker not installed", data.get("fill_reason") or "")
+        self.assertIn("live", data.get("reason") or "")
+        self.assertIn("EROFS_GONE", data.get("fill_reason") or "")
 
 
 def get_status(url: str):

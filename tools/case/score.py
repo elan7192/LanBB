@@ -190,6 +190,9 @@ def score_program(
         "last_score": versions.get("last_score") or "0/116",
         "applies": versions.get("applies"),
         "applies_reason": versions.get("applies_reason") or "",
+        "applies_erofs": versions.get("applies_erofs") or "",
+        "applies_readonly_rootfs": versions.get("applies_readonly_rootfs"),
+        "applies_tmpfs": versions.get("applies_tmpfs") or "",
     }
     if payload is None:
         try:
