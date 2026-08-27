@@ -125,15 +125,24 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             "path": str(scope),
         }
     saved = REPO_ROOT / "programs" / slug / "score.json"
+    versions = REPO_ROOT / "labs" / "juice-shop" / "versions.json"
+    wall = _read_json(versions) if versions.is_file() else {}
     if saved.is_file():
         data = _read_json(saved) or {}
         data["fail_closed"] = False
         if "available" not in data:
             data["available"] = data.get("status") == "ok"
-        data["last_score"] = data.get("score") or data.get("last_score")
+        data["last_score"] = data.get("score") or data.get("last_score") or (
+            wall or {}
+        ).get("last_score")
+        if wall:
+            data["wall"] = data.get("wall") or wall.get("wall")
+            if not data.get("available"):
+                data["docker"] = (
+                    "docker compose -f labs/juice-shop/overlays/"
+                    f"{wall.get('wall')}/docker-compose.yml up"
+                )
         return 200, data
-    versions = REPO_ROOT / "labs" / "juice-shop" / "versions.json"
-    wall = _read_json(versions) if versions.is_file() else {}
     last = (wall or {}).get("last_score") or (wall or {}).get("score")
     return 200, {
         "program": slug,
