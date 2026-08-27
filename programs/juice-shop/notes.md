@@ -23,4 +23,6 @@ Loop 8 hunted `v7-hardened`. Fill live score **0/116** (GET `/api/Challenges/` H
 
 Loop 9 hunted `v8-hardened`. Fill live score **0/116** (GET `/api/Challenges/` HTTP 200, docker_disabled=18). Wall APPLIES: default-deny 403 on `/`, `/login`, `/api`. Do not rediscover. Report path still wrote. Wall is now `v9-hardened` (working harden: no juice EROFS, no tmpfs over data/static, burst>=1, exact-equals GET `/api/Challenges/`; host allowlist; leftover oauth/health/debug closed).
 
+Loop 10 hunted `v9-hardened`. Fill **unavailable** (GET `/api/Challenges/` connection refused; docker not installed). Honest score **0/116**. Last live fill remains **0/116** on `v8-hardened` (GET 200, default-deny 403 on `/`, `/login`, `/api` APPLIES). Do not invent n. Do not rediscover. Report path still wrote. Wall is now `v10-hardened` (working harden: no juice EROFS, no tmpfs over data/static, burst>=1, exact trailing-slash GET `/api/Challenges/` only; empty-query/cookie-closed score path; leftover privacy/hidden/data HTTP routes closed).
+
 Coverage honesty: the 13-skill pack does not cover Cryptographic Issues, Miscellaneous, Security Misconfiguration, Security through Obscurity. Docker-off: Insecure Deserialization, XXE.

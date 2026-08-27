@@ -122,7 +122,7 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertEqual(result["status"], "unknown")
         self.assertEqual(result["hacking_total_master"], 116)
         self.assertEqual(result["docker_solvable"], 98)
-        self.assertIn("v9-hardened", result.get("docker") or result.get("wall") or "")
+        self.assertIn("v10-hardened", result.get("docker") or result.get("wall") or "")
 
     def test_copied_skills_exist_without_payloads(self):
         skills = CASE / "skills"
@@ -757,18 +757,142 @@ class JuiceShopCaseTest(unittest.TestCase):
         versions = json.loads(
             (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(versions["wall"], "v9-hardened")
-        self.assertEqual(versions.get("hunted"), "v8-hardened")
+        self.assertIn("v9-hardened", versions["overlays"])
+        self.assertNotEqual(versions["wall"], "v8-hardened")
+        self.assertNotEqual(versions["wall"], "v9-hardened")
+        self.assertIn("burst=1", v9)
+        self.assertIn("EROFS", compose9)
+        self.assertIn("data/static", compose9)
+
+    def test_v10_overlay_is_strictly_harder_than_v9(self):
+        root = CASE.parent.parent
+        v9 = (root / "labs/juice-shop/overlays/v9-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        v10 = (root / "labs/juice-shop/overlays/v10-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        for token in (
+            "/ftp",
+            "/encryptionkeys",
+            "/file-upload",
+            "/snippets",
+            "/graphql",
+            "/api/BasketItems",
+            "/rest/captcha",
+            "/api/Users",
+            "/rest/web3",
+            "/api/Products",
+            "/rest/user {",
+            "/assets {",
+            "/i18n",
+            "/score-board",
+            "location /rest {",
+            "location /api {",
+            "location = / {",
+            "location /search",
+            "location /photo-wall",
+            "location /saved-payment-methods",
+            "location /blockchain",
+            "location /web3-sandbox",
+            "location /faucet",
+            "location /logout",
+            "location /oauth {",
+            "location /health",
+            "location /actuator",
+            "proxy_cookie_flags",
+            "limit_conn",
+            "Strict-Transport-Security",
+            "map $request_uri",
+            "Origin-Agent-Cluster",
+            "require-trusted-types-for",
+            "X-Download-Options",
+            "X-XSS-Protection",
+            "PUT|PATCH|DELETE",
+            "jndi:",
+            "__proto__",
+            "gzip off",
+            "interest-cohort",
+            "ldap://",
+            "gopher://",
+            "child_process",
+            "etag off",
+            "sandbox;",
+            "form-action 'none'",
+            "clipboard-write=()",
+            "$host !~ ^(127\\.0\\.0\\.1|localhost)$",
+        ):
+            self.assertIn(token, v9)
+            self.assertIn(token, v10)
+        for extra in (
+            "location /change-password",
+            "location /nft-unlock",
+            "location /quarantine",
+            "location /api/Memorys",
+            "location /data {",
+            "if ($is_args)",
+            "if ($http_cookie)",
+            "process\\.env",
+            "%2e%2e",
+            "/etc/passwd",
+            "rate=5r/m",
+            "otp-credentials=()",
+            "script-src 'none'",
+            "limit_req_status 429",
+            "php|asp",
+        ):
+            self.assertNotIn(extra, v9)
+            self.assertIn(extra, v10)
+        self.assertIn("location = /api/Challenges/", v10)
+        self.assertIn("GET)$", v10)
+        self.assertEqual(v9.count("proxy_pass"), 2)
+        self.assertEqual(v10.count("proxy_pass"), 1)
+        self.assertNotIn("burst=0", v10)
+        self.assertIn("burst=1", v10)
+        self.assertGreater(v10.count("deny all"), v9.count("deny all"))
+        compose9 = (
+            root / "labs/juice-shop/overlays/v9-hardened/docker-compose.yml"
+        ).read_text(encoding="utf-8")
+        compose10 = (
+            root / "labs/juice-shop/overlays/v10-hardened/docker-compose.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+            compose10,
+        )
+        juice10, _, edge10 = compose10.partition("\n  edge:")
+        juice9, _, edge9 = compose9.partition("\n  edge:")
+        self.assertTrue(edge10)
+        self.assertNotIn("read_only: true", juice10)
+        self.assertNotIn("- /juice-shop/data", juice10)
+        self.assertIn("ReadonlyRootfs=false", juice10)
+        self.assertIn("read_only: true", edge10)
+        self.assertIn("NODE_ENV: production", compose10)
+        self.assertIn("/tmp:size=1m", juice10)
+        self.assertIn("mem_limit: 128m", juice10)
+        self.assertIn("mem_limit: 6m", edge10)
+        self.assertIn("mem_limit: 8m", compose9)
+        self.assertNotIn("mem_limit: 6m", compose9)
+        self.assertIn("127.0.0.1:3000:3000", compose10)
+        self.assertIn("ulimits:", compose10)
+        self.assertIn("pids_limit: 32", juice10)
+        self.assertNotIn("pids_limit: 32", juice9)
+        self.assertIn("EROFS", compose10)
+        self.assertIn("data/static", compose10)
+        versions = json.loads(
+            (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(versions["wall"], "v10-hardened")
+        self.assertEqual(versions.get("hunted"), "v9-hardened")
         self.assertEqual(versions["last_score"], "0/116")
-        self.assertEqual(versions.get("fill"), "live")
-        self.assertEqual(versions.get("fill_wall"), "v8-hardened")
+        self.assertEqual(versions.get("fill"), "unavailable")
+        self.assertEqual(versions.get("fill_wall"), "v9-hardened")
         self.assertEqual(versions.get("last_live_score"), "0/116")
         self.assertEqual(versions.get("last_live_wall"), "v8-hardened")
         self.assertEqual(versions.get("last_live_score_get"), 200)
         self.assertIn("/login", versions.get("last_live_deny_403") or [])
-        self.assertEqual(versions.get("fill_score_get"), 200)
-        self.assertEqual(versions.get("fill_deny_403"), ["/", "/login", "/api"])
-        self.assertIsNone(versions.get("fill_score_post"))
+        self.assertIsNone(versions.get("fill_score_get"))
+        self.assertEqual(versions.get("fill_deny_403"), [])
         self.assertEqual(versions.get("score_path"), "GET = /api/Challenges/")
         self.assertEqual(versions.get("bind"), "127.0.0.1:3000")
         self.assertTrue(versions.get("applies") is True)
@@ -778,15 +902,14 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertTrue(versions.get("data_static_visible") is True)
         self.assertEqual(versions.get("data_static_challenges_yml"), 1593)
         self.assertEqual(versions.get("data_static_security_questions_yml"), 29)
-        self.assertIn("live", versions.get("fill_reason") or "")
-        self.assertIn("APPLIES", versions.get("fill_reason") or "")
-        self.assertIn("v8-hardened", versions.get("fill_reason") or "")
+        self.assertIn("unavailable", versions.get("fill_reason") or "")
+        self.assertIn("v9-hardened", versions.get("fill_reason") or "")
         self.assertEqual(versions["docker_disabled_env"], 18)
-        self.assertIn("v9-hardened", versions["overlays"])
-        self.assertNotEqual(versions["wall"], "v8-hardened")
-        self.assertIn("burst=1", v9)
-        self.assertIn("EROFS", compose9)
-        self.assertIn("data/static", compose9)
+        self.assertIn("v10-hardened", versions["overlays"])
+        self.assertNotEqual(versions["wall"], "v9-hardened")
+        self.assertIn("burst=1", v10)
+        self.assertIn("EROFS", compose10)
+        self.assertIn("data/static", compose10)
 
 
 if __name__ == "__main__":

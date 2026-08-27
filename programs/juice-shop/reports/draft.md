@@ -1,13 +1,13 @@
 # CASE report: juice-shop
 
 - Date (Taipei): 2026-08-27
-- UTC: 2026-08-27T02:10:58Z
+- UTC: 2026-08-27T02:18:54Z
 - Kind: lab
 - Lab score: 0/116
-- Fill: live GET /api/Challenges/ on v8-hardened
-- Fill GET: 200
-- Fill 403: /, /login, /api
-- Fill POST: see versions.json
+- Fill: unavailable GET /api/Challenges/ on v9-hardened
+- Fill GET: unavailable
+- Fill 403: unavailable
+- Fill POST: unavailable
 - Last live fill: 0/116 on v8-hardened
 - Last live GET: 200
 - Last live 403: /, /login, /api
@@ -15,13 +15,13 @@
 - Score path: GET = /api/Challenges/
 - Bind: 127.0.0.1:3000
 - Authorization: local-docker
-- Hunted wall: v8-hardened
-- Current wall: v9-hardened
-- Applies: True (v8 Fill APPLIES: GET /api/Challenges/ 200, default-deny 403 on / /login /api; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. v9 keeps those apply constraints plus exact-equals GET /api/Challenges/, host allowlist, leftover oauth/health/debug closed. Do not rediscover.)
+- Hunted wall: v9-hardened
+- Current wall: v10-hardened
+- Applies: True (Last live Fill on v8 APPLIES: GET /api/Challenges/ 200, default-deny 403 on / /login /api; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. This hunt Fill on v9 was unavailable (no docker). v10 keeps those apply constraints plus exact trailing-slash GET /api/Challenges/ only, empty-query/cookie-closed score path, leftover privacy/hidden/data HTTP routes closed. Do not rediscover.)
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Fill live score 0/116 on v8-hardened. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Fill unavailable score 0/116 on v9-hardened. Report path completed without an exploit PoC.
 
 ## Scope
 
@@ -48,4 +48,4 @@ Docker-off: Insecure Deserialization, XXE.
 
 ## Close path
 
-Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `v9-hardened` in `labs/juice-shop` (this loop hunted `v8-hardened`). Do not attach payloads or reproduction scripts.
+Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `v10-hardened` in `labs/juice-shop` (this loop hunted `v9-hardened`). Do not attach payloads or reproduction scripts.

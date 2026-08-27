@@ -25,10 +25,10 @@ python3 tools/case/lanbb.py scope parse juice-shop
 python3 flows/serve.py
 # http://127.0.0.1:8765/  → pick case-bounty
 
-# 4. Optional: start the current wall (v9-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6/v7/v8 forever.
-docker compose -f labs/juice-shop/overlays/v9-hardened/docker-compose.yml up
-# previous wall: labs/juice-shop/overlays/v8-hardened/docker-compose.yml
-# older wall: labs/juice-shop/overlays/v7-hardened/docker-compose.yml
+# 4. Optional: start the current wall (v10-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6/v7/v8/v9 forever.
+docker compose -f labs/juice-shop/overlays/v10-hardened/docker-compose.yml up
+# previous wall: labs/juice-shop/overlays/v9-hardened/docker-compose.yml
+# older wall: labs/juice-shop/overlays/v8-hardened/docker-compose.yml
 # stock pin: docker compose -f labs/juice-shop/overlays/v0-stock/docker-compose.yml up
 
 # 5. Hunt is CASE-only (scope → in-scope recon skip on loopback → report). No auto-pwn.
@@ -40,14 +40,14 @@ python3 tools/case/lanbb.py case report juice-shop
 #    docker-solvable=98 (18 disabledEnv on Docker). Coding /snippets are separate — do not mix.
 #    GET /rest/continue-code is a token only — do not forge.
 python3 tools/case/lanbb.py case score juice-shop
-# Fill live on v8 overlay this loop: 0/116 (GET /api/Challenges/ HTTP 200). Wall APPLIES (default-deny 403 on /, /login, /api). Do not invent n. Do not rediscover.
+# Fill unavailable this loop on v9 (GET /api/Challenges/ connection refused; no docker). Honest 0/116. Last live fill 0/116 on v8 APPLIES (GET 200, default-deny 403 on /, /login, /api). Do not invent n. Do not rediscover.
 
 # 7. After hunt→harden, emit Pawel memories (no working dump, no wiki)
 python3 tools/case/lanbb.py case memory emit juice-shop \
   --score 0/116 \
-  --hardened "v9-hardened: working harden (no juice EROFS, no tmpfs over data/static) + exact-equals GET /api/Challenges/ + host allowlist + leftover oauth/health/debug closed + nginx burst>=1" \
-  --semantic-file programs/juice-shop/memory/semantic-loop-9.md \
-  --loop 9
+  --hardened "v10-hardened: working harden (no juice EROFS, no tmpfs over data/static) + exact trailing-slash GET /api/Challenges/ + empty-query/cookie-closed score path + leftover privacy/hidden/data HTTP closed + nginx burst>=1" \
+  --semantic-file programs/juice-shop/memory/semantic-loop-10.md \
+  --loop 10
 ```
 
 Folder:

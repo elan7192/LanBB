@@ -119,6 +119,17 @@ def write_report(slug: str, root: Optional[Path] = None) -> Path:
 13-skill pack does not cover: {miss}.
 Docker-off: {off}.
 """
+    fill_get = wall_meta["fill_score_get"]
+    fill_deny = wall_meta["fill_deny_403"]
+    fill_post = wall_meta["fill_score_post"]
+    if wall_meta["fill"] == "unavailable":
+        fill_get = fill_get if fill_get not in ("", None) else "unavailable"
+        fill_deny = fill_deny if fill_deny not in ("", None) else "unavailable"
+        fill_post = fill_post if fill_post not in ("", None) else "unavailable"
+    else:
+        fill_get = fill_get or "see versions.json"
+        fill_deny = fill_deny or "see versions.json"
+        fill_post = fill_post or "see versions.json"
     body = f"""# CASE report: {scope.slug}
 
 - Date (Taipei): {taipei}
@@ -126,9 +137,9 @@ Docker-off: {off}.
 - Kind: {scope.kind}
 - Lab score: {score}
 - Fill: {wall_meta["fill"]} GET /api/Challenges/ on {wall_meta["fill_wall"]}
-- Fill GET: {wall_meta["fill_score_get"] or "see versions.json"}
-- Fill 403: {wall_meta["fill_deny_403"] or "see versions.json"}
-- Fill POST: {wall_meta["fill_score_post"] or "see versions.json"}
+- Fill GET: {fill_get}
+- Fill 403: {fill_deny}
+- Fill POST: {fill_post}
 - Last live fill: {wall_meta["last_live_score"] or "none"} on {wall_meta["last_live_wall"] or "none"}
 - Last live GET: {wall_meta["last_live_score_get"] or "see versions.json"}
 - Last live 403: {wall_meta["last_live_deny_403"] or "see versions.json"}
