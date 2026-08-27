@@ -72,6 +72,9 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "wall": lab.get("wall"),
                 "hunted": lab.get("hunted"),
                 "fill": lab.get("fill"),
+                "fill_wall": lab.get("fill_wall"),
+                "fill_reason": lab.get("fill_reason"),
+                "next_hunt": lab.get("next_hunt") or lab.get("wall"),
             }
         )
     return out
@@ -156,6 +159,8 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             data["hunted"] = wall.get("hunted") or data.get("hunted")
             data["fill"] = wall.get("fill") or data.get("fill")
             data["fill_wall"] = wall.get("fill_wall") or data.get("fill_wall")
+            data["fill_reason"] = wall.get("fill_reason") or _fill_reason(wall)
+            data["next_hunt"] = wall.get("wall") or data.get("next_hunt")
             data["docker_disabled_env"] = wall.get("docker_disabled_env") or data.get(
                 "docker_disabled_env"
             )
@@ -163,7 +168,7 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             data["score"] = data.get("last_score") or data.get("score")
             data["n"] = wall.get("n") if wall.get("n") is not None else data.get("n")
             data["N"] = wall.get("N") or wall.get("challenges") or data.get("N")
-            data["reason"] = _fill_reason(wall)
+            data["reason"] = data["fill_reason"]
             if not data.get("available"):
                 data["docker"] = (
                     "docker compose -f labs/juice-shop/overlays/"
@@ -183,8 +188,10 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "hunted": (wall or {}).get("hunted"),
         "fill": (wall or {}).get("fill"),
         "fill_wall": (wall or {}).get("fill_wall"),
+        "fill_reason": (wall or {}).get("fill_reason") or _fill_reason(wall or {}),
+        "next_hunt": (wall or {}).get("wall"),
         "docker_disabled_env": (wall or {}).get("docker_disabled_env"),
-        "reason": _fill_reason(wall or {}),
+        "reason": (wall or {}).get("fill_reason") or _fill_reason(wall or {}),
     }
 
 

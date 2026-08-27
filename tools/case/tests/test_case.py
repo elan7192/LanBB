@@ -122,7 +122,7 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertEqual(result["status"], "unknown")
         self.assertEqual(result["hacking_total_master"], 116)
         self.assertEqual(result["docker_solvable"], 98)
-        self.assertIn("v4-hardened", result.get("docker") or result.get("wall") or "")
+        self.assertIn("v5-hardened", result.get("docker") or result.get("wall") or "")
 
     def test_copied_skills_exist_without_payloads(self):
         skills = CASE / "skills"
@@ -302,14 +302,85 @@ class JuiceShopCaseTest(unittest.TestCase):
         versions = json.loads(
             (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(versions["wall"], "v4-hardened")
-        self.assertEqual(versions.get("hunted"), "v3-hardened")
-        self.assertEqual(versions["last_score"], "0/116")
-        self.assertEqual(versions.get("fill"), "unavailable")
-        self.assertEqual(versions.get("fill_wall"), "v3-hardened")
-        self.assertEqual(versions["docker_disabled_env"], 18)
         self.assertIn("v4-hardened", versions["overlays"])
         self.assertNotEqual(versions["wall"], "v3-hardened")
+        self.assertNotEqual(versions["wall"], "v4-hardened")
+
+    def test_v5_overlay_is_strictly_harder_than_v4(self):
+        root = CASE.parent.parent
+        v4 = (root / "labs/juice-shop/overlays/v4-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        v5 = (root / "labs/juice-shop/overlays/v5-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        for token in (
+            "/ftp",
+            "/encryptionkeys",
+            "/file-upload",
+            "/snippets",
+            "/graphql",
+            "/api/BasketItems",
+            "/rest/captcha",
+            "proxy_cookie_flags",
+            "limit_conn",
+            "Strict-Transport-Security",
+            "map $request_uri",
+            "X-DNS-Prefetch-Control",
+            "Cache-Control",
+        ):
+            self.assertIn(token, v4)
+            self.assertIn(token, v5)
+        for extra in (
+            "location /api/Users {",
+            "location /rest/user/whoami",
+            "location /rest/web3",
+            "location /nft",
+            "location /api/Hints",
+            "location /api/Products",
+            "location /rest/products {",
+            "Origin-Agent-Cluster",
+            "require-trusted-types-for",
+            "eval[[:space:]]*\\(",
+        ):
+            self.assertNotIn(extra, v4)
+            self.assertIn(extra, v5)
+        self.assertIn("CONNECT|OPTIONS", v5)
+        self.assertNotIn("CONNECT|OPTIONS", v4)
+        self.assertIn("GET|HEAD|POST|OPTIONS", v4)
+        self.assertNotIn("GET|HEAD|POST|OPTIONS", v5)
+        self.assertIn("burst=0", v4)
+        self.assertNotIn("burst=0", v5)
+        self.assertIn("burst=1", v5)
+        self.assertGreater(v5.count("deny all"), v4.count("deny all"))
+        compose4 = (
+            root / "labs/juice-shop/overlays/v4-hardened/docker-compose.yml"
+        ).read_text(encoding="utf-8")
+        compose5 = (
+            root / "labs/juice-shop/overlays/v5-hardened/docker-compose.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+            compose5,
+        )
+        self.assertIn("read_only: true", compose5)
+        self.assertIn("NODE_ENV: production", compose5)
+        self.assertIn("/juice-shop/data", compose5)
+        self.assertNotIn("/juice-shop/data", compose4)
+        self.assertIn("mem_limit: 384m", compose5)
+        self.assertIn("mem_limit: 512m", compose4)
+        self.assertNotIn("mem_limit: 384m", compose4)
+        versions = json.loads(
+            (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(versions["wall"], "v5-hardened")
+        self.assertEqual(versions.get("hunted"), "v4-hardened")
+        self.assertEqual(versions["last_score"], "0/116")
+        self.assertEqual(versions.get("fill"), "live")
+        self.assertEqual(versions.get("fill_wall"), "v4-hardened")
+        self.assertEqual(versions["docker_disabled_env"], 18)
+        self.assertIn("v5-hardened", versions["overlays"])
+        self.assertNotEqual(versions["wall"], "v4-hardened")
 
 
 if __name__ == "__main__":

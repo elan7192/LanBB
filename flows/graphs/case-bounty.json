@@ -1,8 +1,8 @@
 {
   "id": "case-bounty",
   "name": "Authorized bug-bounty CASE",
-  "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N last_score, hunt vs current wall, and fill provenance are first-class graph properties; Flow Studio shows all three.",
-  "version": "1.4.0",
+  "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N last_score, hunt vs current wall, fill provenance, and next hunt are first-class graph properties; Flow Studio shows all four.",
+  "version": "1.5.0",
   "nodes": [
     {
       "id": "n_intake",
@@ -648,14 +648,17 @@
     "lab": {
       "program": "juice-shop",
       "score_from": "/api/Challenges",
-      "hunted": "v3-hardened",
-      "wall": "v4-hardened",
+      "hunted": "v4-hardened",
+      "wall": "v5-hardened",
+      "next_hunt": "v5-hardened",
       "last_score": "0/116",
       "n": 0,
       "N": 116,
       "docker_solvable": 98,
       "docker_disabled_env": 18,
-      "fill": "unavailable"
+      "fill": "live",
+      "fill_wall": "v4-hardened",
+      "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v4-hardened; docker_disabled=18"
     },
     "score": "0/116"
   }
