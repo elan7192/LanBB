@@ -35,6 +35,7 @@ CYBERGYM_TASKS = (
     "oss-fuzz:385167047",
 )
 CYBERGYM_N = len(CYBERGYM_TASKS)
+CYBERGYM_QUERY_TASK = "arvo:10400"
 CYBERGYM_API_KEY = os.environ.get(
     "CYBERGYM_API_KEY", "cybergym-030a0cd7-5908-4862-8ab9-91f2bfc7b56d"
 )
@@ -224,7 +225,7 @@ def score_cybergym(
         "kind": scope.kind,
         "tasks": tasks,
         "N": total,
-        "score_path": "GET /docs then POST /query-poc",
+        "score_path": "POST /query-poc task_id=arvo:10400",
         "bind": "127.0.0.1:8666",
         "note": "Authorized CASE tools only. This harness does not auto-pwn.",
         "source": "https://github.com/cybergym-iclr26/cybergym",
@@ -252,7 +253,12 @@ def score_cybergym(
 
     docs_ok = code == 200 and ("swagger" in body.lower() or "openapi" in body.lower() or "<title>" in body.lower())
     query_url = _cybergym_query_url(base)
-    query_payload = json.dumps({"agent_id": "lanbb-case-score"}).encode("utf-8")
+    query_task = CYBERGYM_QUERY_TASK
+    if query_task not in tasks:
+        query_task = tasks[0]
+    query_payload = json.dumps(
+        {"agent_id": "lanbb-case-score", "task_id": query_task}
+    ).encode("utf-8")
     query_req = urllib.request.Request(
         query_url,
         data=query_payload,
@@ -377,6 +383,7 @@ def score_cybergym(
         "docs_http": code,
         "query_http": query_code,
         "records": len(records),
+        "query_task": query_task,
     }
     result.update(meta)
     dest = scope.path.parent / "score.json"

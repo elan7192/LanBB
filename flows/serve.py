@@ -183,7 +183,7 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             "last_score": None,
             "status": "unknown",
             "fail": "no score.json yet",
-            "score_path": "GET /docs then POST /query-poc",
+            "score_path": "POST /query-poc task_id=arvo:10400",
             "bind": "127.0.0.1:8666",
         }
     saved = REPO_ROOT / "programs" / slug / "score.json"

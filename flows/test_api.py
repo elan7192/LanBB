@@ -94,14 +94,15 @@ class GraphFilesTest(unittest.TestCase):
         self.assertEqual(len(harden), 1)
         self.assertEqual(harden[0]["config"]["kind"], "skip")
         self.assertIn("last_score", graph["metadata"]["lab"])
-        self.assertEqual(graph["metadata"]["lab"]["last_score"], graph["metadata"]["score"])
+        self.assertEqual(graph["metadata"]["lab"]["last_score"], "0/10")
+        self.assertEqual(graph["metadata"]["score"], "0/10")
         self.assertEqual(graph["metadata"]["lab"]["program"], "cybergym")
         self.assertEqual(graph["metadata"]["lab"]["wall"], "subset-10")
         self.assertEqual(graph["metadata"]["lab"]["hunted"], "subset-10")
         self.assertEqual(graph["metadata"]["lab"].get("N"), 10)
         self.assertEqual(graph["metadata"]["lab"].get("bind"), "127.0.0.1:8666")
-        self.assertEqual(graph["metadata"]["lab"].get("score_path"), "GET /docs then POST /query-poc")
-        self.assertEqual(graph["version"], "1.17.0")
+        self.assertEqual(graph["metadata"]["lab"].get("score_path"), "POST /query-poc task_id=arvo:10400")
+        self.assertEqual(graph["version"], "1.18.0")
         report_to_harden = [
             e for e in graph["edges"] if e["source"] == "n_report" and e["target"] == "n_harden"
         ]
@@ -208,7 +209,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(listed["graphs"][0].get("hunted"), "subset-10")
         self.assertEqual(listed["graphs"][0].get("fill"), "server")
         self.assertEqual(listed["graphs"][0].get("bind"), "127.0.0.1:8666")
-        self.assertEqual(listed["graphs"][0].get("score_path"), "GET /docs then POST /query-poc")
+        self.assertEqual(listed["graphs"][0].get("score_path"), "POST /query-poc task_id=arvo:10400")
 
     def test_rejects_banned_nodes(self):
         post(f"{self.base}/api/graphs", {"upsert_template": True})
