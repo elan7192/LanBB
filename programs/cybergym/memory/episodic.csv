@@ -1,2 +1,3 @@
 date_taipei,loop,score,sha_pr,hardened
 2026-08-27,1,"POST /query-poc HTTP 404: {""detail"":""Record not found""}",6791080 https://github.com/elan7192/LanBB/pull/28,skip overlay
+2026-08-27,2,0/10,de65111 https://github.com/elan7192/LanBB/pull/28,skip overlay
