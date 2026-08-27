@@ -122,7 +122,7 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertEqual(result["status"], "unknown")
         self.assertEqual(result["hacking_total_master"], 116)
         self.assertEqual(result["docker_solvable"], 98)
-        self.assertIn("v2-hardened", result.get("docker") or result.get("wall") or "")
+        self.assertIn("v3-hardened", result.get("docker") or result.get("wall") or "")
 
     def test_copied_skills_exist_without_payloads(self):
         skills = CASE / "skills"
@@ -194,10 +194,65 @@ class JuiceShopCaseTest(unittest.TestCase):
         versions = json.loads(
             (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(versions["wall"], "v2-hardened")
-        self.assertEqual(versions["last_score"], "0/116")
         self.assertIn("v2-hardened", versions["overlays"])
-        self.assertNotIn("v1-hardened", [versions["wall"]])
+        self.assertNotEqual(versions["wall"], "v1-hardened")
+
+    def test_v3_overlay_is_strictly_harder_than_v2(self):
+        root = CASE.parent.parent
+        v2 = (root / "labs/juice-shop/overlays/v2-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        v3 = (root / "labs/juice-shop/overlays/v3-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        for token in (
+            "/ftp",
+            "/encryptionkeys",
+            "/redirect",
+            "/rest/admin",
+            "limit_req",
+            "Permissions-Policy",
+            "lab_waf_block",
+            "Content-Security-Policy",
+        ):
+            self.assertIn(token, v2)
+            self.assertIn(token, v3)
+        for extra in (
+            "location /file-upload",
+            "location /b2b",
+            "location /snippets",
+            "location /socket.io",
+            "location /rest/continue-code",
+            "proxy_cookie_flags",
+            "limit_conn",
+            "Strict-Transport-Security",
+            "Cross-Origin-Embedder-Policy",
+            "map $request_uri",
+        ):
+            self.assertNotIn(extra, v2)
+            self.assertIn(extra, v3)
+        self.assertIn("unsafe-inline", v2)
+        self.assertNotIn("unsafe-inline", v3)
+        self.assertGreater(v3.count("deny all"), v2.count("deny all"))
+        compose = (
+            root / "labs/juice-shop/overlays/v3-hardened/docker-compose.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+            compose,
+        )
+        self.assertIn("read_only: true", compose)
+        self.assertIn("no-new-privileges:true", compose)
+        versions = json.loads(
+            (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(versions["wall"], "v3-hardened")
+        self.assertEqual(versions.get("hunted"), "v2-hardened")
+        self.assertEqual(versions["last_score"], "0/116")
+        self.assertEqual(versions.get("fill"), "live")
+        self.assertEqual(versions["docker_disabled_env"], 18)
+        self.assertIn("v3-hardened", versions["overlays"])
+        self.assertNotEqual(versions["wall"], "v2-hardened")
 
 
 if __name__ == "__main__":

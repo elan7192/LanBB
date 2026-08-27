@@ -113,6 +113,8 @@ body {
   border-radius: 999px;
 }
 .pill.dim { color: var(--muted); border-color: var(--line); }
+.pill.wall { color: var(--gold); border-color: rgba(228, 184, 74, 0.28); }
+.pill.wall.dim { color: var(--muted); border-color: var(--line); }
 
 .rail, .inspector {
   background: rgba(12, 17, 24, 0.92);
@@ -262,7 +264,10 @@ button.ghost {
   color: var(--text);
   border: 1px solid var(--line);
 }
-.hidden { display: none !important; }
+.empty[hidden],
+.empty.hidden {
+  display: none !important;
+}
 
 .insp-meta {
   display: grid;

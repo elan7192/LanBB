@@ -1,15 +1,17 @@
 # CASE report: juice-shop
 
 - Date (Taipei): 2026-08-27
-- UTC: 2026-08-27T00:08:42Z
+- UTC: 2026-08-27T00:18:51Z
 - Kind: lab
 - Lab score: 0/116
+- Fill: live GET /api/Challenges/ on v2-hardened (docker_disabled=18)
 - Authorization: local-docker
-- Wall: v2-hardened
+- Hunted wall: v2-hardened
+- Current wall: v3-hardened
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Score 0/116. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Live Fill score 0/116 on v2-hardened (docker_disabled=18). Report path completed without an exploit PoC.
 
 ## Scope
 
@@ -36,4 +38,4 @@ Docker-off: Insecure Deserialization, XXE.
 
 ## Close path
 
-Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `v2-hardened` in `labs/juice-shop`. Do not attach payloads or reproduction scripts.
+Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `v3-hardened` in `labs/juice-shop` (this loop hunted `v2-hardened`). Do not attach payloads or reproduction scripts.
