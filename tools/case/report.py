@@ -23,26 +23,41 @@ def _findings(case_dir: Path) -> list[str]:
     return out
 
 
-def _score_line(case_dir: Path) -> str:
+def _wall_meta(root: Path) -> dict:
+    versions = root / "labs" / "juice-shop" / "versions.json"
+    if not versions.is_file():
+        return {
+            "wall": "unknown",
+            "score": "0/N",
+            "coverage": [],
+            "docker_off": [],
+        }
+    import json
+
+    data = json.loads(versions.read_text(encoding="utf-8"))
+    return {
+        "wall": str(data.get("wall") or "unknown"),
+        "score": str(data.get("last_score") or data.get("score") or "0/N"),
+        "coverage": list(data.get("skill_pack_does_not_cover") or []),
+        "docker_off": list(data.get("docker_off_not_exercised") or []),
+    }
+
+
+def _score_line(case_dir: Path, root: Optional[Path] = None) -> str:
     path = case_dir / "score.json"
     if path.is_file():
         import json
 
         data = json.loads(path.read_text(encoding="utf-8"))
         return str(data.get("score") or "n/N")
-    versions = repo_root() / "labs" / "juice-shop" / "versions.json"
-    if versions.is_file():
-        import json
-
-        data = json.loads(versions.read_text(encoding="utf-8"))
-        return str(data.get("last_score") or "0/N")
-    return "0/N"
+    return _wall_meta(root or repo_root())["score"]
 
 
 def write_report(slug: str, root: Optional[Path] = None) -> Path:
     scope = load_scope(slug, root)
     case_dir = scope.path.parent
-    score = _score_line(case_dir)
+    wall_meta = _wall_meta(root or repo_root())
+    score = _score_line(case_dir, root)
     findings = _findings(case_dir)
     when = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     taipei = datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d")
@@ -51,6 +66,18 @@ def write_report(slug: str, root: Optional[Path] = None) -> Path:
         if findings
         else "None recorded. Empty findings are valid. This hunt did not auto-pwn the lab."
     )
+    coverage = wall_meta["coverage"]
+    docker_off = wall_meta["docker_off"]
+    coverage_block = ""
+    if coverage or docker_off:
+        miss = ", ".join(coverage) if coverage else "(none listed)"
+        off = ", ".join(docker_off) if docker_off else "(none listed)"
+        coverage_block = f"""
+## Coverage honesty
+
+13-skill pack does not cover: {miss}.
+Docker-off: {off}.
+"""
     body = f"""# CASE report: {scope.slug}
 
 - Date (Taipei): {taipei}
@@ -58,6 +85,7 @@ def write_report(slug: str, root: Optional[Path] = None) -> Path:
 - Kind: {scope.kind}
 - Lab score: {score}
 - Authorization: {scope.authorization or "see scope.md"}
+- Wall: {wall_meta["wall"]}
 
 ## Judgment
 
@@ -76,10 +104,10 @@ Out of scope:
 ## Findings
 
 {finding_block}
-
+{coverage_block}
 ## Close path
 
-Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses the harder wall in `labs/juice-shop`. Do not attach payloads or reproduction scripts.
+Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `{wall_meta["wall"]}` in `labs/juice-shop`. Do not attach payloads or reproduction scripts.
 """
     dest = case_dir / "reports" / "draft.md"
     dest.parent.mkdir(parents=True, exist_ok=True)

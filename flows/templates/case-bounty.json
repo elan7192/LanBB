@@ -1,8 +1,8 @@
 {
   "id": "case-bounty",
   "name": "Authorized bug-bounty CASE",
-  "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, report, close. Scope, authorization, and recon gates fail closed. CASE workflow only. Local lab score is shown in Flow Studio.",
-  "version": "1.1.0",
+  "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N last_score is a first-class graph property; Flow Studio shows it.",
+  "version": "1.2.0",
   "nodes": [
     {
       "id": "n_intake",
@@ -214,6 +214,66 @@
       "error": null
     },
     {
+      "id": "n_lab",
+      "type": "case_step",
+      "label": "Juice Shop lab",
+      "category": "lab",
+      "status": "idle",
+      "description": "In-scope local OWASP Juice Shop only. Hypothetical shop. Current wall is labs/juice-shop/versions.json. Not a live bounty program.",
+      "config": {
+        "stage": "lab",
+        "badge": "LAB",
+        "program": "juice-shop",
+        "score_from": "/api/Challenges",
+        "wall_from": "labs/juice-shop/versions.json"
+      },
+      "position": {
+        "x": 1624,
+        "y": 168
+      },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_skill_pick",
+      "type": "case_step",
+      "label": "Pick CASE skills",
+      "category": "skills",
+      "status": "idle",
+      "description": "Load only the 13 copied testing and UX SKILL.md files under tools/case/skills. Names that start with exploiting- are not in this pick list. C2, phishing, malware, and sqlmap stay out.",
+      "config": {
+        "stage": "skills",
+        "badge": "13 SKILLS",
+        "count": 13,
+        "allowlist": [
+          "conducting-external-reconnaissance-with-osint",
+          "performing-web-application-vulnerability-triage",
+          "prioritizing-vulnerabilities-with-cvss-scoring",
+          "testing-api-security-with-owasp-top-10",
+          "testing-for-xss-vulnerabilities",
+          "testing-for-json-web-token-vulnerabilities",
+          "testing-for-broken-access-control",
+          "testing-for-business-logic-vulnerabilities",
+          "testing-oauth2-implementation-flaws",
+          "conducting-api-security-testing",
+          "testing-cors-misconfiguration",
+          "testing-for-open-redirect-vulnerabilities",
+          "detecting-ai-model-prompt-injection-attacks"
+        ],
+        "forbidden_prefixes": [
+          "exploiting-"
+        ]
+      },
+      "position": {
+        "x": 1848,
+        "y": 168
+      },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
       "id": "n_evidence",
       "type": "case_step",
       "label": "Evidence log",
@@ -225,7 +285,7 @@
         "badge": "CASE FILE"
       },
       "position": {
-        "x": 1624,
+        "x": 2072,
         "y": 168
       },
       "ports": [],
@@ -244,7 +304,28 @@
         "badge": "REPORT"
       },
       "position": {
-        "x": 1848,
+        "x": 2296,
+        "y": 168
+      },
+      "ports": [],
+      "result": null,
+      "error": null
+    },
+    {
+      "id": "n_harden",
+      "type": "case_step",
+      "label": "Harden lab overlay",
+      "category": "harden",
+      "status": "idle",
+      "description": "After the report, raise the Juice Shop lab overlay (new vN-hardened under labs/juice-shop/overlays). This is a lab wall change, not a LanBB merge.",
+      "config": {
+        "stage": "harden",
+        "badge": "WALL",
+        "target": "labs/juice-shop/overlays",
+        "kind": "lab-overlay"
+      },
+      "position": {
+        "x": 2520,
         "y": 168
       },
       "ports": [],
@@ -265,7 +346,7 @@
         "pass_when": "program accepts the report package"
       },
       "position": {
-        "x": 2072,
+        "x": 2744,
         "y": 168
       },
       "ports": [],
@@ -284,7 +365,7 @@
         "badge": "REVISE"
       },
       "position": {
-        "x": 2072,
+        "x": 2744,
         "y": 360
       },
       "ports": [],
@@ -303,7 +384,7 @@
         "badge": "MEMORY"
       },
       "position": {
-        "x": 2296,
+        "x": 2968,
         "y": 168
       },
       "ports": [],
@@ -322,7 +403,7 @@
         "badge": "CLOSE"
       },
       "position": {
-        "x": 2520,
+        "x": 3192,
         "y": 168
       },
       "ports": [],
@@ -400,12 +481,12 @@
       "label": "case file ready"
     },
     {
-      "id": "e_report_review",
+      "id": "e_report_harden",
       "source": "n_report",
-      "target": "n_review",
+      "target": "n_harden",
       "source_port": "out",
       "target_port": "in",
-      "label": "submit"
+      "label": "reported"
     },
     {
       "id": "e_review_revise",
@@ -435,7 +516,7 @@
     {
       "id": "e_recon_pass",
       "source": "n_recon_gate",
-      "target": "n_evidence",
+      "target": "n_lab",
       "source_port": "out",
       "target_port": "in",
       "label": "pass",
@@ -466,6 +547,30 @@
       "source_port": "out",
       "target_port": "in",
       "label": "logged"
+    },
+    {
+      "id": "e_lab_skills",
+      "source": "n_lab",
+      "target": "n_skill_pick",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "in-scope lab"
+    },
+    {
+      "id": "e_skills_evidence",
+      "source": "n_skill_pick",
+      "target": "n_evidence",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "13 skills"
+    },
+    {
+      "id": "e_harden_review",
+      "source": "n_harden",
+      "target": "n_review",
+      "source_port": "out",
+      "target_port": "in",
+      "label": "wall raised"
     }
   ],
   "metadata": {
@@ -488,6 +593,7 @@
         "scope",
         "authorization",
         "report",
+        "harden",
         "close"
       ]
     },
@@ -513,20 +619,40 @@
         "x": 1176
       },
       {
+        "id": "lab",
+        "label": "Lab",
+        "x": 1624
+      },
+      {
+        "id": "skills",
+        "label": "Skills",
+        "x": 1848
+      },
+      {
         "id": "report",
         "label": "Report",
-        "x": 1624
+        "x": 2072
+      },
+      {
+        "id": "harden",
+        "label": "Harden",
+        "x": 2520
       },
       {
         "id": "close",
         "label": "Close",
-        "x": 2296
+        "x": 2968
       }
     ],
     "lab": {
       "program": "juice-shop",
       "score_from": "/api/Challenges",
-      "wall": "v1-hardened"
-    }
+      "wall": "v2-hardened",
+      "last_score": "0/116",
+      "n": 0,
+      "N": 116,
+      "docker_solvable": 98
+    },
+    "score": "0/116"
   }
 }

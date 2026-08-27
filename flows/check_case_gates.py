@@ -3,7 +3,11 @@
 
 A graph fails this slice if any of:
   coordinator_node, wiki_ingest_true, route_skips_lead,
-  merge_now, semantica_agi, specialist_asks_user.
+  merge_now, semantica_agi, specialist_asks_user, skip_approval.
+
+skip_approval: e:route:cursor / e:route:lanbb / e:route:search must visit
+approval:lead first. e:social-wiki AFTER_APPROVE without approval:lead
+fails closed.
 
 CASE workflow only. No exploit, scan, or payload checks here.
 """
@@ -21,7 +25,15 @@ RULES = (
     "merge_now",
     "semantica_agi",
     "specialist_asks_user",
+    "skip_approval",
 )
+
+ROUTE_MUST_VISIT_APPROVAL = (
+    "e:route:cursor",
+    "e:route:lanbb",
+    "e:route:search",
+)
+SOCIAL_WIKI_EDGE = "e:social-wiki"
 
 SPECIALIST_LANES = {
     "wiki",
@@ -58,6 +70,7 @@ def check_graph(graph: Dict[str, Any]) -> List[Violation]:
     found.extend(_merge_now(graph, nodes, edges))
     found.extend(_semantica_agi(graph))
     found.extend(_specialist_asks_user(nodes, edges, by_id))
+    found.extend(_skip_approval(nodes, edges, by_id))
     return found
 
 
@@ -81,6 +94,15 @@ def _is_lead(node: Dict[str, Any]) -> bool:
         [node.get("id"), node.get("label"), node.get("type"), _lane(node)]
     ).lower()
     return "lead" in text
+
+
+def _is_approval_lead(node: Dict[str, Any]) -> bool:
+    nid = str(node.get("id") or "").strip().lower()
+    if nid == "approval:lead":
+        return True
+    label = str(node.get("label") or "").strip().lower()
+    kind = str(node.get("type") or "").strip().lower()
+    return nid.startswith("approval:") and "lead" in f"{nid} {label} {kind} {_lane(node)}"
 
 
 def _is_intake(node: Dict[str, Any]) -> bool:
@@ -280,6 +302,54 @@ def _specialist_asks_user(
                 {
                     "rule": "specialist_asks_user",
                     "where": str(edge.get("id") or f"{src.get('id')}->{dst.get('id')}"),
+                }
+            )
+    return out
+
+
+def _edge_blob(edge: Dict[str, Any]) -> str:
+    return json.dumps(
+        {
+            "id": edge.get("id"),
+            "label": edge.get("label"),
+            "kind": edge.get("kind"),
+            "type": edge.get("type"),
+            "config": edge.get("config"),
+            "properties": edge.get("properties"),
+        }
+    )
+
+
+def _skip_approval(
+    nodes: List[Dict[str, Any]],
+    edges: List[Dict[str, Any]],
+    by_id: Dict[str, Dict[str, Any]],
+) -> List[Violation]:
+    """Routes to cursor/lanbb/search, and AFTER_APPROVE wiki, must visit approval:lead first."""
+    out: List[Violation] = []
+    has_approval = any(_is_approval_lead(n) for n in nodes)
+    for edge in edges:
+        eid = str(edge.get("id") or "").strip()
+        src = by_id.get(str(edge.get("source")))
+        if eid in ROUTE_MUST_VISIT_APPROVAL:
+            if not src or not _is_approval_lead(src):
+                out.append(
+                    {
+                        "rule": "skip_approval",
+                        "where": eid,
+                    }
+                )
+            continue
+        if eid != SOCIAL_WIKI_EDGE:
+            continue
+        after = "AFTER_APPROVE" in _edge_blob(edge).upper()
+        if not after:
+            continue
+        if not has_approval or not src or not _is_approval_lead(src):
+            out.append(
+                {
+                    "rule": "skip_approval",
+                    "where": eid,
                 }
             )
     return out

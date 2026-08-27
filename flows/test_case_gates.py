@@ -20,6 +20,8 @@ FIXTURE_RULES = (
     ("fail_merge_now.json", "merge_now"),
     ("fail_semantica_org.json", "semantica_agi"),
     ("fail_asks_user.json", "specialist_asks_user"),
+    ("fail_skip_approval.json", "skip_approval"),
+    ("fail_social_wiki.json", "skip_approval"),
 )
 
 BANNED = ("exploit", "scan", "payload")
@@ -53,6 +55,67 @@ class DefaultGraphsPassTest(unittest.TestCase):
         graph = _load(GRAPHS / "team-swimlanes.json")
         violations = gates.check_graph(graph)
         self.assertEqual(violations, [], msg=violations)
+
+    def test_team_swimlanes_route_lanbb_visits_approval(self):
+        graph = _load(GRAPHS / "team-swimlanes.json")
+        self.assertTrue(any(n.get("id") == "approval:lead" for n in graph["nodes"]))
+        lanbb = [e for e in graph["edges"] if e.get("id") == "e:route:lanbb"]
+        self.assertEqual(len(lanbb), 1)
+        self.assertEqual(lanbb[0]["source"], "approval:lead")
+        self.assertEqual(gates.check_graph(graph), [])
+
+    def test_route_search_without_approval_fails(self):
+        graph = {
+            "nodes": [
+                {"id": "approval:missing", "type": "case_step", "label": "intake", "category": "intake"},
+                {"id": "agent:search", "type": "case_step", "label": "search", "category": "search"},
+            ],
+            "edges": [
+                {
+                    "id": "e:route:search",
+                    "source": "approval:missing",
+                    "target": "agent:search",
+                }
+            ],
+            "metadata": {},
+        }
+        hit = {v["rule"] for v in gates.check_graph(graph)}
+        self.assertIn("skip_approval", hit)
+
+    def test_route_from_approval_lead_passes(self):
+        graph = {
+            "nodes": [
+                {"id": "approval:lead", "type": "decision_gate", "label": "lead approvals", "category": "lead"},
+                {"id": "agent:lanbb", "type": "case_step", "label": "lanbb", "category": "lanbb"},
+                {"id": "agent:cursor", "type": "case_step", "label": "cursor", "category": "cursor"},
+                {"id": "agent:search", "type": "case_step", "label": "search", "category": "search"},
+            ],
+            "edges": [
+                {"id": "e:route:lanbb", "source": "approval:lead", "target": "agent:lanbb"},
+                {"id": "e:route:cursor", "source": "approval:lead", "target": "agent:cursor"},
+                {"id": "e:route:search", "source": "approval:lead", "target": "agent:search"},
+            ],
+            "metadata": {},
+        }
+        self.assertEqual(gates.check_graph(graph), [])
+
+    def test_social_wiki_after_approve_from_approval_passes(self):
+        graph = {
+            "nodes": [
+                {"id": "approval:lead", "type": "decision_gate", "label": "lead approvals", "category": "lead"},
+                {"id": "agent:wiki", "type": "hold", "label": "wiki freeze", "category": "wiki", "config": {"ingest": False}},
+            ],
+            "edges": [
+                {
+                    "id": "e:social-wiki",
+                    "source": "approval:lead",
+                    "target": "agent:wiki",
+                    "label": "AFTER_APPROVE",
+                }
+            ],
+            "metadata": {},
+        }
+        self.assertEqual(gates.check_graph(graph), [])
 
     def test_template_passes_gates(self):
         graph = _load(ROOT / "templates" / "case-bounty.json")

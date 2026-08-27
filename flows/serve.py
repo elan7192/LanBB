@@ -58,6 +58,7 @@ def list_graphs() -> List[Dict[str, Any]]:
             continue
         meta = data.get("metadata") or {}
         gid = str(data.get("id") or path.stem)
+        lab = meta.get("lab") if isinstance(meta.get("lab"), dict) else {}
         out.append(
             {
                 "id": gid,
@@ -66,6 +67,8 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "default": bool(meta.get("default")),
                 "kind": meta.get("kind"),
                 "layout": meta.get("layout"),
+                "last_score": lab.get("last_score") or meta.get("score"),
+                "score": meta.get("score") or lab.get("last_score"),
             }
         )
     return out
@@ -83,6 +86,13 @@ def forbidden_tokens(graph: Dict[str, Any]) -> List[str]:
     for node in graph.get("nodes") or []:
         if not isinstance(node, dict):
             continue
+        cfg = node.get("config")
+        if isinstance(cfg, dict):
+            # Allowlist may name catalogue skills (e.g. prompt-injection-attacks).
+            # Forbidden kinds are node type/label, not the 13-skill pick list.
+            cfg_scan = {k: v for k, v in cfg.items() if k != "allowlist"}
+        else:
+            cfg_scan = cfg
         parts.append(
             json.dumps(
                 {
@@ -91,7 +101,7 @@ def forbidden_tokens(graph: Dict[str, Any]) -> List[str]:
                     "label": node.get("label"),
                     "description": node.get("description"),
                     "category": node.get("category"),
-                    "config": node.get("config"),
+                    "config": cfg_scan,
                 }
             )
         )
@@ -115,18 +125,33 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             "path": str(scope),
         }
     saved = REPO_ROOT / "programs" / slug / "score.json"
+    versions = REPO_ROOT / "labs" / "juice-shop" / "versions.json"
+    wall = _read_json(versions) if versions.is_file() else {}
     if saved.is_file():
         data = _read_json(saved) or {}
         data["fail_closed"] = False
-        data["available"] = True
+        if "available" not in data:
+            data["available"] = data.get("status") == "ok"
+        data["last_score"] = data.get("score") or data.get("last_score") or (
+            wall or {}
+        ).get("last_score")
+        if wall:
+            data["wall"] = data.get("wall") or wall.get("wall")
+            if not data.get("available"):
+                data["docker"] = (
+                    "docker compose -f labs/juice-shop/overlays/"
+                    f"{wall.get('wall')}/docker-compose.yml up"
+                )
         return 200, data
-    versions = REPO_ROOT / "labs" / "juice-shop" / "versions.json"
-    wall = _read_json(versions) if versions.is_file() else {}
+    last = (wall or {}).get("last_score") or (wall or {}).get("score")
     return 200, {
         "program": slug,
         "available": False,
         "fail_closed": False,
-        "score": (wall or {}).get("last_score"),
+        "score": last,
+        "last_score": last,
+        "n": (wall or {}).get("n"),
+        "N": (wall or {}).get("N") or (wall or {}).get("challenges"),
         "wall": (wall or {}).get("wall"),
         "reason": "live lab not scored; last_score is the hunt result for this wall",
     }

@@ -18,7 +18,8 @@ import serve  # noqa: E402
 
 
 BANNED = ("exploit", "scan", "payload", "attack", "weaponized")
-REQUIRED_STAGES = ("intake", "scope", "authorization", "report", "close")
+REQUIRED_STAGES = ("intake", "scope", "authorization", "report", "harden", "close")
+COPIED_SKILLS = 13
 
 
 def get(url: str):
@@ -80,6 +81,26 @@ class GraphFilesTest(unittest.TestCase):
         self.assertEqual(recon[0]["config"].get("optional_cli"), "subfaster")
         memory = [n for n in graph["nodes"] if n["id"] == "n_memory"]
         self.assertEqual(len(memory), 1)
+        lab = [n for n in graph["nodes"] if n["id"] == "n_lab"]
+        self.assertEqual(len(lab), 1)
+        self.assertEqual(lab[0]["label"], "Juice Shop lab")
+        self.assertEqual(lab[0]["config"]["program"], "juice-shop")
+        skills = [n for n in graph["nodes"] if n["id"] == "n_skill_pick"]
+        self.assertEqual(len(skills), 1)
+        allow = skills[0]["config"]["allowlist"]
+        self.assertEqual(len(allow), COPIED_SKILLS)
+        self.assertTrue(all(not name.startswith("exploiting-") for name in allow))
+        harden = [n for n in graph["nodes"] if n["id"] == "n_harden"]
+        self.assertEqual(len(harden), 1)
+        self.assertEqual(harden[0]["config"]["kind"], "lab-overlay")
+        self.assertIn("last_score", graph["metadata"]["lab"])
+        self.assertEqual(graph["metadata"]["lab"]["last_score"], graph["metadata"]["score"])
+        self.assertRegex(graph["metadata"]["score"], r"^\d+/\d+$")
+        self.assertEqual(graph["metadata"]["lab"]["wall"], "v2-hardened")
+        report_to_harden = [
+            e for e in graph["edges"] if e["source"] == "n_report" and e["target"] == "n_harden"
+        ]
+        self.assertEqual(len(report_to_harden), 1)
 
     def test_team_is_not_default(self):
         path = ROOT / "graphs" / "team-swimlanes.json"
@@ -184,6 +205,19 @@ class ApiTest(unittest.TestCase):
         status, data = get(f"{self.base}/api/case/score?program=juice-shop")
         self.assertEqual(status, 200)
         self.assertFalse(data.get("fail_closed"))
+
+    def test_score_pill_uses_last_score_from_versions(self):
+        scope = self.tmp / "programs" / "juice-shop" / "scope.md"
+        scope.parent.mkdir(parents=True)
+        scope.write_text("---\nkind: lab\n---\n## In scope\n- localhost:3000\n")
+        versions = self.tmp / "labs" / "juice-shop" / "versions.json"
+        versions.parent.mkdir(parents=True)
+        versions.write_text('{"wall":"v2-hardened","last_score":"0/116","n":0,"N":116}\n')
+        status, data = get(f"{self.base}/api/case/score?program=juice-shop")
+        self.assertEqual(status, 200)
+        self.assertEqual(data["score"], "0/116")
+        self.assertEqual(data.get("last_score"), "0/116")
+        self.assertEqual(data.get("wall"), "v2-hardened")
 
 
 def get_status(url: str):
