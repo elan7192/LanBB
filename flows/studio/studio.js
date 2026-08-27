@@ -132,6 +132,10 @@ function renderGraphList(activeId) {
     }${
       g.last_live_wall ? " · last-live-wall " + escapeHtml(g.last_live_wall) : ""
     }${
+      g.last_live_score_get != null ? " · last-live-get " + escapeHtml(g.last_live_score_get) : ""
+    }${
+      g.last_live_score_post != null ? " · last-live-post " + escapeHtml(g.last_live_score_post) : ""
+    }${
       g.score_path ? " · " + escapeHtml(g.score_path) : ""
     }${
       g.bind ? " · bind " + escapeHtml(g.bind) : ""
@@ -224,6 +228,24 @@ function graphLastLiveWall(graph) {
   const meta = (graph && graph.metadata) || {};
   const lab = meta.lab || {};
   return lab.last_live_wall || null;
+}
+
+function graphLastLiveScoreGet(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.last_live_score_get != null ? lab.last_live_score_get : null;
+}
+
+function graphLastLiveDeny(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.last_live_deny_403 || null;
+}
+
+function graphLastLiveScorePost(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.last_live_score_post != null ? lab.last_live_score_post : null;
 }
 
 function graphScorePath(graph) {
@@ -325,7 +347,7 @@ function showAppliesPill(value, reason) {
   else el.removeAttribute("title");
 }
 
-function showLastLivePill(score, wall) {
+function showLastLivePill(score, wall, getCode, postCode, deny) {
   const el = $("labLastLive");
   if (!el) return;
   if (!score && !wall) {
@@ -339,8 +361,15 @@ function showLastLivePill(score, wall) {
   if (wall) bits.push("on " + String(wall));
   el.textContent = bits.join(" ");
   el.classList.remove("dim");
-  if (wall) el.setAttribute("title", "Last live GET /api/Challenges/ on " + String(wall));
-  else el.removeAttribute("title");
+  const titleBits = ["Last live GET /api/Challenges/"];
+  if (getCode != null && getCode !== "") titleBits.push(String(getCode));
+  if (deny) {
+    const denyText = Array.isArray(deny) ? deny.join(", ") : String(deny);
+    if (denyText) titleBits.push("default-deny 403 " + denyText);
+  }
+  if (postCode != null && postCode !== "") titleBits.push("POST " + String(postCode));
+  if (wall) titleBits.push("on " + String(wall));
+  el.setAttribute("title", titleBits.join(" · "));
 }
 
 function showWallPill(text, live) {
@@ -384,7 +413,10 @@ async function loadLabScore(
   appliesFallback,
   appliesReasonFallback,
   lastLiveScoreFallback,
-  lastLiveWallFallback
+  lastLiveWallFallback,
+  lastLiveGetFallback,
+  lastLivePostFallback,
+  lastLiveDenyFallback
 ) {
   const el = $("labScore");
   if (!el) return;
@@ -396,7 +428,13 @@ async function loadLabScore(
   if (codingFallback) showCodingPill(codingFallback);
   if (appliesFallback != null) showAppliesPill(appliesFallback, appliesReasonFallback);
   if (lastLiveScoreFallback || lastLiveWallFallback) {
-    showLastLivePill(lastLiveScoreFallback, lastLiveWallFallback);
+    showLastLivePill(
+      lastLiveScoreFallback,
+      lastLiveWallFallback,
+      lastLiveGetFallback,
+      lastLivePostFallback,
+      lastLiveDenyFallback
+    );
   }
   try {
     const data = await getJson("/api/case/score?program=juice-shop");
@@ -446,8 +484,11 @@ async function loadLabScore(
     }
     const lastLiveScore = data && data.last_live_score;
     const lastLiveWall = data && data.last_live_wall;
+    const lastLiveGet = data && data.last_live_score_get;
+    const lastLivePost = data && data.last_live_score_post;
+    const lastLiveDeny = data && data.last_live_deny_403;
     if (lastLiveScore || lastLiveWall) {
-      showLastLivePill(lastLiveScore, lastLiveWall);
+      showLastLivePill(lastLiveScore, lastLiveWall, lastLiveGet, lastLivePost, lastLiveDeny);
     } else if (!lastLiveScoreFallback && !lastLiveWallFallback) {
       showLastLivePill(null, null);
     }
@@ -495,6 +536,14 @@ function inspect(node) {
     rows.push(["Applies", String(lab.applies != null ? lab.applies : graphApplies(state.current) ?? "-")]);
     rows.push(["Applies reason", lab.applies_reason || graphAppliesReason(state.current) || "-"]);
     rows.push(["Last live", (lab.last_live_score || graphLastLiveScore(state.current) || "-") + " on " + (lab.last_live_wall || graphLastLiveWall(state.current) || "-")]);
+    rows.push(["Last live GET", String(lab.last_live_score_get != null ? lab.last_live_score_get : graphLastLiveScoreGet(state.current) ?? "-")]);
+    rows.push([
+      "Last live 403",
+      Array.isArray(lab.last_live_deny_403)
+        ? lab.last_live_deny_403.join(", ")
+        : lab.last_live_deny_403 || graphLastLiveDeny(state.current) || "-",
+    ]);
+    rows.push(["Last live POST", String(lab.last_live_score_post != null ? lab.last_live_score_post : graphLastLiveScorePost(state.current) ?? "-")]);
     rows.push(["Score path", lab.score_path || graphScorePath(state.current) || "GET /api/Challenges/"]);
     rows.push(["Bind", lab.bind || graphBind(state.current) || "-"]);
     rows.push(["Fill GET", String(lab.fill_score_get != null ? lab.fill_score_get : "-")]);
@@ -522,6 +571,14 @@ function inspect(node) {
     rows.push(["Applies", String(lab.applies != null ? lab.applies : graphApplies(state.current) ?? "-")]);
     rows.push(["Applies reason", lab.applies_reason || graphAppliesReason(state.current) || "-"]);
     rows.push(["Last live", (lab.last_live_score || graphLastLiveScore(state.current) || "-") + " on " + (lab.last_live_wall || graphLastLiveWall(state.current) || "-")]);
+    rows.push(["Last live GET", String(lab.last_live_score_get != null ? lab.last_live_score_get : graphLastLiveScoreGet(state.current) ?? "-")]);
+    rows.push([
+      "Last live 403",
+      Array.isArray(lab.last_live_deny_403)
+        ? lab.last_live_deny_403.join(", ")
+        : lab.last_live_deny_403 || graphLastLiveDeny(state.current) || "-",
+    ]);
+    rows.push(["Last live POST", String(lab.last_live_score_post != null ? lab.last_live_score_post : graphLastLiveScorePost(state.current) ?? "-")]);
     rows.push(["Score path", lab.score_path || graphScorePath(state.current) || "GET /api/Challenges/"]);
     rows.push(["Bind", lab.bind || graphBind(state.current) || "-"]);
     rows.push(["Fill GET", String(lab.fill_score_get != null ? lab.fill_score_get : "-")]);
@@ -798,8 +855,13 @@ function showGraph(graph, hint) {
   if (applies != null) showAppliesPill(applies, graphAppliesReason(graph));
   const lastLiveScore = graphLastLiveScore(graph);
   const lastLiveWall = graphLastLiveWall(graph);
-  if (lastLiveScore || lastLiveWall) showLastLivePill(lastLiveScore, lastLiveWall);
-  loadLabScore(cached, wall, hunted, fill, nextHunt, graphFillReason(graph), coding, applies, graphAppliesReason(graph), lastLiveScore, lastLiveWall);
+  const lastLiveGet = graphLastLiveScoreGet(graph);
+  const lastLivePost = graphLastLiveScorePost(graph);
+  const lastLiveDeny = graphLastLiveDeny(graph);
+  if (lastLiveScore || lastLiveWall) {
+    showLastLivePill(lastLiveScore, lastLiveWall, lastLiveGet, lastLivePost, lastLiveDeny);
+  }
+  loadLabScore(cached, wall, hunted, fill, nextHunt, graphFillReason(graph), coding, applies, graphAppliesReason(graph), lastLiveScore, lastLiveWall, lastLiveGet, lastLivePost, lastLiveDeny);
 }
 
 async function openGraph(id) {
