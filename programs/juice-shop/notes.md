@@ -7,6 +7,8 @@ Authorized CASE file. Evidence dumps, screenshots, and HTTP traffic stay gitigno
 3. Record findings, then write a report. No exploit PoC generator.
 4. After hunt→harden, emit memory (`lanbb case memory emit`). Not working memory. Not a wiki.
 
-Loop 2 hunted `v1-hardened`. Score 0/116 (lab docker was not running in this agent VM). Report path still wrote. Wall is now `v2-hardened`.
+Loop 2 hunted `v1-hardened`. Score 0/116 (lab docker was not running in this agent VM). Report path still wrote. Wall became `v2-hardened`.
+
+Loop 3 hunted `v2-hardened`. Score 0/116 (no Docker, nothing on :3000). Report path still wrote. Wall is now `v3-hardened`.
 
 Coverage honesty: the 13-skill pack does not cover Cryptographic Issues, Miscellaneous, Security Misconfiguration, Security through Obscurity. Docker-off: Insecure Deserialization, XXE.

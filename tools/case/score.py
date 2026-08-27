@@ -34,17 +34,17 @@ DOCKER_DISABLED_ENV = 18
 def load_versions(root: Optional[Path] = None) -> Dict[str, Any]:
     path = (root or repo_root()) / "labs" / "juice-shop" / "versions.json"
     if not path.is_file():
-        return {"wall": "v2-hardened", "last_score": "0/116"}
+        return {"wall": "v3-hardened", "hunted": "v2-hardened", "last_score": "0/116"}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return {"wall": "v2-hardened", "last_score": "0/116"}
-    return data if isinstance(data, dict) else {"wall": "v2-hardened"}
+        return {"wall": "v3-hardened", "hunted": "v2-hardened", "last_score": "0/116"}
+    return data if isinstance(data, dict) else {"wall": "v3-hardened"}
 
 
 def current_wall(root: Optional[Path] = None) -> str:
-    wall = str(load_versions(root).get("wall") or "v2-hardened").strip()
-    return wall or "v2-hardened"
+    wall = str(load_versions(root).get("wall") or "v3-hardened").strip()
+    return wall or "v3-hardened"
 
 
 def compose_file(root: Optional[Path] = None) -> Path:
@@ -181,6 +181,7 @@ def score_program(
         "kind": scope.kind,
         "image": DOCKER_IMAGE,
         "wall": wall,
+        "hunted": versions.get("hunted") or "",
         "hacking_total_master": HACKING_TOTAL,
         "docker_solvable": DOCKER_SOLVABLE,
         "docker_disabled_env": DOCKER_DISABLED_ENV,

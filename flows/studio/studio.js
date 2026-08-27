@@ -108,6 +108,8 @@ function renderGraphList(activeId) {
     btn.setAttribute("aria-current", String(g.id === activeId));
     btn.innerHTML = `${escapeHtml(g.name)}<small>${escapeHtml(g.id)}${
       g.default ? " · default" : ""
+    }${g.last_score ? " · " + escapeHtml(g.last_score) : ""}${
+      g.wall ? " · " + escapeHtml(g.wall) : ""
     }</small>`;
     btn.addEventListener("click", () => openGraph(g.id));
     box.appendChild(btn);
@@ -127,6 +129,18 @@ function graphLastScore(graph) {
   return lab.last_score || meta.score || null;
 }
 
+function graphWall(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.wall || null;
+}
+
+function graphHunted(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.hunted || null;
+}
+
 function showScorePill(text, live) {
   const el = $("labScore");
   if (!el) return;
@@ -137,6 +151,18 @@ function showScorePill(text, live) {
   }
   const nN = String(text).replace(/^score\s+/i, "");
   el.textContent = nN;
+  el.classList.toggle("dim", !live);
+}
+
+function showWallPill(text, live) {
+  const el = $("labWall");
+  if (!el) return;
+  if (!text) {
+    el.textContent = "wall —";
+    el.classList.add("dim");
+    return;
+  }
+  el.textContent = String(text);
   el.classList.toggle("dim", !live);
 }
 
@@ -158,20 +184,28 @@ function renderStages(graph) {
     .join("");
 }
 
-async function loadLabScore(fallback) {
+async function loadLabScore(fallback, wallFallback) {
   const el = $("labScore");
   if (!el) return;
   if (fallback) showScorePill(fallback, false);
+  if (wallFallback) showWallPill(wallFallback, false);
   try {
     const data = await getJson("/api/case/score?program=juice-shop");
     const live = data && (data.score || data.last_score);
     if (live) {
       showScorePill(live, Boolean(data.available));
-      return;
+    } else if (!fallback) {
+      showScorePill(null, false);
     }
-    if (!fallback) showScorePill(null, false);
+    const wall = data && data.wall;
+    if (wall) {
+      showWallPill(wall, Boolean(data.available));
+    } else if (!wallFallback) {
+      showWallPill(null, false);
+    }
   } catch {
     if (!fallback) showScorePill(null, false);
+    if (!wallFallback) showWallPill(null, false);
   }
 }
 
@@ -187,13 +221,20 @@ function inspect(node) {
     return;
   }
   const cfg = node.config || {};
-  $("inspTitle").textContent = node.label;
-  $("inspMeta").innerHTML = [
+  const lab = ((state.current && state.current.metadata) || {}).lab || {};
+  const rows = [
     ["Type", node.type],
     ["Stage", cfg.stage || node.category || "-"],
     ["Gate", cfg.fail_closed ? "fail-closed" : node.type === "decision_gate" ? "review" : "-"],
     ["Badge", cfg.badge || "-"],
-  ]
+  ];
+  if (node.id === "n_lab" || cfg.stage === "lab") {
+    rows.push(["Wall", lab.wall || graphWall(state.current) || "-"]);
+    rows.push(["Hunted", lab.hunted || graphHunted(state.current) || "-"]);
+    rows.push(["Score", lab.last_score || graphLastScore(state.current) || "-"]);
+  }
+  $("inspTitle").textContent = node.label;
+  $("inspMeta").innerHTML = rows
     .map(([k, v]) => `<b>${escapeHtml(k)}</b><span>${escapeHtml(v)}</span>`)
     .join("");
   $("inspBody").textContent = node.description || "";
@@ -445,7 +486,9 @@ function showGraph(graph, hint) {
   if (hint) setHint(hint);
   const cached = graphLastScore(graph);
   if (cached) showScorePill(cached, false);
-  loadLabScore(cached);
+  const wall = graphWall(graph);
+  if (wall) showWallPill(wall, false);
+  loadLabScore(cached, wall);
 }
 
 async function openGraph(id) {

@@ -69,6 +69,8 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "layout": meta.get("layout"),
                 "last_score": lab.get("last_score") or meta.get("score"),
                 "score": meta.get("score") or lab.get("last_score"),
+                "wall": lab.get("wall"),
+                "hunted": lab.get("hunted"),
             }
         )
     return out
@@ -136,7 +138,9 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             wall or {}
         ).get("last_score")
         if wall:
-            data["wall"] = data.get("wall") or wall.get("wall")
+            # Current wall is versions.json; hunted is the overlay this loop scored.
+            data["wall"] = wall.get("wall") or data.get("wall")
+            data["hunted"] = wall.get("hunted") or data.get("hunted")
             if not data.get("available"):
                 data["docker"] = (
                     "docker compose -f labs/juice-shop/overlays/"
@@ -153,7 +157,8 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "n": (wall or {}).get("n"),
         "N": (wall or {}).get("N") or (wall or {}).get("challenges"),
         "wall": (wall or {}).get("wall"),
-        "reason": "live lab not scored; last_score is the hunt result for this wall",
+        "hunted": (wall or {}).get("hunted"),
+        "reason": "live lab not scored; last_score is the hunt result; wall is the next overlay",
     }
 
 

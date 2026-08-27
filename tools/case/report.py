@@ -28,6 +28,7 @@ def _wall_meta(root: Path) -> dict:
     if not versions.is_file():
         return {
             "wall": "unknown",
+            "hunted": "unknown",
             "score": "0/N",
             "coverage": [],
             "docker_off": [],
@@ -37,6 +38,7 @@ def _wall_meta(root: Path) -> dict:
     data = json.loads(versions.read_text(encoding="utf-8"))
     return {
         "wall": str(data.get("wall") or "unknown"),
+        "hunted": str(data.get("hunted") or "unknown"),
         "score": str(data.get("last_score") or data.get("score") or "0/N"),
         "coverage": list(data.get("skill_pack_does_not_cover") or []),
         "docker_off": list(data.get("docker_off_not_exercised") or []),
@@ -85,7 +87,8 @@ Docker-off: {off}.
 - Kind: {scope.kind}
 - Lab score: {score}
 - Authorization: {scope.authorization or "see scope.md"}
-- Wall: {wall_meta["wall"]}
+- Hunted wall: {wall_meta["hunted"]}
+- Current wall: {wall_meta["wall"]}
 
 ## Judgment
 
@@ -107,7 +110,7 @@ Out of scope:
 {coverage_block}
 ## Close path
 
-Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `{wall_meta["wall"]}` in `labs/juice-shop`. Do not attach payloads or reproduction scripts.
+Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `{wall_meta["wall"]}` in `labs/juice-shop` (this loop hunted `{wall_meta["hunted"]}`). Do not attach payloads or reproduction scripts.
 """
     dest = case_dir / "reports" / "draft.md"
     dest.parent.mkdir(parents=True, exist_ok=True)
