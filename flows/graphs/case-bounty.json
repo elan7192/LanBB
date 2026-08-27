@@ -655,7 +655,7 @@
       "N": 116,
       "docker_solvable": 98,
       "docker_disabled_env": 18,
-      "fill": "unknown"
+      "fill": "live"
     },
     "score": "0/116"
   }

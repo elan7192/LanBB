@@ -1,17 +1,17 @@
 # CASE report: juice-shop
 
 - Date (Taipei): 2026-08-27
-- UTC: 2026-08-27T00:31:23Z
+- UTC: 2026-08-27T00:35:40Z
 - Kind: lab
 - Lab score: 0/116
-- Fill: unknown GET /api/Challenges/ on v3-hardened (lab docker not reachable; 0/N is honest, not invented); docker_disabled=18
+- Fill: live GET /api/Challenges/ on v3-hardened (docker_disabled=18)
 - Authorization: local-docker
 - Hunted wall: v3-hardened
 - Current wall: v4-hardened
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Fill unknown; score 0/116 is honest, not invented. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Live Fill score 0/116 on v3-hardened. Report path completed without an exploit PoC.
 
 ## Scope
 

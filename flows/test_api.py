@@ -98,7 +98,7 @@ class GraphFilesTest(unittest.TestCase):
         self.assertRegex(graph["metadata"]["score"], r"^\d+/\d+$")
         self.assertEqual(graph["metadata"]["lab"]["wall"], "v4-hardened")
         self.assertEqual(graph["metadata"]["lab"]["hunted"], "v3-hardened")
-        self.assertEqual(graph["metadata"]["lab"].get("fill"), "unknown")
+        self.assertEqual(graph["metadata"]["lab"].get("fill"), "live")
         self.assertEqual(graph["metadata"]["lab"].get("docker_disabled_env"), 18)
         self.assertEqual(graph["version"], "1.4.0")
         report_to_harden = [
@@ -138,7 +138,7 @@ class GraphFilesTest(unittest.TestCase):
         self.assertTrue(template["metadata"]["default"])
         self.assertEqual(template["metadata"]["lab"]["wall"], "v4-hardened")
         self.assertEqual(template["metadata"]["lab"]["hunted"], "v3-hardened")
-        self.assertEqual(template["metadata"]["lab"].get("fill"), "unknown")
+        self.assertEqual(template["metadata"]["lab"].get("fill"), "live")
 
 
 class ApiTest(unittest.TestCase):
@@ -188,7 +188,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(listed["graphs"][0].get("wall"), "v4-hardened")
         self.assertEqual(listed["graphs"][0].get("hunted"), "v3-hardened")
         self.assertEqual(listed["graphs"][0].get("last_score"), "0/116")
-        self.assertEqual(listed["graphs"][0].get("fill"), "unknown")
+        self.assertEqual(listed["graphs"][0].get("fill"), "live")
 
     def test_catalog_does_not_invent_fill_on_non_lab_graph(self):
         post(f"{self.base}/api/graphs", {"upsert_template": True})
@@ -212,7 +212,7 @@ class ApiTest(unittest.TestCase):
         status, listed = get(f"{self.base}/api/graphs")
         self.assertEqual(status, 200)
         by_id = {g["id"]: g for g in listed["graphs"]}
-        self.assertEqual(by_id["case-bounty"].get("fill"), "unknown")
+        self.assertEqual(by_id["case-bounty"].get("fill"), "live")
         self.assertIn(by_id["team-ish"].get("fill"), (None, ""))
 
     def test_rejects_banned_nodes(self):
@@ -256,7 +256,7 @@ class ApiTest(unittest.TestCase):
         versions = self.tmp / "labs" / "juice-shop" / "versions.json"
         versions.parent.mkdir(parents=True)
         versions.write_text(
-            '{"wall":"v4-hardened","hunted":"v3-hardened","last_score":"0/116","n":0,"N":116,"fill":"unknown","docker_disabled_env":18}\n'
+            '{"wall":"v4-hardened","hunted":"v3-hardened","last_score":"0/116","n":0,"N":116,"fill":"live","docker_disabled_env":18}\n'
         )
         status, data = get(f"{self.base}/api/case/score?program=juice-shop")
         self.assertEqual(status, 200)
@@ -264,9 +264,9 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(data.get("last_score"), "0/116")
         self.assertEqual(data.get("wall"), "v4-hardened")
         self.assertEqual(data.get("hunted"), "v3-hardened")
-        self.assertEqual(data.get("fill"), "unknown")
+        self.assertEqual(data.get("fill"), "live")
         self.assertEqual(data.get("docker_disabled_env"), 18)
-        self.assertIn("honest", (data.get("reason") or "").lower())
+        self.assertIn("fill live", (data.get("reason") or "").lower())
 
 
 def get_status(url: str):
