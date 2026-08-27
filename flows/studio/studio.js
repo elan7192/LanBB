@@ -98,6 +98,13 @@ function setHint(text) {
   $("loadHint").textContent = text;
 }
 
+function setEmptyVisible(visible) {
+  const el = $("emptyState");
+  if (!el) return;
+  el.classList.toggle("hidden", !visible);
+  el.hidden = !visible;
+}
+
 function renderGraphList(activeId) {
   const box = $("graphList");
   box.innerHTML = "";
@@ -476,7 +483,7 @@ function fitGraph(graph) {
 function showGraph(graph, hint) {
   state.current = graph;
   state.selected = null;
-  $("emptyState").classList.add("hidden");
+  setEmptyVisible(false);
   $("graphTitle").textContent = graph.name;
   $("graphDesc").textContent = graph.description || "";
   renderStages(graph);
@@ -508,7 +515,6 @@ async function showDocumentedDefault() {
       "Documented default CASE DAG shown in memory. GET did not seed. Save via POST upsert to persist.";
   }
   showGraph(graph, file ? "Loaded documented default from repo files." : "Showing documented default in memory. GET did not seed.");
-  $("emptyState").classList.add("hidden");
 }
 
 async function boot() {
@@ -536,7 +542,7 @@ async function boot() {
   if (listed && listed.length === 0) {
     state.graphs = [];
     renderGraphList(null);
-    $("emptyState").classList.remove("hidden");
+    setEmptyVisible(true);
     setHint("GET /api/graphs was empty and did not seed.");
     try {
       const data = await upsertTemplate();
@@ -566,7 +572,7 @@ async function boot() {
     setHint("API catalog unavailable. Loaded known repo graph files.");
     return;
   }
-  $("emptyState").classList.remove("hidden");
+  setEmptyVisible(true);
   setHint("No catalog and no graph files. Show the documented default or POST upsert.");
 }
 

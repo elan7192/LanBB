@@ -264,7 +264,10 @@ button.ghost {
   color: var(--text);
   border: 1px solid var(--line);
 }
-.hidden { display: none !important; }
+.empty[hidden],
+.empty.hidden {
+  display: none !important;
+}
 
 .insp-meta {
   display: grid;

@@ -123,7 +123,12 @@ class GraphFilesTest(unittest.TestCase):
         for word in BANNED:
             self.assertNotRegex(node_blob, rf"\b{word}s?\b", msg=word)
 
-    def test_template_matches_default_id(self):
+    def test_studio_shows_score_and_wall_pills(self):
+        html = (ROOT / "studio" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="./studio.css"', html)
+        self.assertIn('id="labScore"', html)
+        self.assertIn('id="labWall"', html)
+        self.assertIn("Hunt wall vs current wall", html)
         template = json.loads((ROOT / "templates" / "case-bounty.json").read_text())
         self.assertEqual(template["id"], "case-bounty")
         self.assertTrue(template["metadata"]["default"])
