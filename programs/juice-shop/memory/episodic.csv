@@ -7,4 +7,4 @@ date_taipei,loop,score,sha_pr,hardened
 2026-08-27,6,0/116,62c155d https://github.com/elan7192/LanBB/pull/16,v6-hardened: working harden (no juice EROFS, no tmpfs over data/static) + login closed + GET/HEAD only + SPA/static leak closed + nginx burst>=1
 2026-08-27,7,0/116,32e5bbe https://github.com/elan7192/LanBB/pull/17,v7-hardened: working harden (no juice EROFS, no tmpfs over data/static) + default-deny edge except GET /api/Challenges/ + leftover SPA/JS + remaining /api /rest closed + nginx burst>=1
 2026-08-27,8,0/116,e3894f9 https://github.com/elan7192/LanBB/pull/18,v8-hardened: working harden (no juice EROFS, no tmpfs over data/static) + exact GET /api/Challenges/ + localhost bind + leftover SPA/Web3/payment closed + nginx burst>=1
-2026-08-27,9,0/116,pending,v9-hardened: working harden (no juice EROFS, no tmpfs over data/static) + exact-equals GET /api/Challenges/ + host allowlist + leftover oauth/health/debug closed + nginx burst>=1
+2026-08-27,9,0/116,84aed44,v9-hardened: working harden (no juice EROFS, no tmpfs over data/static) + exact-equals GET /api/Challenges/ + host allowlist + leftover oauth/health/debug closed + nginx burst>=1
