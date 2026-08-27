@@ -119,6 +119,10 @@ function renderGraphList(activeId) {
       g.wall ? " · " + escapeHtml(g.wall) : ""
     }${g.hunted ? " · hunted " + escapeHtml(g.hunted) : ""}${
       g.fill ? " · fill " + escapeHtml(g.fill) : ""
+    }${
+      g.docker_solvable && g.N
+        ? " · " + escapeHtml(String(g.docker_solvable)) + "/" + escapeHtml(String(g.N)) + " docker"
+        : ""
     }</small>`;
     btn.addEventListener("click", () => openGraph(g.id));
     box.appendChild(btn);
@@ -293,6 +297,8 @@ function inspect(node) {
     rows.push(["Hunted", lab.hunted || graphHunted(state.current) || "-"]);
     rows.push(["Score", lab.last_score || graphLastScore(state.current) || "-"]);
     rows.push(["Fill", lab.fill || graphFill(state.current) || "-"]);
+    rows.push(["Docker-solvable", String(lab.docker_solvable != null ? lab.docker_solvable : "-")]);
+    rows.push(["N", String(lab.N != null ? lab.N : "-")]);
   }
   if (node.id === "n_harden" || cfg.stage === "harden") {
     rows.push(["Next wall", lab.wall || graphWall(state.current) || "-"]);
