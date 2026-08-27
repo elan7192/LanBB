@@ -377,7 +377,7 @@ function showCodingPill(text) {
   const el = $("labCoding");
   if (!el) return;
   if (!text) {
-    el.textContent = "coding /snippets out of n/N";
+    el.textContent = "coding";
     el.classList.add("dim");
     return;
   }
