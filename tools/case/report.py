@@ -30,16 +30,21 @@ def _wall_meta(root: Path) -> dict:
             "wall": "unknown",
             "hunted": "unknown",
             "score": "0/N",
+            "fill": "unknown",
+            "fill_wall": "unknown",
             "coverage": [],
             "docker_off": [],
         }
     import json
 
     data = json.loads(versions.read_text(encoding="utf-8"))
+    hunted = str(data.get("hunted") or "unknown")
     return {
         "wall": str(data.get("wall") or "unknown"),
-        "hunted": str(data.get("hunted") or "unknown"),
+        "hunted": hunted,
         "score": str(data.get("last_score") or data.get("score") or "0/N"),
+        "fill": str(data.get("fill") or "unknown"),
+        "fill_wall": str(data.get("fill_wall") or hunted),
         "coverage": list(data.get("skill_pack_does_not_cover") or []),
         "docker_off": list(data.get("docker_off_not_exercised") or []),
     }
@@ -86,13 +91,14 @@ Docker-off: {off}.
 - UTC: {when}
 - Kind: {scope.kind}
 - Lab score: {score}
+- Fill: {wall_meta["fill"]} GET /api/Challenges/ on {wall_meta["fill_wall"]}
 - Authorization: {scope.authorization or "see scope.md"}
 - Hunted wall: {wall_meta["hunted"]}
 - Current wall: {wall_meta["wall"]}
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Score {score}. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Fill {wall_meta["fill"]} score {score} on {wall_meta["fill_wall"]}. Report path completed without an exploit PoC.
 
 ## Scope
 

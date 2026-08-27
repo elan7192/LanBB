@@ -115,6 +115,18 @@ def forbidden_tokens(graph: Dict[str, Any]) -> List[str]:
     return sorted({m.group(1).lower() for m in BANNED_RE.finditer(blob)})
 
 
+def _fill_reason(wall: Dict[str, Any]) -> str:
+    fill = wall.get("fill")
+    if fill == "live":
+        return "Fill live n/N from GET /api/Challenges/ on hunted wall; wall is the next overlay"
+    if fill in {"unavailable", "unknown"}:
+        return (
+            "Fill unavailable: GET /api/Challenges/ did not arrive; "
+            "0/N is honest; wall is the next overlay"
+        )
+    return "live lab not scored; last_score is the hunt result; wall is the next overlay"
+
+
 def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
     """Fail-closed lab score. Missing programs/<slug>/scope.md is 400."""
     slug = (program or "").strip().lower()
@@ -143,17 +155,15 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             data["wall"] = wall.get("wall") or data.get("wall")
             data["hunted"] = wall.get("hunted") or data.get("hunted")
             data["fill"] = wall.get("fill") or data.get("fill")
+            data["fill_wall"] = wall.get("fill_wall") or data.get("fill_wall")
             data["docker_disabled_env"] = wall.get("docker_disabled_env") or data.get(
                 "docker_disabled_env"
             )
-            if wall.get("fill") == "live":
-                data["last_score"] = wall.get("last_score") or data.get("last_score")
-                data["score"] = data.get("last_score") or data.get("score")
-                data["n"] = wall.get("n") if wall.get("n") is not None else data.get("n")
-                data["N"] = wall.get("N") or wall.get("challenges") or data.get("N")
-                data["reason"] = (
-                    "Fill live n/N from GET /api/Challenges/ on hunted wall; not rediscovered"
-                )
+            data["last_score"] = wall.get("last_score") or data.get("last_score")
+            data["score"] = data.get("last_score") or data.get("score")
+            data["n"] = wall.get("n") if wall.get("n") is not None else data.get("n")
+            data["N"] = wall.get("N") or wall.get("challenges") or data.get("N")
+            data["reason"] = _fill_reason(wall)
             if not data.get("available"):
                 data["docker"] = (
                     "docker compose -f labs/juice-shop/overlays/"
@@ -172,12 +182,9 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "wall": (wall or {}).get("wall"),
         "hunted": (wall or {}).get("hunted"),
         "fill": (wall or {}).get("fill"),
+        "fill_wall": (wall or {}).get("fill_wall"),
         "docker_disabled_env": (wall or {}).get("docker_disabled_env"),
-        "reason": (
-            "Fill live n/N from GET /api/Challenges/ on hunted wall; wall is the next overlay"
-            if (wall or {}).get("fill") == "live"
-            else "live lab not scored; last_score is the hunt result; wall is the next overlay"
-        ),
+        "reason": _fill_reason(wall or {}),
     }
 
 

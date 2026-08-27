@@ -1,6 +1,6 @@
 # v3-hardened
 
-Stricter than `v2-hardened`. Next hunt must use this wall, not v2.
+Stricter than `v2-hardened`. Previous wall. Next hunt must use `v4-hardened`, not v3.
 
 Keeps v2:
 
