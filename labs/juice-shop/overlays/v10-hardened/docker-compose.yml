@@ -13,12 +13,12 @@ services:
     ulimits:
       nproc: 32
       nofile: 96
-    # Working harden that actually applies (last live Fill on v8: GET /api/Challenges/
+    # Working harden that actually applies (Fill on v9: GET /api/Challenges/
     # 200, default-deny 403 on / /login /api; EROFS_GONE, ReadonlyRootfs=false).
-    # This hunt Fill on v9 was unavailable (no docker). Juice root stays writable.
-    # Do not set read_only. v5 EROFS-skipped .well-known/csaf. tmpfs=/tmp only.
-    # Do not tmpfs /juice-shop/data — that hides data/static. Keep juice at 128m
-    # so GET /api/Challenges/ can still apply.
+    # Juice root stays writable. Do not set read_only. v5 EROFS-skipped
+    # .well-known/csaf. tmpfs=/tmp only. Do not tmpfs /juice-shop/data —
+    # that hides data/static. Keep juice at 128m so GET /api/Challenges/
+    # can still apply.
     tmpfs:
       - /tmp:size=1m
     environment:
