@@ -82,6 +82,9 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "last_live_fill": lab.get("last_live_fill"),
                 "last_live_score": lab.get("last_live_score"),
                 "last_live_wall": lab.get("last_live_wall"),
+                "last_live_score_get": lab.get("last_live_score_get"),
+                "last_live_deny_403": lab.get("last_live_deny_403"),
+                "last_live_score_post": lab.get("last_live_score_post"),
                 "score_path": lab.get("score_path"),
                 "bind": lab.get("bind"),
                 "fill_score_get": lab.get("fill_score_get"),
@@ -198,6 +201,19 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             data["last_live_fill"] = wall.get("last_live_fill") or data.get("last_live_fill")
             data["last_live_score"] = wall.get("last_live_score") or data.get("last_live_score")
             data["last_live_wall"] = wall.get("last_live_wall") or data.get("last_live_wall")
+            data["last_live_score_get"] = (
+                wall.get("last_live_score_get")
+                if wall.get("last_live_score_get") is not None
+                else data.get("last_live_score_get")
+            )
+            data["last_live_deny_403"] = wall.get("last_live_deny_403") or data.get(
+                "last_live_deny_403"
+            )
+            data["last_live_score_post"] = (
+                wall.get("last_live_score_post")
+                if wall.get("last_live_score_post") is not None
+                else data.get("last_live_score_post")
+            )
             data["score_path"] = wall.get("score_path") or data.get("score_path")
             data["bind"] = wall.get("bind") or data.get("bind")
             data["fill_score_get"] = (
@@ -248,6 +264,9 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "last_live_fill": (wall or {}).get("last_live_fill"),
         "last_live_score": (wall or {}).get("last_live_score"),
         "last_live_wall": (wall or {}).get("last_live_wall"),
+        "last_live_score_get": (wall or {}).get("last_live_score_get"),
+        "last_live_deny_403": (wall or {}).get("last_live_deny_403"),
+        "last_live_score_post": (wall or {}).get("last_live_score_post"),
         "score_path": (wall or {}).get("score_path"),
         "bind": (wall or {}).get("bind"),
         "fill_score_get": (wall or {}).get("fill_score_get"),

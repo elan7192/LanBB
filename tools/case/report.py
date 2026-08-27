@@ -35,6 +35,9 @@ def _wall_meta(root: Path) -> dict:
             "last_live_fill": "",
             "last_live_score": "",
             "last_live_wall": "",
+            "last_live_score_get": "",
+            "last_live_deny_403": "",
+            "last_live_score_post": "",
             "fill_score_get": "",
             "fill_deny_403": "",
             "fill_score_post": "",
@@ -58,6 +61,13 @@ def _wall_meta(root: Path) -> dict:
             "last_live_fill": str(data.get("last_live_fill") or ""),
             "last_live_score": str(data.get("last_live_score") or ""),
             "last_live_wall": str(data.get("last_live_wall") or ""),
+            "last_live_score_get": data.get("last_live_score_get") if data.get("last_live_score_get") is not None else "",
+            "last_live_deny_403": (
+                ", ".join(data.get("last_live_deny_403"))
+                if isinstance(data.get("last_live_deny_403"), list)
+                else str(data.get("last_live_deny_403") or "")
+            ),
+            "last_live_score_post": data.get("last_live_score_post") if data.get("last_live_score_post") is not None else "",
             "fill_score_get": data.get("fill_score_get") if data.get("fill_score_get") is not None else "",
             "fill_deny_403": (
                 ", ".join(data.get("fill_deny_403"))
@@ -120,6 +130,9 @@ Docker-off: {off}.
 - Fill 403: {wall_meta["fill_deny_403"] or "see versions.json"}
 - Fill POST: {wall_meta["fill_score_post"] or "see versions.json"}
 - Last live fill: {wall_meta["last_live_score"] or "none"} on {wall_meta["last_live_wall"] or "none"}
+- Last live GET: {wall_meta["last_live_score_get"] or "see versions.json"}
+- Last live 403: {wall_meta["last_live_deny_403"] or "see versions.json"}
+- Last live POST: {wall_meta["last_live_score_post"] or "see versions.json"}
 - Score path: {wall_meta["score_path"]}
 - Bind: {wall_meta["bind"] or "see overlay"}
 - Authorization: {scope.authorization or "see scope.md"}
