@@ -17,8 +17,9 @@ Current wall: see `versions.json` (`wall`). Hunt that overlay, then harden a **n
 | `overlays/v8-hardened/` | Older wall: working harden plus exact GET /api/Challenges/, localhost bind, leftover SPA/Web3/payment closed |
 | `overlays/v9-hardened/` | Older wall: working harden plus exact-equals score locations, host allowlist, leftover oauth/health/debug closed |
 | `overlays/v10-hardened/` | Older wall: working harden plus exact trailing-slash GET /api/Challenges/ only, empty-query/cookie-closed score path, leftover privacy/hidden/data HTTP routes closed |
-| `overlays/v11-hardened/` | Previous wall: working harden plus Authorization/Origin/Referer closed on the score path, leftover continue-code/login/search/Baskets/nested privacy-security SPA HTTP routes closed. Edge 4m/4 failed on Fill (daemon min 6MB). |
-| `overlays/v12-hardened/` | Current wall: working harden plus extra hop/auth headers closed on the score path, leftover hacking-instructor/juicy-nft/continue-code-xss/products-queries HTTP routes closed, edge floor mem>=6m pids>=6 |
+| `overlays/v11-hardened/` | Older wall: working harden plus Authorization/Origin/Referer closed on the score path, leftover continue-code/login/search/Baskets/nested privacy-security SPA HTTP routes closed. Edge 4m/4 failed on Fill (daemon min 6MB). |
+| `overlays/v12-hardened/` | Previous wall: working harden plus extra hop/auth headers closed on the score path, leftover hacking-instructor/juicy-nft/continue-code-xss/products-queries HTTP routes closed, edge floor mem>=6m pids>=6 |
+| `overlays/v13-hardened/` | Current wall: working harden plus leftover rewrite/identity headers closed on the score path, leftover continue-code-apply/tutorial/access_token/ftp-backup HTTP routes closed, edge floor mem>=6m pids>=6 held |
 
 ```bash
 # stock
@@ -36,9 +37,10 @@ docker compose -f labs/juice-shop/overlays/v8-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v9-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v10-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v11-hardened/docker-compose.yml up
-
-# current wall (v12)
 docker compose -f labs/juice-shop/overlays/v12-hardened/docker-compose.yml up
+
+# current wall (v13)
+docker compose -f labs/juice-shop/overlays/v13-hardened/docker-compose.yml up
 ```
 
 In-scope URL stays `http://127.0.0.1:3000`. Fail-closed: no recon/score without `programs/juice-shop/scope.md`.
