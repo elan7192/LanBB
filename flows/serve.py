@@ -71,7 +71,7 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "score": meta.get("score") or lab.get("last_score"),
                 "wall": lab.get("wall"),
                 "hunted": lab.get("hunted"),
-                "fill": lab.get("fill") or "unknown",
+                "fill": lab.get("fill"),
             }
         )
     return out

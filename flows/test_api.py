@@ -190,6 +190,31 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(listed["graphs"][0].get("last_score"), "0/116")
         self.assertEqual(listed["graphs"][0].get("fill"), "unknown")
 
+    def test_catalog_does_not_invent_fill_on_non_lab_graph(self):
+        post(f"{self.base}/api/graphs", {"upsert_template": True})
+        other = {
+            "id": "team-ish",
+            "name": "other",
+            "nodes": [
+                {
+                    "id": "n1",
+                    "type": "case_step",
+                    "label": "intake",
+                    "category": "intake",
+                    "position": {"x": 0, "y": 0},
+                }
+            ],
+            "edges": [],
+            "metadata": {"default": False, "kind": "team_swimlanes"},
+        }
+        code, data = post(f"{self.base}/api/graphs", {"id": "team-ish", "graph": other})
+        self.assertIn(code, (200, 201))
+        status, listed = get(f"{self.base}/api/graphs")
+        self.assertEqual(status, 200)
+        by_id = {g["id"]: g for g in listed["graphs"]}
+        self.assertEqual(by_id["case-bounty"].get("fill"), "unknown")
+        self.assertIn(by_id["team-ish"].get("fill"), (None, ""))
+
     def test_rejects_banned_nodes(self):
         post(f"{self.base}/api/graphs", {"upsert_template": True})
         graph = {
