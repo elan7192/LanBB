@@ -9,6 +9,8 @@ LanBB is the product.
 - Canonical engine remote: https://github.com/semantica-agi/semantica
 - Nesting: git submodule at `tools/semantica`
 
+**Headlong** notes live at `tools/headlong/`. Round 2 ran `bin/shellm` from a throwaway clone. `llm` exited 1: `ANTHROPIC_API_KEY is not set`. See `tools/headlong/proof/shellm-fail.md`.
+
 ## How to run a case (OWASP Juice Shop lab)
 
 Lab only. Hypothetical shop. Not a live bounty program. Not random internet. Not adult/porn programs.
