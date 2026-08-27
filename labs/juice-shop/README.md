@@ -15,8 +15,9 @@ Current wall: see `versions.json` (`wall`). Hunt that overlay, then harden a **n
 | `overlays/v6-hardened/` | Older wall: working harden (no juice EROFS, no tmpfs over data/static) plus login closed, GET/HEAD only, SPA/static leak closed |
 | `overlays/v7-hardened/` | Older wall: working harden plus default-deny unmatched GET/HEAD, leftover SPA/JS, remaining /api /rest closed except Challenges |
 | `overlays/v8-hardened/` | Older wall: working harden plus exact GET /api/Challenges/, localhost bind, leftover SPA/Web3/payment closed |
-| `overlays/v9-hardened/` | Previous wall: working harden plus exact-equals score locations, host allowlist, leftover oauth/health/debug closed |
-| `overlays/v10-hardened/` | Current wall: working harden plus exact trailing-slash GET /api/Challenges/ only, empty-query/cookie-closed score path, leftover privacy/hidden/data HTTP routes closed |
+| `overlays/v9-hardened/` | Older wall: working harden plus exact-equals score locations, host allowlist, leftover oauth/health/debug closed |
+| `overlays/v10-hardened/` | Previous wall: working harden plus exact trailing-slash GET /api/Challenges/ only, empty-query/cookie-closed score path, leftover privacy/hidden/data HTTP routes closed |
+| `overlays/v11-hardened/` | Current wall: working harden plus Authorization/Origin/Referer closed on the score path, leftover continue-code/login/search/Baskets/nested privacy-security SPA HTTP routes closed |
 
 ```bash
 # stock
@@ -32,9 +33,10 @@ docker compose -f labs/juice-shop/overlays/v6-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v7-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v8-hardened/docker-compose.yml up
 docker compose -f labs/juice-shop/overlays/v9-hardened/docker-compose.yml up
-
-# current wall (v10)
 docker compose -f labs/juice-shop/overlays/v10-hardened/docker-compose.yml up
+
+# current wall (v11)
+docker compose -f labs/juice-shop/overlays/v11-hardened/docker-compose.yml up
 ```
 
 In-scope URL stays `http://127.0.0.1:3000`. Fail-closed: no recon/score without `programs/juice-shop/scope.md`.
