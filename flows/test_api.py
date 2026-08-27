@@ -98,17 +98,20 @@ class GraphFilesTest(unittest.TestCase):
         self.assertRegex(graph["metadata"]["score"], r"^\d+/\d+$")
         self.assertEqual(graph["metadata"]["lab"]["wall"], "v8-hardened")
         self.assertEqual(graph["metadata"]["lab"]["hunted"], "v7-hardened")
-        self.assertEqual(graph["metadata"]["lab"].get("fill"), "unavailable")
+        self.assertEqual(graph["metadata"]["lab"].get("fill"), "live")
         self.assertEqual(graph["metadata"]["lab"].get("fill_wall"), "v7-hardened")
         self.assertEqual(graph["metadata"]["lab"].get("next_hunt"), "v8-hardened")
         self.assertEqual(graph["metadata"]["lab"].get("docker_disabled_env"), 18)
         self.assertIn("snippets", graph["metadata"]["lab"].get("coding_challenges") or "")
         self.assertTrue(graph["metadata"]["lab"].get("applies") is True)
         self.assertEqual(graph["metadata"]["lab"].get("last_live_score"), "0/116")
-        self.assertEqual(graph["metadata"]["lab"].get("last_live_wall"), "v6-hardened")
+        self.assertEqual(graph["metadata"]["lab"].get("last_live_wall"), "v7-hardened")
         self.assertEqual(graph["metadata"]["lab"].get("score_path"), "GET = /api/Challenges/")
         self.assertEqual(graph["metadata"]["lab"].get("bind"), "127.0.0.1:3000")
-        self.assertIn("unavailable", graph["metadata"]["lab"].get("fill_reason") or "")
+        self.assertEqual(graph["metadata"]["lab"].get("fill_score_get"), 200)
+        self.assertEqual(graph["metadata"]["lab"].get("fill_score_post"), 405)
+        self.assertIn("/ftp", graph["metadata"]["lab"].get("fill_deny_403") or [])
+        self.assertIn("APPLIES", graph["metadata"]["lab"].get("fill_reason") or "")
         self.assertEqual(graph["version"], "1.8.0")
         report_to_harden = [
             e for e in graph["edges"] if e["source"] == "n_report" and e["target"] == "n_harden"
@@ -165,11 +168,12 @@ class GraphFilesTest(unittest.TestCase):
         self.assertTrue(template["metadata"]["default"])
         self.assertEqual(template["metadata"]["lab"]["wall"], "v8-hardened")
         self.assertEqual(template["metadata"]["lab"]["hunted"], "v7-hardened")
-        self.assertEqual(template["metadata"]["lab"].get("fill"), "unavailable")
+        self.assertEqual(template["metadata"]["lab"].get("fill"), "live")
         self.assertEqual(template["metadata"]["lab"].get("next_hunt"), "v8-hardened")
         self.assertTrue(template["metadata"]["lab"].get("applies") is True)
-        self.assertEqual(template["metadata"]["lab"].get("last_live_wall"), "v6-hardened")
-        self.assertIn("unavailable", template["metadata"]["lab"].get("fill_reason") or "")
+        self.assertEqual(template["metadata"]["lab"].get("last_live_wall"), "v7-hardened")
+        self.assertEqual(template["metadata"]["lab"].get("fill_score_get"), 200)
+        self.assertIn("APPLIES", template["metadata"]["lab"].get("fill_reason") or "")
 
 
 class ApiTest(unittest.TestCase):
@@ -219,15 +223,17 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(listed["graphs"][0].get("wall"), "v8-hardened")
         self.assertEqual(listed["graphs"][0].get("hunted"), "v7-hardened")
         self.assertEqual(listed["graphs"][0].get("last_score"), "0/116")
-        self.assertEqual(listed["graphs"][0].get("fill"), "unavailable")
+        self.assertEqual(listed["graphs"][0].get("fill"), "live")
         self.assertEqual(listed["graphs"][0].get("fill_wall"), "v7-hardened")
         self.assertEqual(listed["graphs"][0].get("next_hunt"), "v8-hardened")
         self.assertIn("snippets", listed["graphs"][0].get("coding_challenges") or "")
         self.assertTrue(listed["graphs"][0].get("applies") is True)
         self.assertEqual(listed["graphs"][0].get("last_live_score"), "0/116")
-        self.assertEqual(listed["graphs"][0].get("last_live_wall"), "v6-hardened")
+        self.assertEqual(listed["graphs"][0].get("last_live_wall"), "v7-hardened")
         self.assertEqual(listed["graphs"][0].get("score_path"), "GET = /api/Challenges/")
         self.assertEqual(listed["graphs"][0].get("bind"), "127.0.0.1:3000")
+        self.assertEqual(listed["graphs"][0].get("fill_score_get"), 200)
+        self.assertEqual(listed["graphs"][0].get("fill_score_post"), 405)
 
     def test_rejects_banned_nodes(self):
         post(f"{self.base}/api/graphs", {"upsert_template": True})
@@ -270,7 +276,7 @@ class ApiTest(unittest.TestCase):
         versions = self.tmp / "labs" / "juice-shop" / "versions.json"
         versions.parent.mkdir(parents=True)
         versions.write_text(
-            '{"wall":"v8-hardened","hunted":"v7-hardened","last_score":"0/116","n":0,"N":116,"fill":"unavailable","fill_wall":"v7-hardened","fill_reason":"Fill unavailable: GET /api/Challenges/ connection refused (docker not installed). Honest 0/116 on hunted v7-hardened. Last live fill 0/116 on v6-hardened APPLIES.","docker_disabled_env":18,"coding_challenges":"separate /snippets — not mixed into n/N","applies":true,"applies_reason":"working harden: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible","applies_erofs":"gone","applies_readonly_rootfs":false,"applies_tmpfs":"/tmp only","data_static_visible":true,"data_static_challenges_yml":1593,"data_static_security_questions_yml":29,"last_live_fill":"live","last_live_score":"0/116","last_live_wall":"v6-hardened","score_path":"GET = /api/Challenges/","bind":"127.0.0.1:3000"}\n'
+            '{"wall":"v8-hardened","hunted":"v7-hardened","last_score":"0/116","n":0,"N":116,"fill":"live","fill_wall":"v7-hardened","fill_reason":"Fill live 0/116 from GET /api/Challenges/ on v7-hardened (HTTP 200). Wall APPLIES: default-deny 403; POST 405.","docker_disabled_env":18,"coding_challenges":"separate /snippets — not mixed into n/N","applies":true,"applies_reason":"v7 Fill APPLIES: GET 200, default-deny 403, POST 405","applies_erofs":"gone","applies_readonly_rootfs":false,"applies_tmpfs":"/tmp only","data_static_visible":true,"data_static_challenges_yml":1593,"data_static_security_questions_yml":29,"last_live_fill":"live","last_live_score":"0/116","last_live_wall":"v7-hardened","score_path":"GET = /api/Challenges/","bind":"127.0.0.1:3000","fill_score_get":200,"fill_deny_403":["/","/ftp","/api","/rest","/login","/assets","/snippets","/graphql"],"fill_score_post":405}\n'
         )
         status, data = get(f"{self.base}/api/case/score?program=juice-shop")
         self.assertEqual(status, 200)
@@ -278,18 +284,20 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(data.get("last_score"), "0/116")
         self.assertEqual(data.get("wall"), "v8-hardened")
         self.assertEqual(data.get("hunted"), "v7-hardened")
-        self.assertEqual(data.get("fill"), "unavailable")
+        self.assertEqual(data.get("fill"), "live")
         self.assertEqual(data.get("fill_wall"), "v7-hardened")
         self.assertEqual(data.get("next_hunt"), "v8-hardened")
         self.assertEqual(data.get("docker_disabled_env"), 18)
         self.assertIn("snippets", data.get("coding_challenges") or "")
         self.assertTrue(data.get("applies") is True)
-        self.assertIn("unavailable", data.get("reason") or "")
-        self.assertIn("unavailable", data.get("fill_reason") or "")
+        self.assertIn("live", data.get("reason") or "")
+        self.assertIn("APPLIES", data.get("fill_reason") or "")
         self.assertEqual(data.get("last_live_score"), "0/116")
-        self.assertEqual(data.get("last_live_wall"), "v6-hardened")
+        self.assertEqual(data.get("last_live_wall"), "v7-hardened")
         self.assertEqual(data.get("score_path"), "GET = /api/Challenges/")
         self.assertEqual(data.get("bind"), "127.0.0.1:3000")
+        self.assertEqual(data.get("fill_score_get"), 200)
+        self.assertEqual(data.get("fill_score_post"), 405)
 
 
 def get_status(url: str):

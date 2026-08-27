@@ -84,6 +84,9 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "last_live_wall": lab.get("last_live_wall"),
                 "score_path": lab.get("score_path"),
                 "bind": lab.get("bind"),
+                "fill_score_get": lab.get("fill_score_get"),
+                "fill_deny_403": lab.get("fill_deny_403"),
+                "fill_score_post": lab.get("fill_score_post"),
             }
         )
     return out
@@ -197,6 +200,17 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             data["last_live_wall"] = wall.get("last_live_wall") or data.get("last_live_wall")
             data["score_path"] = wall.get("score_path") or data.get("score_path")
             data["bind"] = wall.get("bind") or data.get("bind")
+            data["fill_score_get"] = (
+                wall.get("fill_score_get")
+                if wall.get("fill_score_get") is not None
+                else data.get("fill_score_get")
+            )
+            data["fill_deny_403"] = wall.get("fill_deny_403") or data.get("fill_deny_403")
+            data["fill_score_post"] = (
+                wall.get("fill_score_post")
+                if wall.get("fill_score_post") is not None
+                else data.get("fill_score_post")
+            )
             data["last_score"] = wall.get("last_score") or data.get("last_score")
             data["score"] = data.get("last_score") or data.get("score")
             data["n"] = wall.get("n") if wall.get("n") is not None else data.get("n")
@@ -236,6 +250,9 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "last_live_wall": (wall or {}).get("last_live_wall"),
         "score_path": (wall or {}).get("score_path"),
         "bind": (wall or {}).get("bind"),
+        "fill_score_get": (wall or {}).get("fill_score_get"),
+        "fill_deny_403": (wall or {}).get("fill_deny_403"),
+        "fill_score_post": (wall or {}).get("fill_score_post"),
         "reason": (wall or {}).get("fill_reason") or _fill_reason(wall or {}),
     }
 

@@ -1,21 +1,24 @@
 # CASE report: juice-shop
 
 - Date (Taipei): 2026-08-27
-- UTC: 2026-08-27T01:22:42Z
+- UTC: 2026-08-27T01:56:00Z
 - Kind: lab
 - Lab score: 0/116
-- Fill: unavailable GET /api/Challenges/ on v7-hardened
-- Last live fill: 0/116 on v6-hardened
+- Fill: live GET /api/Challenges/ on v7-hardened
+- Fill GET: 200
+- Fill 403: /, /ftp, /api, /rest, /login, /assets, /snippets, /graphql
+- Fill POST: 405
+- Last live fill: 0/116 on v7-hardened
 - Score path: GET = /api/Challenges/
 - Bind: 127.0.0.1:3000
 - Authorization: local-docker
 - Hunted wall: v7-hardened
 - Current wall: v8-hardened
-- Applies: True (working harden: EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible (challenges.yml 1593, securityQuestions.yml 29); v8 keeps those apply constraints plus exact GET /api/Challenges/, localhost bind, leftover SPA/Web3/payment closed)
+- Applies: True (v7 Fill APPLIES: GET /api/Challenges/ 200, default-deny 403 on / /ftp /api /rest /login /assets /snippets /graphql, POST 405; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. v8 keeps those apply constraints plus exact GET /api/Challenges/, localhost bind, leftover SPA/Web3/payment closed)
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Fill unavailable score 0/116 on v7-hardened. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Fill live score 0/116 on v7-hardened. Report path completed without an exploit PoC.
 
 ## Scope
 

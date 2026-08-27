@@ -497,6 +497,12 @@ function inspect(node) {
     rows.push(["Last live", (lab.last_live_score || graphLastLiveScore(state.current) || "-") + " on " + (lab.last_live_wall || graphLastLiveWall(state.current) || "-")]);
     rows.push(["Score path", lab.score_path || graphScorePath(state.current) || "GET /api/Challenges/"]);
     rows.push(["Bind", lab.bind || graphBind(state.current) || "-"]);
+    rows.push(["Fill GET", String(lab.fill_score_get != null ? lab.fill_score_get : "-")]);
+    rows.push([
+      "Fill 403",
+      Array.isArray(lab.fill_deny_403) ? lab.fill_deny_403.join(", ") : lab.fill_deny_403 || "-",
+    ]);
+    rows.push(["Fill POST", String(lab.fill_score_post != null ? lab.fill_score_post : "-")]);
     rows.push(["EROFS", lab.applies_erofs || "-"]);
     rows.push(["ReadonlyRootfs", String(lab.applies_readonly_rootfs != null ? lab.applies_readonly_rootfs : "-")]);
     rows.push(["tmpfs", lab.applies_tmpfs || "-"]);
@@ -518,6 +524,12 @@ function inspect(node) {
     rows.push(["Last live", (lab.last_live_score || graphLastLiveScore(state.current) || "-") + " on " + (lab.last_live_wall || graphLastLiveWall(state.current) || "-")]);
     rows.push(["Score path", lab.score_path || graphScorePath(state.current) || "GET /api/Challenges/"]);
     rows.push(["Bind", lab.bind || graphBind(state.current) || "-"]);
+    rows.push(["Fill GET", String(lab.fill_score_get != null ? lab.fill_score_get : "-")]);
+    rows.push([
+      "Fill 403",
+      Array.isArray(lab.fill_deny_403) ? lab.fill_deny_403.join(", ") : lab.fill_deny_403 || "-",
+    ]);
+    rows.push(["Fill POST", String(lab.fill_score_post != null ? lab.fill_score_post : "-")]);
   }
   $("inspTitle").textContent = node.label;
   $("inspMeta").innerHTML = rows

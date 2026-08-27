@@ -13,7 +13,8 @@ services:
     ulimits:
       nproc: 48
       nofile: 256
-    # Working harden that actually applies (Fill on v6: EROFS_GONE, ReadonlyRootfs=false).
+    # Working harden that actually applies (Fill on v7: GET /api/Challenges/ 200,
+    # default-deny 403, POST 405; EROFS_GONE, ReadonlyRootfs=false).
     # Juice root stays writable. Do not set read_only. v5 EROFS-skipped .well-known/csaf.
     # tmpfs=/tmp only. Do not tmpfs /juice-shop/data — that hides data/static.
     tmpfs:

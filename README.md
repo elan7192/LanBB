@@ -40,7 +40,7 @@ python3 tools/case/lanbb.py case report juice-shop
 #    docker-solvable=98 (18 disabledEnv on Docker). Coding /snippets are separate — do not mix.
 #    GET /rest/continue-code is a token only — do not forge.
 python3 tools/case/lanbb.py case score juice-shop
-# Fill unavailable this loop (no docker on hunted v7). Honest 0/116. Last live fill 0/116 on v6 APPLIES. Do not invent n. Do not rediscover.
+# Fill live on v7 overlay this loop: 0/116 (GET /api/Challenges/ HTTP 200). Wall APPLIES (default-deny 403, POST 405). Do not invent n. Do not rediscover.
 
 # 7. After hunt→harden, emit Pawel memories (no working dump, no wiki)
 python3 tools/case/lanbb.py case memory emit juice-shop \
