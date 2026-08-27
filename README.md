@@ -25,10 +25,10 @@ python3 tools/case/lanbb.py scope parse juice-shop
 python3 flows/serve.py
 # http://127.0.0.1:8765/  → pick case-bounty
 
-# 4. Optional: start the current wall (v7-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6 forever.
-docker compose -f labs/juice-shop/overlays/v7-hardened/docker-compose.yml up
-# previous wall: labs/juice-shop/overlays/v6-hardened/docker-compose.yml
-# older wall: labs/juice-shop/overlays/v5-hardened/docker-compose.yml
+# 4. Optional: start the current wall (v8-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6/v7 forever.
+docker compose -f labs/juice-shop/overlays/v8-hardened/docker-compose.yml up
+# previous wall: labs/juice-shop/overlays/v7-hardened/docker-compose.yml
+# older wall: labs/juice-shop/overlays/v6-hardened/docker-compose.yml
 # stock pin: docker compose -f labs/juice-shop/overlays/v0-stock/docker-compose.yml up
 
 # 5. Hunt is CASE-only (scope → in-scope recon skip on loopback → report). No auto-pwn.
@@ -40,14 +40,14 @@ python3 tools/case/lanbb.py case report juice-shop
 #    docker-solvable=98 (18 disabledEnv on Docker). Coding /snippets are separate — do not mix.
 #    GET /rest/continue-code is a token only — do not forge.
 python3 tools/case/lanbb.py case score juice-shop
-# Fill live on v6 overlay this loop: 0/116 (docker_disabled=18). Wall APPLIES (EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible). Do not invent n. Do not rediscover.
+# Fill unavailable this loop (no docker on hunted v7). Honest 0/116. Last live fill 0/116 on v6 APPLIES. Do not invent n. Do not rediscover.
 
 # 7. After hunt→harden, emit Pawel memories (no working dump, no wiki)
 python3 tools/case/lanbb.py case memory emit juice-shop \
   --score 0/116 \
-  --hardened "v7-hardened: working harden (no juice EROFS, no tmpfs over data/static) + default-deny edge except GET /api/Challenges/ + leftover SPA/JS + remaining /api /rest closed + nginx burst>=1" \
-  --semantic-file programs/juice-shop/memory/semantic-loop-7.md \
-  --loop 7
+  --hardened "v8-hardened: working harden (no juice EROFS, no tmpfs over data/static) + exact GET /api/Challenges/ + localhost bind + leftover SPA/Web3/payment closed + nginx burst>=1" \
+  --semantic-file programs/juice-shop/memory/semantic-loop-8.md \
+  --loop 8
 ```
 
 Folder:

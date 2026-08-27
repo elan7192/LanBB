@@ -79,6 +79,11 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "docker_disabled_env": lab.get("docker_disabled_env"),
                 "applies": lab.get("applies"),
                 "applies_reason": lab.get("applies_reason"),
+                "last_live_fill": lab.get("last_live_fill"),
+                "last_live_score": lab.get("last_live_score"),
+                "last_live_wall": lab.get("last_live_wall"),
+                "score_path": lab.get("score_path"),
+                "bind": lab.get("bind"),
             }
         )
     return out
@@ -187,6 +192,11 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
                 if wall.get("data_static_visible") is not None
                 else data.get("data_static_visible")
             )
+            data["last_live_fill"] = wall.get("last_live_fill") or data.get("last_live_fill")
+            data["last_live_score"] = wall.get("last_live_score") or data.get("last_live_score")
+            data["last_live_wall"] = wall.get("last_live_wall") or data.get("last_live_wall")
+            data["score_path"] = wall.get("score_path") or data.get("score_path")
+            data["bind"] = wall.get("bind") or data.get("bind")
             data["last_score"] = wall.get("last_score") or data.get("last_score")
             data["score"] = data.get("last_score") or data.get("score")
             data["n"] = wall.get("n") if wall.get("n") is not None else data.get("n")
@@ -221,6 +231,11 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "applies_readonly_rootfs": (wall or {}).get("applies_readonly_rootfs"),
         "applies_tmpfs": (wall or {}).get("applies_tmpfs"),
         "data_static_visible": (wall or {}).get("data_static_visible"),
+        "last_live_fill": (wall or {}).get("last_live_fill"),
+        "last_live_score": (wall or {}).get("last_live_score"),
+        "last_live_wall": (wall or {}).get("last_live_wall"),
+        "score_path": (wall or {}).get("score_path"),
+        "bind": (wall or {}).get("bind"),
         "reason": (wall or {}).get("fill_reason") or _fill_reason(wall or {}),
     }
 
