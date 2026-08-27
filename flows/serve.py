@@ -75,6 +75,8 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "fill_wall": lab.get("fill_wall"),
                 "fill_reason": lab.get("fill_reason"),
                 "next_hunt": lab.get("next_hunt") or lab.get("wall"),
+                "coding_challenges": lab.get("coding_challenges"),
+                "docker_disabled_env": lab.get("docker_disabled_env"),
             }
         )
     return out
@@ -161,6 +163,9 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             data["fill_wall"] = wall.get("fill_wall") or data.get("fill_wall")
             data["fill_reason"] = wall.get("fill_reason") or _fill_reason(wall)
             data["next_hunt"] = wall.get("wall") or data.get("next_hunt")
+            data["coding_challenges"] = wall.get("coding_challenges") or data.get(
+                "coding_challenges"
+            )
             data["docker_disabled_env"] = wall.get("docker_disabled_env") or data.get(
                 "docker_disabled_env"
             )
@@ -190,6 +195,7 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "fill_wall": (wall or {}).get("fill_wall"),
         "fill_reason": (wall or {}).get("fill_reason") or _fill_reason(wall or {}),
         "next_hunt": (wall or {}).get("wall"),
+        "coding_challenges": (wall or {}).get("coding_challenges"),
         "docker_disabled_env": (wall or {}).get("docker_disabled_env"),
         "reason": (wall or {}).get("fill_reason") or _fill_reason(wall or {}),
     }

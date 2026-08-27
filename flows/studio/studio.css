@@ -121,6 +121,8 @@ body {
 .pill.fill.miss { color: var(--coral); border-color: rgba(240, 113, 103, 0.28); }
 .pill.next { color: var(--blue); border-color: rgba(61, 139, 253, 0.28); }
 .pill.next.dim { color: var(--muted); border-color: var(--line); }
+.pill.coding { color: #9ad0f5; border-color: rgba(154, 208, 245, 0.28); }
+.pill.coding.dim { color: var(--muted); border-color: var(--line); }
 
 .rail, .inspector {
   background: rgba(12, 17, 24, 0.92);
