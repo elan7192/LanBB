@@ -90,6 +90,9 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "fill_score_get": lab.get("fill_score_get"),
                 "fill_deny_403": lab.get("fill_deny_403"),
                 "fill_score_post": lab.get("fill_score_post"),
+                "edge_floor_mem": lab.get("edge_floor_mem"),
+                "edge_floor_pids": lab.get("edge_floor_pids"),
+                "edge_floor_reason": lab.get("edge_floor_reason"),
             }
         )
     return out
@@ -227,6 +230,15 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
                 if wall.get("fill_score_post") is not None
                 else data.get("fill_score_post")
             )
+            data["edge_floor_mem"] = wall.get("edge_floor_mem") or data.get("edge_floor_mem")
+            data["edge_floor_pids"] = (
+                wall.get("edge_floor_pids")
+                if wall.get("edge_floor_pids") is not None
+                else data.get("edge_floor_pids")
+            )
+            data["edge_floor_reason"] = wall.get("edge_floor_reason") or data.get(
+                "edge_floor_reason"
+            )
             data["last_score"] = wall.get("last_score") or data.get("last_score")
             data["score"] = data.get("last_score") or data.get("score")
             data["n"] = wall.get("n") if wall.get("n") is not None else data.get("n")
@@ -272,6 +284,9 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "fill_score_get": (wall or {}).get("fill_score_get"),
         "fill_deny_403": (wall or {}).get("fill_deny_403"),
         "fill_score_post": (wall or {}).get("fill_score_post"),
+        "edge_floor_mem": (wall or {}).get("edge_floor_mem"),
+        "edge_floor_pids": (wall or {}).get("edge_floor_pids"),
+        "edge_floor_reason": (wall or {}).get("edge_floor_reason"),
         "reason": (wall or {}).get("fill_reason") or _fill_reason(wall or {}),
     }
 

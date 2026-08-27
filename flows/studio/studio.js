@@ -139,6 +139,10 @@ function renderGraphList(activeId) {
       g.score_path ? " · " + escapeHtml(g.score_path) : ""
     }${
       g.bind ? " · bind " + escapeHtml(g.bind) : ""
+    }${
+      g.edge_floor_mem || g.edge_floor_pids != null
+        ? " · edge " + escapeHtml(g.edge_floor_mem || "") + "/" + escapeHtml(g.edge_floor_pids)
+        : ""
     }</small>`;
     btn.addEventListener("click", () => openGraph(g.id));
     box.appendChild(btn);
@@ -246,6 +250,24 @@ function graphLastLiveScorePost(graph) {
   const meta = (graph && graph.metadata) || {};
   const lab = meta.lab || {};
   return lab.last_live_score_post != null ? lab.last_live_score_post : null;
+}
+
+function graphEdgeFloorMem(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.edge_floor_mem || null;
+}
+
+function graphEdgeFloorPids(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.edge_floor_pids != null ? lab.edge_floor_pids : null;
+}
+
+function graphEdgeFloorReason(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.edge_floor_reason || null;
 }
 
 function graphScorePath(graph) {
@@ -372,6 +394,26 @@ function showLastLivePill(score, wall, getCode, postCode, deny) {
   el.setAttribute("title", titleBits.join(" · "));
 }
 
+function showEdgeFloorPill(mem, pids, reason) {
+  const el = $("labEdgeFloor");
+  if (!el) return;
+  if (!mem && pids == null) {
+    el.textContent = "edge floor —";
+    el.classList.add("dim");
+    el.classList.remove("miss");
+    el.removeAttribute("title");
+    return;
+  }
+  const bits = ["edge floor"];
+  if (mem) bits.push(String(mem));
+  if (pids != null && pids !== "") bits.push("pids " + String(pids));
+  el.textContent = bits.join(" ");
+  el.classList.remove("dim");
+  el.classList.remove("miss");
+  if (reason) el.setAttribute("title", String(reason));
+  else el.removeAttribute("title");
+}
+
 function showWallPill(text, live) {
   const el = $("labWall");
   if (!el) return;
@@ -416,7 +458,10 @@ async function loadLabScore(
   lastLiveWallFallback,
   lastLiveGetFallback,
   lastLivePostFallback,
-  lastLiveDenyFallback
+  lastLiveDenyFallback,
+  edgeMemFallback,
+  edgePidsFallback,
+  edgeReasonFallback
 ) {
   const el = $("labScore");
   if (!el) return;
@@ -435,6 +480,9 @@ async function loadLabScore(
       lastLivePostFallback,
       lastLiveDenyFallback
     );
+  }
+  if (edgeMemFallback || edgePidsFallback != null) {
+    showEdgeFloorPill(edgeMemFallback, edgePidsFallback, edgeReasonFallback);
   }
   try {
     const data = await getJson("/api/case/score?program=juice-shop");
@@ -492,6 +540,14 @@ async function loadLabScore(
     } else if (!lastLiveScoreFallback && !lastLiveWallFallback) {
       showLastLivePill(null, null);
     }
+    const edgeMem = data && data.edge_floor_mem;
+    const edgePids = data && data.edge_floor_pids;
+    const edgeReason = data && data.edge_floor_reason;
+    if (edgeMem || edgePids != null) {
+      showEdgeFloorPill(edgeMem, edgePids, edgeReason);
+    } else if (!edgeMemFallback && edgePidsFallback == null) {
+      showEdgeFloorPill(null, null);
+    }
   } catch {
     if (!fallback) showScorePill(null, false);
     if (!wallFallback) showWallPill(null, false);
@@ -501,6 +557,7 @@ async function loadLabScore(
     if (!codingFallback) showCodingPill(null);
     if (appliesFallback == null) showAppliesPill(null);
     if (!lastLiveScoreFallback && !lastLiveWallFallback) showLastLivePill(null, null);
+    if (!edgeMemFallback && edgePidsFallback == null) showEdgeFloorPill(null, null);
   }
 }
 
@@ -546,6 +603,9 @@ function inspect(node) {
     rows.push(["Last live POST", String(lab.last_live_score_post != null ? lab.last_live_score_post : graphLastLiveScorePost(state.current) ?? "-")]);
     rows.push(["Score path", lab.score_path || graphScorePath(state.current) || "GET /api/Challenges/"]);
     rows.push(["Bind", lab.bind || graphBind(state.current) || "-"]);
+    rows.push(["Edge floor mem", lab.edge_floor_mem || graphEdgeFloorMem(state.current) || "-"]);
+    rows.push(["Edge floor pids", String(lab.edge_floor_pids != null ? lab.edge_floor_pids : graphEdgeFloorPids(state.current) ?? "-")]);
+    rows.push(["Edge floor reason", lab.edge_floor_reason || graphEdgeFloorReason(state.current) || "-"]);
     rows.push(["Fill GET", String(lab.fill_score_get != null ? lab.fill_score_get : "-")]);
     rows.push([
       "Fill 403",
@@ -581,6 +641,9 @@ function inspect(node) {
     rows.push(["Last live POST", String(lab.last_live_score_post != null ? lab.last_live_score_post : graphLastLiveScorePost(state.current) ?? "-")]);
     rows.push(["Score path", lab.score_path || graphScorePath(state.current) || "GET /api/Challenges/"]);
     rows.push(["Bind", lab.bind || graphBind(state.current) || "-"]);
+    rows.push(["Edge floor mem", lab.edge_floor_mem || graphEdgeFloorMem(state.current) || "-"]);
+    rows.push(["Edge floor pids", String(lab.edge_floor_pids != null ? lab.edge_floor_pids : graphEdgeFloorPids(state.current) ?? "-")]);
+    rows.push(["Edge floor reason", lab.edge_floor_reason || graphEdgeFloorReason(state.current) || "-"]);
     rows.push(["Fill GET", String(lab.fill_score_get != null ? lab.fill_score_get : "-")]);
     rows.push([
       "Fill 403",
@@ -861,7 +924,13 @@ function showGraph(graph, hint) {
   if (lastLiveScore || lastLiveWall) {
     showLastLivePill(lastLiveScore, lastLiveWall, lastLiveGet, lastLivePost, lastLiveDeny);
   }
-  loadLabScore(cached, wall, hunted, fill, nextHunt, graphFillReason(graph), coding, applies, graphAppliesReason(graph), lastLiveScore, lastLiveWall, lastLiveGet, lastLivePost, lastLiveDeny);
+  const edgeMem = graphEdgeFloorMem(graph);
+  const edgePids = graphEdgeFloorPids(graph);
+  const edgeReason = graphEdgeFloorReason(graph);
+  if (edgeMem || edgePids != null) {
+    showEdgeFloorPill(edgeMem, edgePids, edgeReason);
+  }
+  loadLabScore(cached, wall, hunted, fill, nextHunt, graphFillReason(graph), coding, applies, graphAppliesReason(graph), lastLiveScore, lastLiveWall, lastLiveGet, lastLivePost, lastLiveDeny, edgeMem, edgePids, edgeReason);
 }
 
 async function openGraph(id) {

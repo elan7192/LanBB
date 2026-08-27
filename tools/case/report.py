@@ -45,6 +45,9 @@ def _wall_meta(root: Path) -> dict:
             "bind": "",
             "applies": None,
             "applies_reason": "",
+            "edge_floor_mem": "",
+            "edge_floor_pids": "",
+            "edge_floor_reason": "",
             "coverage": [],
             "docker_off": [],
         }
@@ -79,6 +82,9 @@ def _wall_meta(root: Path) -> dict:
             "bind": str(data.get("bind") or ""),
             "applies": data.get("applies"),
             "applies_reason": str(data.get("applies_reason") or ""),
+            "edge_floor_mem": str(data.get("edge_floor_mem") or ""),
+            "edge_floor_pids": data.get("edge_floor_pids") if data.get("edge_floor_pids") is not None else "",
+            "edge_floor_reason": str(data.get("edge_floor_reason") or ""),
             "coverage": list(data.get("skill_pack_does_not_cover") or []),
         "docker_off": list(data.get("docker_off_not_exercised") or []),
     }
@@ -146,6 +152,8 @@ Docker-off: {off}.
 - Last live POST: {wall_meta["last_live_score_post"] or "see versions.json"}
 - Score path: {wall_meta["score_path"]}
 - Bind: {wall_meta["bind"] or "see overlay"}
+- Edge floor: mem {wall_meta["edge_floor_mem"] or "see versions.json"} / pids {wall_meta["edge_floor_pids"] or "see versions.json"}
+- Edge floor reason: {wall_meta["edge_floor_reason"] or "see versions.json"}
 - Authorization: {scope.authorization or "see scope.md"}
 - Hunted wall: {wall_meta["hunted"]}
 - Current wall: {wall_meta["wall"]}
