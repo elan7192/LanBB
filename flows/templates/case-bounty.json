@@ -659,7 +659,7 @@
       "coding_challenges": "separate /snippets \u2014 not mixed into n/N",
       "fill": "unavailable",
       "fill_wall": "v9-hardened",
-      "fill_reason": "Fill unavailable: GET /api/Challenges/ connection refused; docker not installed on this Cloud VM. Honest 0/116. Last live fill remains 0/116 on v8-hardened (GET 200, default-deny 403 on / /login /api APPLIES). Do not invent n. Do not rediscover.",
+      "fill_reason": "Fill unavailable on hunted v9-hardened: GET /api/Challenges/ connection refused; docker not installed on this Cloud VM. Honest 0/116. Last live fill remains 0/116 on v8-hardened (GET 200, default-deny 403 on / /login /api APPLIES). Do not invent n. Do not rediscover.",
       "fill_score_get": null,
       "fill_deny_403": [],
       "last_live_fill": "live",
