@@ -1,0 +1,35 @@
+{
+  "id": "fail-social-wiki",
+  "name": "FAIL social-wiki AFTER_APPROVE without approval:lead",
+  "description": "Fixture. e:social-wiki is AFTER_APPROVE but the graph has no approval:lead visit.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "agent:lead",
+      "type": "case_step",
+      "label": "lead",
+      "category": "lead",
+      "description": "Lead routes a social find.",
+      "config": { "lane": "lead" },
+      "position": { "x": 0, "y": 0 }
+    },
+    {
+      "id": "agent:wiki",
+      "type": "case_step",
+      "label": "wiki",
+      "category": "wiki",
+      "description": "Wiki lane. Frozen in product graphs; this fixture is fail-closed.",
+      "config": { "lane": "wiki", "ingest": false },
+      "position": { "x": 200, "y": 0 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e:social-wiki",
+      "source": "agent:lead",
+      "target": "agent:wiki",
+      "label": "AFTER_APPROVE"
+    }
+  ],
+  "metadata": { "product": "LanBB", "kind": "team_swimlanes", "default": false, "fixture": "fail_social_wiki_after_approve" }
+}

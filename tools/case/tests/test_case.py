@@ -122,6 +122,7 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertEqual(result["status"], "unknown")
         self.assertEqual(result["hacking_total_master"], 116)
         self.assertEqual(result["docker_solvable"], 98)
+        self.assertIn("v2-hardened", result.get("docker") or result.get("wall") or "")
 
     def test_copied_skills_exist_without_payloads(self):
         skills = CASE / "skills"
@@ -155,6 +156,48 @@ class JuiceShopCaseTest(unittest.TestCase):
         ]
         for name in forbidden:
             self.assertFalse((skills / name).exists(), name)
+        self.assertEqual(len(names), 13)
+
+    def test_v2_overlay_is_strictly_harder_than_v1(self):
+        root = CASE.parent.parent
+        v1 = (root / "labs/juice-shop/overlays/v1-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        v2 = (root / "labs/juice-shop/overlays/v2-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        for token in (
+            "/ftp",
+            "limit_req",
+            "X-Content-Type-Options",
+            "Content-Security-Policy",
+        ):
+            self.assertIn(token, v1)
+            self.assertIn(token, v2)
+        for extra in (
+            "/encryptionkeys",
+            "/redirect",
+            "/rest/admin",
+            "Permissions-Policy",
+            "lab_waf_block",
+        ):
+            self.assertNotIn(extra, v1)
+            self.assertIn(extra, v2)
+        self.assertGreater(v2.count("deny all"), v1.count("deny all"))
+        compose = (
+            root / "labs/juice-shop/overlays/v2-hardened/docker-compose.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+            compose,
+        )
+        versions = json.loads(
+            (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(versions["wall"], "v2-hardened")
+        self.assertEqual(versions["last_score"], "0/116")
+        self.assertIn("v2-hardened", versions["overlays"])
+        self.assertNotIn("v1-hardened", [versions["wall"]])
 
 
 if __name__ == "__main__":

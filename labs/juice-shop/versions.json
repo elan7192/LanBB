@@ -1,12 +1,27 @@
 {
   "lab": "juice-shop",
-  "wall": "v1-hardened",
-  "overlays": ["v0-stock", "v1-hardened"],
+  "wall": "v2-hardened",
+  "overlays": ["v0-stock", "v1-hardened", "v2-hardened"],
   "last_score": "0/116",
+  "score": "0/116",
+  "n": 0,
+  "N": 116,
   "challenges": 116,
   "docker_solvable": 98,
   "docker_disabled_env": 18,
   "image": "bkimminich/juice-shop",
+  "image_pin": "bkimminich/juice-shop@sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
   "score_url": "http://127.0.0.1:3000/api/Challenges/",
-  "note": "Hunt the current wall. Stock is v0. Each loop must raise the wall. Never live programs. Never porn programs."
+  "skill_pack": 13,
+  "skill_pack_does_not_cover": [
+    "Cryptographic Issues",
+    "Miscellaneous",
+    "Security Misconfiguration",
+    "Security through Obscurity"
+  ],
+  "docker_off_not_exercised": [
+    "Insecure Deserialization",
+    "XXE"
+  ],
+  "note": "Hunt the current wall (v2). Stock is v0. v1 is the previous wall. Each loop must raise the wall. Never live programs. Never porn programs."
 }

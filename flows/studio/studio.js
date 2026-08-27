@@ -121,6 +121,25 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;");
 }
 
+function graphLastScore(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.last_score || meta.score || null;
+}
+
+function showScorePill(text, live) {
+  const el = $("labScore");
+  if (!el) return;
+  if (!text) {
+    el.textContent = "score —";
+    el.classList.add("dim");
+    return;
+  }
+  const nN = String(text).replace(/^score\s+/i, "");
+  el.textContent = nN;
+  el.classList.toggle("dim", !live);
+}
+
 function renderStages(graph) {
   const meta = graph.metadata || {};
   const stages =
@@ -139,19 +158,20 @@ function renderStages(graph) {
     .join("");
 }
 
-async function loadLabScore() {
+async function loadLabScore(fallback) {
   const el = $("labScore");
   if (!el) return;
+  if (fallback) showScorePill(fallback, false);
   try {
     const data = await getJson("/api/case/score?program=juice-shop");
-    if (data && data.score) {
-      el.textContent = `score ${data.score}`;
-      el.classList.remove("dim");
+    const live = data && (data.score || data.last_score);
+    if (live) {
+      showScorePill(live, Boolean(data.available));
       return;
     }
-    el.textContent = "score —";
+    if (!fallback) showScorePill(null, false);
   } catch {
-    el.textContent = "score —";
+    if (!fallback) showScorePill(null, false);
   }
 }
 
@@ -423,7 +443,9 @@ function showGraph(graph, hint) {
   fitGraph(graph);
   inspect(null);
   if (hint) setHint(hint);
-  loadLabScore();
+  const cached = graphLastScore(graph);
+  if (cached) showScorePill(cached, false);
+  loadLabScore(cached);
 }
 
 async function openGraph(id) {

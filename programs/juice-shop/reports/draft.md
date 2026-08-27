@@ -1,14 +1,15 @@
 # CASE report: juice-shop
 
 - Date (Taipei): 2026-08-27
+- UTC: 2026-08-27T00:08:42Z
 - Kind: lab
 - Lab score: 0/116
 - Authorization: local-docker
-- Wall: v1-hardened
+- Wall: v2-hardened
 
 ## Judgment
 
-Authorized CASE against the in-scope Juice Shop lab only. Score 0/116. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Score 0/116. Report path completed without an exploit PoC.
 
 ## Scope
 
@@ -28,6 +29,11 @@ Out of scope:
 
 None recorded. Empty findings are valid. This hunt did not auto-pwn the lab.
 
+## Coverage honesty
+
+13-skill pack does not cover: Cryptographic Issues, Miscellaneous, Security Misconfiguration, Security through Obscurity.
+Docker-off: Insecure Deserialization, XXE.
+
 ## Close path
 
-Next hunt uses `labs/juice-shop/overlays/v1-hardened/`. Raise the wall again after that hunt. Do not attach payloads or reproduction scripts.
+Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `v2-hardened` in `labs/juice-shop`. Do not attach payloads or reproduction scripts.

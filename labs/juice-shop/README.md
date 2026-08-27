@@ -7,14 +7,18 @@ Current wall: see `versions.json` (`wall`). Hunt that overlay, then harden a **n
 | Overlay | Role |
 | --- | --- |
 | `overlays/v0-stock/` | Unmodified `bkimminich/juice-shop` |
-| `overlays/v1-hardened/` | Edge proxy: security headers, login rate limit, extra-file path closed |
+| `overlays/v1-hardened/` | Previous wall: security headers, login rate limit, extra-file path closed |
+| `overlays/v2-hardened/` | Current wall: v1 plus image pin, stronger headers, broader rate limits, WAF-ish query block, extra surfaces closed |
 
 ```bash
 # stock
 docker compose -f labs/juice-shop/overlays/v0-stock/docker-compose.yml up
 
-# current wall (v1)
+# previous wall
 docker compose -f labs/juice-shop/overlays/v1-hardened/docker-compose.yml up
+
+# current wall (v2)
+docker compose -f labs/juice-shop/overlays/v2-hardened/docker-compose.yml up
 ```
 
 In-scope URL stays `http://127.0.0.1:3000`. Fail-closed: no recon/score without `programs/juice-shop/scope.md`.

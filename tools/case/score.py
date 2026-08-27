@@ -20,15 +20,45 @@ from typing import Any, Dict, Optional
 from scope import ScopeError, load_scope, repo_root
 
 DEFAULT_BASE = os.environ.get("LANBB_JUICE_BASE", "http://127.0.0.1:3000")
-DOCKER_IMAGE = "bkimminich/juice-shop"
-DOCKER_NAME = "lanbb-juice-shop"
-DOCKER_RUN = (
-    f"docker run --rm -d --name {DOCKER_NAME} -p 3000:3000 {DOCKER_IMAGE}"
+IMAGE_DIGEST = (
+    "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e"
 )
+DOCKER_IMAGE = f"bkimminich/juice-shop@{IMAGE_DIGEST}"
+DOCKER_NAME = "lanbb-juice-shop"
 # Juice Shop master hacking challenges (not coding /snippets).
 HACKING_TOTAL = 116
 DOCKER_SOLVABLE = 98
 DOCKER_DISABLED_ENV = 18
+
+
+def load_versions(root: Optional[Path] = None) -> Dict[str, Any]:
+    path = (root or repo_root()) / "labs" / "juice-shop" / "versions.json"
+    if not path.is_file():
+        return {"wall": "v2-hardened", "last_score": "0/116"}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"wall": "v2-hardened", "last_score": "0/116"}
+    return data if isinstance(data, dict) else {"wall": "v2-hardened"}
+
+
+def current_wall(root: Optional[Path] = None) -> str:
+    wall = str(load_versions(root).get("wall") or "v2-hardened").strip()
+    return wall or "v2-hardened"
+
+
+def compose_file(root: Optional[Path] = None) -> Path:
+    root = root or repo_root()
+    return root / "labs" / "juice-shop" / "overlays" / current_wall(root) / "docker-compose.yml"
+
+
+def documented_start(root: Optional[Path] = None) -> str:
+    path = compose_file(root)
+    return f"docker compose -f {path} up"
+
+
+# Back-compat name used in older error text; always the current wall, never stock.
+DOCKER_RUN = documented_start()
 
 
 class ScoreError(ScopeError):
@@ -51,7 +81,7 @@ def fetch_challenges(base: str, timeout: float = 4.0) -> Dict[str, Any]:
     except urllib.error.URLError as exc:
         raise ScoreError(
             f"Juice Shop not reachable at {base} ({exc}). "
-            f"Start the local lab: {DOCKER_RUN}"
+            f"Start the current wall: {documented_start()}"
         ) from exc
     try:
         data = json.loads(body)
@@ -93,14 +123,20 @@ def wait_for_lab(base: str, tries: int = 30, delay: float = 2.0) -> Dict[str, An
     raise ScoreError(str(last) if last else "lab did not become ready")
 
 
-def start_lab_docker() -> str:
+def start_lab_docker(root: Optional[Path] = None) -> str:
+    """Bring up the current wall overlay. Never falls back to stock v0."""
+    root = root or repo_root()
+    start = documented_start(root)
     docker = shutil.which("docker")
     if not docker:
         raise ScoreError(
-            "docker not installed. Documented start:\n"
-            f"  {DOCKER_RUN}\n"
+            "docker not installed. Documented start (current wall, not stock):\n"
+            f"  {start}\n"
             "Then: python3 tools/case/lanbb.py case score juice-shop"
         )
+    compose = compose_file(root)
+    if not compose.is_file():
+        raise ScoreError(f"missing current wall compose file: {compose}")
     inspect = subprocess.run(
         [docker, "inspect", "-f", "{{.State.Running}}", DOCKER_NAME],
         capture_output=True,
@@ -108,27 +144,17 @@ def start_lab_docker() -> str:
     )
     if inspect.returncode == 0 and inspect.stdout.strip() == "true":
         return "already-running"
-    subprocess.run([docker, "rm", "-f", DOCKER_NAME], capture_output=True)
     proc = subprocess.run(
-        [
-            docker,
-            "run",
-            "--rm",
-            "-d",
-            "--name",
-            DOCKER_NAME,
-            "-p",
-            "3000:3000",
-            DOCKER_IMAGE,
-        ],
+        [docker, "compose", "-f", str(compose), "up", "-d"],
         capture_output=True,
         text=True,
+        cwd=str(compose.parent),
     )
     if proc.returncode != 0:
         raise ScoreError(
-            "docker run failed:\n"
+            "docker compose failed:\n"
             f"{proc.stderr or proc.stdout}\n"
-            f"Documented start: {DOCKER_RUN}"
+            f"Documented start: {start}"
         )
     return "started"
 
@@ -146,22 +172,26 @@ def score_program(
         raise ScoreError(
             f"fail-closed: score loop is lab-only; {slug!r} is kind={scope.kind!r}"
         )
+    versions = load_versions(root)
+    wall = current_wall(root)
     meta = {
         "program": scope.slug,
         "base": base,
         "fail_closed": False,
         "kind": scope.kind,
         "image": DOCKER_IMAGE,
+        "wall": wall,
         "hacking_total_master": HACKING_TOTAL,
         "docker_solvable": DOCKER_SOLVABLE,
         "docker_disabled_env": DOCKER_DISABLED_ENV,
         "continue_code": "GET /rest/continue-code is a token only — do not forge",
         "note": "Authorized CASE tools only. This harness does not auto-pwn.",
+        "last_score": versions.get("last_score") or "0/116",
     }
     if payload is None:
         try:
             if start:
-                start_lab_docker()
+                start_lab_docker(root)
                 payload = wait_for_lab(base)
             else:
                 payload = fetch_challenges(base)
@@ -173,7 +203,7 @@ def score_program(
                 "status": "unknown",
                 "available": False,
                 "reason": str(exc),
-                "docker": DOCKER_RUN,
+                "docker": documented_start(root),
             }
             result.update(meta)
             dest = scope.path.parent / "score.json"

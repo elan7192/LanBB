@@ -1,8 +1,8 @@
 {
   "id": "team-swimlanes",
   "name": "Team swimlanes",
-  "description": "Second saved graph. Team routing for CASE work. Not the default. Wiki lane is frozen. Lead holds authorization. LanBB owns the CASE file.",
-  "version": "1.0.0",
+  "description": "Second saved graph. Team routing for CASE work. Not the default. Wiki lane is frozen. approval:lead is required before lanbb. e:route:lanbb visits approval first. Not a live-program graph.",
+  "version": "1.1.0",
   "nodes": [
     {
       "id": "n_program_case",
@@ -15,7 +15,10 @@
         "lane": "lead",
         "badge": "IN"
       },
-      "position": { "x": 80, "y": 72 },
+      "position": {
+        "x": 80,
+        "y": 72
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -31,13 +34,16 @@
         "lane": "lead",
         "badge": "FRONT DOOR"
       },
-      "position": { "x": 340, "y": 72 },
+      "position": {
+        "x": 340,
+        "y": 72
+      },
       "ports": [],
       "result": null,
       "error": null
     },
     {
-      "id": "n_lead_auth",
+      "id": "approval:lead",
       "type": "decision_gate",
       "label": "Lead authorization",
       "category": "lead",
@@ -49,7 +55,10 @@
         "fail_closed": true,
         "pass_when": "written authorization on file"
       },
-      "position": { "x": 600, "y": 72 },
+      "position": {
+        "x": 600,
+        "y": 72
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -66,7 +75,10 @@
         "badge": "HOLD",
         "fail_closed": true
       },
-      "position": { "x": 860, "y": 72 },
+      "position": {
+        "x": 860,
+        "y": 72
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -82,7 +94,10 @@
         "lane": "lanbb",
         "badge": "CASE OWNER"
       },
-      "position": { "x": 600, "y": 248 },
+      "position": {
+        "x": 600,
+        "y": 248
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -98,7 +113,10 @@
         "lane": "lanbb",
         "badge": "REPORT"
       },
-      "position": { "x": 860, "y": 248 },
+      "position": {
+        "x": 860,
+        "y": 248
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -114,7 +132,10 @@
         "lane": "lead",
         "badge": "CLOSE"
       },
-      "position": { "x": 1120, "y": 72 },
+      "position": {
+        "x": 1120,
+        "y": 72
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -130,7 +151,10 @@
         "lane": "wiki",
         "badge": "FROZEN"
       },
-      "position": { "x": 80, "y": 424 },
+      "position": {
+        "x": 80,
+        "y": 424
+      },
       "ports": [],
       "result": null,
       "error": null
@@ -148,23 +172,23 @@
     {
       "id": "e_lead_auth",
       "source": "n_lead_intake",
-      "target": "n_lead_auth",
+      "target": "approval:lead",
       "source_port": "out",
       "target_port": "in",
       "label": "route"
     },
     {
-      "id": "e_auth_pass",
-      "source": "n_lead_auth",
+      "id": "e:route:lanbb",
+      "source": "approval:lead",
       "target": "n_lanbb_case",
       "source_port": "out",
       "target_port": "in",
-      "label": "pass",
+      "label": "pass to lanbb",
       "kind": "pass"
     },
     {
       "id": "e_auth_fail",
-      "source": "n_lead_auth",
+      "source": "approval:lead",
       "target": "n_lead_hold",
       "source_port": "out",
       "target_port": "in",
@@ -196,12 +220,30 @@
     "fail_closed": true,
     "policy": {
       "fail_closed": true,
-      "forbidden_node_kinds": ["exploit", "scan", "payload", "attack", "weaponized"]
+      "forbidden_node_kinds": [
+        "exploit",
+        "scan",
+        "payload",
+        "attack",
+        "weaponized"
+      ]
     },
     "lanes": [
-      { "id": "lead", "label": "lead", "color": "#3d8bfd" },
-      { "id": "lanbb", "label": "lanbb", "color": "#5ee0b5" },
-      { "id": "wiki", "label": "wiki", "color": "#c4b5fd" }
+      {
+        "id": "lead",
+        "label": "lead",
+        "color": "#3d8bfd"
+      },
+      {
+        "id": "lanbb",
+        "label": "lanbb",
+        "color": "#5ee0b5"
+      },
+      {
+        "id": "wiki",
+        "label": "wiki",
+        "color": "#c4b5fd"
+      }
     ]
   }
 }

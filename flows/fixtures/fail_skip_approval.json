@@ -1,0 +1,35 @@
+{
+  "id": "fail-skip-approval",
+  "name": "FAIL route skips approval:lead",
+  "description": "Fixture. e:route:cursor goes to cursor without visiting approval:lead first.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "agent:lead",
+      "type": "case_step",
+      "label": "lead",
+      "category": "lead",
+      "description": "Lead routes work.",
+      "config": { "lane": "lead" },
+      "position": { "x": 0, "y": 0 }
+    },
+    {
+      "id": "agent:cursor",
+      "type": "case_step",
+      "label": "cursor",
+      "category": "cursor",
+      "description": "Takes a CASE file without approval:lead.",
+      "config": { "lane": "cursor" },
+      "position": { "x": 200, "y": 0 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e:route:cursor",
+      "source": "agent:lead",
+      "target": "agent:cursor",
+      "label": "skip approval"
+    }
+  ],
+  "metadata": { "product": "LanBB", "kind": "team_swimlanes", "default": false, "fixture": "fail_skip_approval" }
+}
