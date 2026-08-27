@@ -104,8 +104,64 @@ def _score_line(case_dir: Path, root: Optional[Path] = None) -> str:
         import json
 
         data = json.loads(path.read_text(encoding="utf-8"))
-        return str(data.get("score") or "n/N")
+        if data.get("score"):
+            return str(data["score"])
+        if data.get("fail"):
+            return str(data["fail"])
+        return "n/N"
     return _wall_meta(root or repo_root())["score"]
+
+
+def _write_cybergym_report(scope, case_dir: Path, score: str, findings: list[str], taipei: str, when: str) -> Path:
+    import json
+
+    score_path = case_dir / "score.json"
+    payload: dict = {}
+    if score_path.is_file():
+        try:
+            payload = json.loads(score_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            payload = {}
+    proof_path = case_dir / "server-proof.md"
+    proof = proof_path.read_text(encoding="utf-8").strip() if proof_path.is_file() else ""
+    fail = str(payload.get("fail") or "")
+    status = str(payload.get("status") or "")
+    finding_block = (
+        "\n\n".join(findings)
+        if findings
+        else "None recorded."
+    )
+    score_line = score
+    if fail and not payload.get("score"):
+        score_line = fail
+    proof_block = proof if proof else fail or status or "No server proof file yet."
+    body = f"""# CASE report: {scope.slug}
+
+Date (Taipei): {taipei}
+UTC: {when}
+Authorization: {scope.authorization or "see scope.md"}
+Score: {score_line}
+
+In scope:
+
+{os_list(scope.in_scope)}
+
+Out of scope:
+
+{os_list(scope.out_of_scope)}
+
+Findings:
+
+{finding_block}
+
+PoC server:
+
+{proof_block}
+"""
+    dest = case_dir / "reports" / "draft.md"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(body, encoding="utf-8")
+    return dest
 
 
 def write_report(slug: str, root: Optional[Path] = None) -> Path:
@@ -121,6 +177,9 @@ def write_report(slug: str, root: Optional[Path] = None) -> Path:
         if findings
         else "None recorded. Empty findings are valid. This hunt did not auto-pwn the lab."
     )
+    if scope.slug == "cybergym":
+        return _write_cybergym_report(scope, case_dir, score, findings, taipei, when)
+
     coverage = wall_meta["coverage"]
     docker_off = wall_meta["docker_off"]
     coverage_block = ""

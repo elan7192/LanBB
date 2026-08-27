@@ -13,9 +13,9 @@ const NODE_H = 72;
 
 const DOCUMENTATED_DEFAULT = {
   id: "case-bounty",
-  name: "Authorized bug-bounty CASE",
+  name: "Authorized CASE",
   description:
-    "Documented default. Shown in memory when the catalog is empty and upsert is unavailable.",
+    "Documented CASE DAG when the catalog is empty.",
   version: "1.0.0",
   nodes: [],
   edges: [],
@@ -320,7 +320,7 @@ function showScorePill(text, live) {
   const el = $("labScore");
   if (!el) return;
   if (!text) {
-    el.textContent = "score —";
+    el.textContent = "score";
     el.classList.add("dim");
     return;
   }
@@ -333,7 +333,7 @@ function showHuntedPill(text) {
   const el = $("labHunted");
   if (!el) return;
   if (!text) {
-    el.textContent = "hunted —";
+    el.textContent = "hunted";
     el.classList.add("dim");
     return;
   }
@@ -346,7 +346,7 @@ function showFillPill(text, reason) {
   if (!el) return;
   const value = text ? String(text) : "";
   if (!value) {
-    el.textContent = "fill —";
+    el.textContent = "fill";
     el.classList.add("dim");
     el.classList.remove("live", "miss");
     el.removeAttribute("title");
@@ -365,7 +365,7 @@ function showNextPill(text) {
   const el = $("labNext");
   if (!el) return;
   if (!text) {
-    el.textContent = "next hunt —";
+    el.textContent = "next";
     el.classList.add("dim");
     return;
   }
@@ -389,7 +389,7 @@ function showAppliesPill(value, reason) {
   const el = $("labApplies");
   if (!el) return;
   if (value == null || value === "") {
-    el.textContent = "applies —";
+    el.textContent = "applies";
     el.classList.add("dim");
     el.classList.remove("miss");
     el.removeAttribute("title");
@@ -407,7 +407,7 @@ function showLastLivePill(score, wall, getCode, postCode, deny) {
   const el = $("labLastLive");
   if (!el) return;
   if (!score && !wall) {
-    el.textContent = "last live —";
+    el.textContent = "last live";
     el.classList.add("dim");
     el.removeAttribute("title");
     return;
@@ -432,7 +432,7 @@ function showEdgeFloorPill(mem, pids, reason) {
   const el = $("labEdgeFloor");
   if (!el) return;
   if (!mem && pids == null) {
-    el.textContent = "edge floor —";
+    el.textContent = "edge";
     el.classList.add("dim");
     el.classList.remove("miss");
     el.removeAttribute("title");
@@ -452,7 +452,7 @@ function showWorkersPill(workers, reason, oom, source) {
   const el = $("labWorkers");
   if (!el) return;
   if (workers == null || workers === "") {
-    el.textContent = "workers —";
+    el.textContent = "workers";
     el.classList.add("dim");
     el.removeAttribute("title");
     return;
@@ -470,7 +470,7 @@ function showWallPill(text, live) {
   const el = $("labWall");
   if (!el) return;
   if (!text) {
-    el.textContent = "wall —";
+    el.textContent = "lab";
     el.classList.add("dim");
     return;
   }
@@ -544,10 +544,19 @@ async function loadLabScore(
     showWorkersPill(workersFallback, workersReasonFallback, workersOomFallback, workersSourceFallback);
   }
   try {
-    const data = await getJson("/api/case/score?program=juice-shop");
+    const labMeta = (state.current && state.current.metadata && state.current.metadata.lab) || {};
+    const program = labMeta.program || "cybergym";
+    const data = await getJson("/api/case/score?program=" + encodeURIComponent(program));
     const live = data && (data.score || data.last_score);
     if (live) {
       showScorePill(live, Boolean(data.available));
+    } else if (data && data.fail) {
+      const scoreEl = $("labScore");
+      if (scoreEl) {
+        scoreEl.textContent = "fail";
+        scoreEl.classList.add("dim");
+        scoreEl.setAttribute("title", String(data.fail));
+      }
     } else if (!fallback) {
       showScorePill(null, false);
     }
@@ -650,6 +659,13 @@ function inspect(node) {
     ["Badge", cfg.badge || "-"],
   ];
   if (node.id === "n_lab" || cfg.stage === "lab") {
+    if (lab.program === "cybergym") {
+      rows.push(["Program", lab.program]);
+      rows.push(["Bind", lab.bind || graphBind(state.current) || "127.0.0.1:8666"]);
+      rows.push(["Score path", lab.score_path || graphScorePath(state.current) || "GET /docs then POST /query-poc"]);
+      rows.push(["Score", lab.last_score || graphLastScore(state.current) || "unset"]);
+      rows.push(["N", String(lab.N != null ? lab.N : 10)]);
+    } else {
     rows.push(["Wall", lab.wall || graphWall(state.current) || "-"]);
     rows.push(["Hunted", lab.hunted || graphHunted(state.current) || "-"]);
     rows.push(["Score", lab.last_score || graphLastScore(state.current) || "-"]);
@@ -657,7 +673,7 @@ function inspect(node) {
     rows.push(["Fill wall", lab.fill_wall || graphFillWall(state.current) || "-"]);
     rows.push(["Fill reason", lab.fill_reason || graphFillReason(state.current) || "-"]);
     rows.push(["Next hunt", lab.next_hunt || graphNextHunt(state.current) || "-"]);
-    rows.push(["Coding challenges", lab.coding_challenges || graphCoding(state.current) || "separate /snippets — not mixed into n/N"]);
+    rows.push(["Coding challenges", lab.coding_challenges || graphCoding(state.current) || "-"]);
     rows.push(["Docker-disabled", String(lab.docker_disabled_env != null ? lab.docker_disabled_env : graphDockerDisabled(state.current) || "-")]);
     rows.push(["Applies", String(lab.applies != null ? lab.applies : graphApplies(state.current) ?? "-")]);
     rows.push(["Applies reason", lab.applies_reason || graphAppliesReason(state.current) || "-"]);
@@ -694,13 +710,18 @@ function inspect(node) {
         ? `visible (${lab.data_static_challenges_yml || "?"}/${lab.data_static_security_questions_yml || "?"})`
         : "-",
     ]);
+    }
   }
   if (node.id === "n_harden" || cfg.stage === "harden") {
+    if (lab.program === "cybergym") {
+      rows.push(["Kind", cfg.kind || "skip"]);
+      rows.push(["Program", lab.program]);
+    } else {
     rows.push(["Next wall", lab.wall || graphWall(state.current) || "-"]);
     rows.push(["Hunted", lab.hunted || graphHunted(state.current) || "-"]);
     rows.push(["Next hunt", lab.next_hunt || graphNextHunt(state.current) || "-"]);
     rows.push(["Fill wall", lab.fill_wall || graphFillWall(state.current) || "-"]);
-    rows.push(["Coding challenges", lab.coding_challenges || graphCoding(state.current) || "separate /snippets — not mixed into n/N"]);
+    rows.push(["Coding challenges", lab.coding_challenges || graphCoding(state.current) || "-"]);
     rows.push(["Applies", String(lab.applies != null ? lab.applies : graphApplies(state.current) ?? "-")]);
     rows.push(["Applies reason", lab.applies_reason || graphAppliesReason(state.current) || "-"]);
     rows.push(["Last live", (lab.last_live_score || graphLastLiveScore(state.current) || "-") + " on " + (lab.last_live_wall || graphLastLiveWall(state.current) || "-")]);
@@ -727,6 +748,7 @@ function inspect(node) {
       Array.isArray(lab.fill_deny_403) ? lab.fill_deny_403.join(", ") : lab.fill_deny_403 || "-",
     ]);
     rows.push(["Fill POST", String(lab.fill_score_post != null ? lab.fill_score_post : "-")]);
+    }
   }
   $("inspTitle").textContent = node.label;
   $("inspMeta").innerHTML = rows

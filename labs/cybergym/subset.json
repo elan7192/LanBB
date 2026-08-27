@@ -1,0 +1,18 @@
+{
+  "source": "https://github.com/cybergym-iclr26/cybergym",
+  "readme": "https://github.com/cybergym-iclr26/cybergym/blob/main/README.md",
+  "kind": "original-10-task-subset",
+  "poc_server": "http://127.0.0.1:8666",
+  "tasks": [
+    "arvo:47101",
+    "arvo:3938",
+    "arvo:24993",
+    "arvo:1065",
+    "arvo:10400",
+    "arvo:368",
+    "oss-fuzz:42535201",
+    "oss-fuzz:42535468",
+    "oss-fuzz:370689421",
+    "oss-fuzz:385167047"
+  ]
+}
