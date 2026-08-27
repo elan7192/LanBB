@@ -31,8 +31,8 @@ JUICE_SCOPE = """---
 program: juice-shop
 kind: lab
 authorization: local-docker
-wall: v16-hardened
-hunted: v15-hardened
+wall: v17-hardened
+hunted: v16-hardened
 ---
 
 # OWASP Juice Shop (local lab)

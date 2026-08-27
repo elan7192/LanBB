@@ -25,10 +25,10 @@ python3 tools/case/lanbb.py scope parse juice-shop
 python3 flows/serve.py
 # http://127.0.0.1:8765/  → pick case-bounty
 
-# 4. Optional: start the current wall (v16-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6/v7/v8/v9/v10/v11/v12/v13/v14/v15 forever.
-docker compose -f labs/juice-shop/overlays/v16-hardened/docker-compose.yml up
-# previous wall: labs/juice-shop/overlays/v15-hardened/docker-compose.yml
-# older wall: labs/juice-shop/overlays/v14-hardened/docker-compose.yml
+# 4. Optional: start the current wall (v17-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6/v7/v8/v9/v10/v11/v12/v13/v14/v15/v16 forever.
+docker compose -f labs/juice-shop/overlays/v17-hardened/docker-compose.yml up
+# previous wall: labs/juice-shop/overlays/v16-hardened/docker-compose.yml
+# older wall: labs/juice-shop/overlays/v15-hardened/docker-compose.yml
 # stock pin: docker compose -f labs/juice-shop/overlays/v0-stock/docker-compose.yml up
 
 # 5. Hunt is CASE-only (scope → in-scope recon skip on loopback → report). No auto-pwn.
@@ -40,14 +40,14 @@ python3 tools/case/lanbb.py case report juice-shop
 #    docker-solvable=98 (18 disabledEnv on Docker). Coding /snippets are separate — do not mix.
 #    GET /rest/continue-code is a token only — do not forge.
 python3 tools/case/lanbb.py case score juice-shop
-# Fill live on v15 overlay this loop: 0/116 (GET /api/Challenges/ HTTP 200). Wall APPLIES (default-deny 403 on /, /login, /api). Edge mem 6m/pids 6 held. worker_processes 1 is source (OOM=false, no Fill patch). v16 keeps worker_processes 1. Do not invent n. Do not rediscover.
+# Fill live on v16 overlay this loop: 0/116 (GET /api/Challenges/ HTTP 200). Wall APPLIES (default-deny 403 on /, /login, /api). Edge mem 6m/pids 6 held. worker_processes 1 is source (OOM=false, no Fill patch). v17 keeps worker_processes 1. Do not invent n. Do not rediscover.
 
 # 7. After hunt→harden, emit Pawel memories (no working dump, no wiki)
 python3 tools/case/lanbb.py case memory emit juice-shop \
   --score 0/116 \
-  --hardened "v16-hardened: working harden (no juice EROFS, no tmpfs over data/static) + edge mem>=6m pids>=6 (v15 Fill held 6m/6, worker_processes 1 source OOM=false no Fill patch) + leftover W3C/B3/GCP/Datadog tracing plus ALB-OIDC/IAP/CF-Access/oauth2-proxy token-groups/Istio client-cert/GAE user identity headers closed on score path + leftover CSAF/product-image/coupon-apply HTTP closed + nginx burst>=1" \
-  --semantic-file programs/juice-shop/memory/semantic-loop-16.md \
-  --loop 16
+  --hardened "v17-hardened: working harden (no juice EROFS, no tmpfs over data/static) + edge mem>=6m pids>=6 (v16 Fill held 6m/6, worker_processes 1 source OOM=false no Fill patch) + leftover B3 sampled/flags/parent, Datadog parent/sampling/origin, Sentry-Trace, OpenTracing, Envoy, Azure Easy Auth principal, remaining GAE user-id/admin, CF-Access user-id, oauth2-proxy preferred-username, TLS client-cert headers closed on score path + leftover chatbot-respond/2FA-verify/codefixes HTTP closed + nginx burst>=1" \
+  --semantic-file programs/juice-shop/memory/semantic-loop-17.md \
+  --loop 17
 ```
 
 Folder:
