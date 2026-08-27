@@ -2,7 +2,7 @@
 
 Stricter than `v10-hardened`. Next hunt must use this wall, not v10.
 
-This overlay is a **working harden** that actually applies. This hunt Fill on v10 was unavailable (GET `/api/Challenges/` connection refused; docker not installed). Honest score 0/116. Last live Fill remains 0/116 on v9 (GET `/api/Challenges/` HTTP 200). Wall APPLIES on that last live: default-deny 403 on `/`, `/login`, `/api`. v11 keeps those apply constraints (no juice EROFS, no tmpfs over data/static, burst>=1, exact GET `/api/Challenges/` stays open). v5 juice `read_only` EROFS-skipped `.well-known/csaf` and `tmpfs /juice-shop/data` hid `data/static`. v11 does not copy those skipped locks. Juice stays at 128m so the score harness can still apply.
+This overlay is a **working harden** that actually applies. Fill on v10 scored live 0/116 (GET `/api/Challenges/` HTTP 200). Wall APPLIES: default-deny 403 on `/`, `/login`, `/api`. v11 keeps those apply constraints (no juice EROFS, no tmpfs over data/static, burst>=1, exact GET `/api/Challenges/` stays open). v5 juice `read_only` EROFS-skipped `.well-known/csaf` and `tmpfs /juice-shop/data` hid `data/static`. v11 does not copy those skipped locks. Juice stays at 128m so the score harness can still apply.
 
 Keeps from v10 what actually applied:
 
