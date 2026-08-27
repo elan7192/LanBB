@@ -1,27 +1,27 @@
 # CASE report: juice-shop
 
 - Date (Taipei): 2026-08-27
-- UTC: 2026-08-27T02:07:27Z
+- UTC: 2026-08-27T02:10:58Z
 - Kind: lab
 - Lab score: 0/116
-- Fill: unavailable GET /api/Challenges/ on v8-hardened
-- Fill GET: see versions.json
-- Fill 403: see versions.json
+- Fill: live GET /api/Challenges/ on v8-hardened
+- Fill GET: 200
+- Fill 403: /, /login, /api
 - Fill POST: see versions.json
-- Last live fill: 0/116 on v7-hardened
+- Last live fill: 0/116 on v8-hardened
 - Last live GET: 200
-- Last live 403: /, /ftp, /api, /rest, /login, /assets, /snippets, /graphql
-- Last live POST: 405
+- Last live 403: /, /login, /api
+- Last live POST: see versions.json
 - Score path: GET = /api/Challenges/
 - Bind: 127.0.0.1:3000
 - Authorization: local-docker
 - Hunted wall: v8-hardened
 - Current wall: v9-hardened
-- Applies: True (This hunt fill unavailable (no docker). Last live v7 Fill APPLIES: GET /api/Challenges/ 200, default-deny 403, POST 405; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. v8 and v9 keep those apply constraints plus exact GET /api/Challenges/, localhost bind. Do not invent a live GET on v8.)
+- Applies: True (v8 Fill APPLIES: GET /api/Challenges/ 200, default-deny 403 on / /login /api; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. v9 keeps those apply constraints plus exact-equals GET /api/Challenges/, host allowlist, leftover oauth/health/debug closed. Do not rediscover.)
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Fill unavailable score 0/116 on v8-hardened. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Fill live score 0/116 on v8-hardened. Report path completed without an exploit PoC.
 
 ## Scope
 
