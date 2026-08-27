@@ -9,6 +9,14 @@ LanBB is the product.
 - Canonical engine remote: https://github.com/semantica-agi/semantica
 - Nesting: git submodule at `tools/semantica`
 
+**Headlong stub** lives at `tools/headlong/`. Run one think-run-FINAL cycle:
+
+```bash
+python3 tools/headlong/loop.py cycle --task "Print 6 times 7 as a single integer."
+```
+
+See `tools/headlong/README.md`.
+
 ## How to run a case (OWASP Juice Shop lab)
 
 Lab only. Hypothetical shop. Not a live bounty program. Not random internet. Not adult/porn programs.
