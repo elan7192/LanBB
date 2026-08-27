@@ -12,7 +12,7 @@ Current wall: see `versions.json` (`wall`). Hunt that overlay, then harden a **n
 | `overlays/v3-hardened/` | Older wall: v2 plus method allowlist, URI WAF, cookie flags, COEP/HSTS, read-only edge, upload/PII/chatbot/B2B/snippets closed |
 | `overlays/v4-hardened/` | Older wall: v3 plus app/edge caps, broader URI WAF, GraphQL/basket/reviews/captcha/data-export closed |
 | `overlays/v5-hardened/` | Previous wall: v4 plus juice read-only, drop OPTIONS, login WAF, identity/Web3/catalog/search/info-leak closed |
-| `overlays/v6-hardened/` | Current wall: v5 plus login closed, GET/HEAD only, SPA/static leak closed, tighter caps |
+| `overlays/v6-hardened/` | Current wall: working harden (no juice EROFS, no tmpfs over data/static) plus login closed, GET/HEAD only, SPA/static leak closed |
 
 ```bash
 # stock

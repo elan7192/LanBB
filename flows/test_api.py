@@ -98,7 +98,7 @@ class GraphFilesTest(unittest.TestCase):
         self.assertRegex(graph["metadata"]["score"], r"^\d+/\d+$")
         self.assertEqual(graph["metadata"]["lab"]["wall"], "v6-hardened")
         self.assertEqual(graph["metadata"]["lab"]["hunted"], "v5-hardened")
-        self.assertEqual(graph["metadata"]["lab"].get("fill"), "unavailable")
+        self.assertEqual(graph["metadata"]["lab"].get("fill"), "live")
         self.assertEqual(graph["metadata"]["lab"].get("fill_wall"), "v5-hardened")
         self.assertEqual(graph["metadata"]["lab"].get("next_hunt"), "v6-hardened")
         self.assertEqual(graph["metadata"]["lab"].get("docker_disabled_env"), 18)
@@ -152,7 +152,7 @@ class GraphFilesTest(unittest.TestCase):
         self.assertTrue(template["metadata"]["default"])
         self.assertEqual(template["metadata"]["lab"]["wall"], "v6-hardened")
         self.assertEqual(template["metadata"]["lab"]["hunted"], "v5-hardened")
-        self.assertEqual(template["metadata"]["lab"].get("fill"), "unavailable")
+        self.assertEqual(template["metadata"]["lab"].get("fill"), "live")
         self.assertEqual(template["metadata"]["lab"].get("next_hunt"), "v6-hardened")
 
 
@@ -203,7 +203,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(listed["graphs"][0].get("wall"), "v6-hardened")
         self.assertEqual(listed["graphs"][0].get("hunted"), "v5-hardened")
         self.assertEqual(listed["graphs"][0].get("last_score"), "0/116")
-        self.assertEqual(listed["graphs"][0].get("fill"), "unavailable")
+        self.assertEqual(listed["graphs"][0].get("fill"), "live")
         self.assertEqual(listed["graphs"][0].get("fill_wall"), "v5-hardened")
         self.assertEqual(listed["graphs"][0].get("next_hunt"), "v6-hardened")
         self.assertIn("snippets", listed["graphs"][0].get("coding_challenges") or "")
@@ -249,7 +249,7 @@ class ApiTest(unittest.TestCase):
         versions = self.tmp / "labs" / "juice-shop" / "versions.json"
         versions.parent.mkdir(parents=True)
         versions.write_text(
-            '{"wall":"v6-hardened","hunted":"v5-hardened","last_score":"0/116","n":0,"N":116,"fill":"unavailable","fill_wall":"v5-hardened","fill_reason":"Fill unavailable: GET /api/Challenges/ connection refused; docker not installed; honest 0/116 on v5-hardened; docker_disabled=18","docker_disabled_env":18,"coding_challenges":"separate /snippets — not mixed into n/N"}\n'
+            '{"wall":"v6-hardened","hunted":"v5-hardened","last_score":"0/116","n":0,"N":116,"fill":"live","fill_wall":"v5-hardened","fill_reason":"Fill live 0/116 from GET /api/Challenges/ on v5-hardened; docker_disabled=18. v5 juice read-only SKIPPED (EROFS on .well-known/csaf); tmpfs /juice-shop/data hides data/static so that wall did not apply","docker_disabled_env":18,"coding_challenges":"separate /snippets — not mixed into n/N"}\n'
         )
         status, data = get(f"{self.base}/api/case/score?program=juice-shop")
         self.assertEqual(status, 200)
@@ -257,12 +257,12 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(data.get("last_score"), "0/116")
         self.assertEqual(data.get("wall"), "v6-hardened")
         self.assertEqual(data.get("hunted"), "v5-hardened")
-        self.assertEqual(data.get("fill"), "unavailable")
+        self.assertEqual(data.get("fill"), "live")
         self.assertEqual(data.get("fill_wall"), "v5-hardened")
         self.assertEqual(data.get("next_hunt"), "v6-hardened")
         self.assertEqual(data.get("docker_disabled_env"), 18)
         self.assertIn("snippets", data.get("coding_challenges") or "")
-        self.assertIn("unavailable", data.get("reason") or "")
+        self.assertIn("live", data.get("reason") or "")
         self.assertIn("docker_disabled=18", data.get("fill_reason") or "")
 
 

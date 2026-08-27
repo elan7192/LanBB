@@ -2,6 +2,8 @@
 
 Stricter than `v4-hardened`. Previous wall. Next hunt must use `v6-hardened`, not v5.
 
+Fill on this overlay: juice `read_only` SKIPPED (EROFS on `.well-known/csaf`). `tmpfs /juice-shop/data` hides `data/static`, so those container locks did not apply. nginx `limit_req` burst>=1 did apply. v6 does not copy the skipped juice locks.
+
 Keeps v4:
 
 - Image pin `bkimminich/juice-shop@sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e`

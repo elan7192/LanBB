@@ -437,25 +437,31 @@ class JuiceShopCaseTest(unittest.TestCase):
             "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
             compose6,
         )
-        self.assertIn("read_only: true", compose6)
+        juice6, _, edge6 = compose6.partition("\n  edge:")
+        self.assertTrue(edge6)
+        self.assertNotIn("read_only: true", juice6)
+        self.assertNotIn("- /juice-shop/data", juice6)
+        self.assertIn("read_only: true", edge6)
         self.assertIn("NODE_ENV: production", compose6)
-        self.assertIn("/juice-shop/data:size=32m", compose6)
-        self.assertNotIn("size=32m", compose5)
+        self.assertIn("/tmp:size=16m", juice6)
         self.assertIn("mem_limit: 256m", compose6)
         self.assertIn("mem_limit: 384m", compose5)
         self.assertNotIn("mem_limit: 256m", compose5)
+        self.assertIn("/juice-shop/data", compose5)
         versions = json.loads(
             (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
         )
         self.assertEqual(versions["wall"], "v6-hardened")
         self.assertEqual(versions.get("hunted"), "v5-hardened")
         self.assertEqual(versions["last_score"], "0/116")
-        self.assertEqual(versions.get("fill"), "unavailable")
+        self.assertEqual(versions.get("fill"), "live")
         self.assertEqual(versions.get("fill_wall"), "v5-hardened")
         self.assertEqual(versions["docker_disabled_env"], 18)
         self.assertIn("v6-hardened", versions["overlays"])
         self.assertNotEqual(versions["wall"], "v5-hardened")
         self.assertIn("burst=1", v6)
+        self.assertIn("EROFS", compose6)
+        self.assertIn("data/static", compose6)
 
 
 if __name__ == "__main__":

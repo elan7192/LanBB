@@ -657,9 +657,9 @@
       "docker_solvable": 98,
       "docker_disabled_env": 18,
       "coding_challenges": "separate /snippets — not mixed into n/N",
-      "fill": "unavailable",
+      "fill": "live",
       "fill_wall": "v5-hardened",
-      "fill_reason": "Fill unavailable: GET /api/Challenges/ connection refused; docker not installed; honest 0/116 on v5-hardened; docker_disabled=18"
+      "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v5-hardened; docker_disabled=18. v5 juice read-only SKIPPED (EROFS on .well-known/csaf); tmpfs /juice-shop/data hides data/static so that wall did not apply"
     },
     "score": "0/116"
   }
