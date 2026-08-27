@@ -1,0 +1,57 @@
+services:
+  juice:
+    image: bkimminich/juice-shop@sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e
+    expose:
+      - "3000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 128m
+    pids_limit: 24
+    cpus: "0.20"
+    ulimits:
+      nproc: 24
+      nofile: 80
+    # Working harden that actually applies (last live Fill on v9: GET
+    # /api/Challenges/ 200, default-deny 403 on / /login /api; this hunt
+    # Fill unavailable on v10 — docker not installed). EROFS_GONE,
+    # ReadonlyRootfs=false. Juice root stays writable. Do not set
+    # read_only. v5 EROFS-skipped .well-known/csaf. tmpfs=/tmp only. Do
+    # not tmpfs /juice-shop/data — that hides data/static. Keep juice at
+    # 128m so GET /api/Challenges/ can still apply.
+    tmpfs:
+      - /tmp:size=1m
+    environment:
+      NODE_ENV: production
+    logging:
+      driver: json-file
+      options:
+        max-size: "128k"
+        max-file: "2"
+  edge:
+    image: nginx:alpine
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - juice
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=1m
+      - /var/run:size=1m
+      - /tmp:size=1m
+      - /var/log/nginx:size=1m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 4m
+    pids_limit: 4
+    cpus: "0.04"
+    logging:
+      driver: json-file
+      options:
+        max-size: "64k"
+        max-file: "2"

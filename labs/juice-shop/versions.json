@@ -1,8 +1,8 @@
 {
   "lab": "juice-shop",
-  "hunted": "v9-hardened",
-  "wall": "v10-hardened",
-  "overlays": ["v0-stock", "v1-hardened", "v2-hardened", "v3-hardened", "v4-hardened", "v5-hardened", "v6-hardened", "v7-hardened", "v8-hardened", "v9-hardened", "v10-hardened"],
+  "hunted": "v10-hardened",
+  "wall": "v11-hardened",
+  "overlays": ["v0-stock", "v1-hardened", "v2-hardened", "v3-hardened", "v4-hardened", "v5-hardened", "v6-hardened", "v7-hardened", "v8-hardened", "v9-hardened", "v10-hardened", "v11-hardened"],
   "last_score": "0/116",
   "score": "0/116",
   "n": 0,
@@ -11,12 +11,12 @@
   "docker_solvable": 98,
   "docker_disabled_env": 18,
   "coding_challenges": "separate /snippets — not mixed into n/N",
-  "fill": "live",
+  "fill": "unavailable",
   "fill_url": "http://127.0.0.1:3000/api/Challenges/",
-  "fill_wall": "v9-hardened",
-  "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v9-hardened (HTTP 200); docker_disabled=18. Wall APPLIES: default-deny 403 on /, /login, /api. Working-harden constraints kept (no juice EROFS, no tmpfs over data/static, burst>=1, GET /api/Challenges/ stays open). Do not rediscover. Do not invent n.",
-  "fill_score_get": 200,
-  "fill_deny_403": ["/", "/login", "/api"],
+  "fill_wall": "v10-hardened",
+  "fill_reason": "Fill unavailable this hunt on v10-hardened: GET /api/Challenges/ connection refused (docker not installed). Honest score 0/116. Last live Fill 0/116 on v9-hardened (GET 200, default-deny 403 on /, /login, /api) APPLIES. Working-harden constraints kept (no juice EROFS, no tmpfs over data/static, burst>=1, GET /api/Challenges/ stays open). Do not rediscover. Do not invent n.",
+  "fill_score_get": "unavailable",
+  "fill_deny_403": "unavailable",
   "last_live_fill": "live",
   "last_live_score": "0/116",
   "last_live_wall": "v9-hardened",
@@ -25,7 +25,7 @@
   "score_path": "GET = /api/Challenges/",
   "bind": "127.0.0.1:3000",
   "applies": true,
-  "applies_reason": "v9 Fill APPLIES: GET /api/Challenges/ 200, default-deny 403 on / /login /api; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. v10 keeps those apply constraints plus exact trailing-slash GET /api/Challenges/ only, empty-query/cookie-closed score path, leftover privacy/hidden/data HTTP routes closed. Do not rediscover.",
+  "applies_reason": "Last live Fill APPLIES on v9: GET /api/Challenges/ 200, default-deny 403 on / /login /api; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. This hunt Fill unavailable on v10 (connection refused; docker not installed). v11 keeps those apply constraints plus Authorization/Origin/Referer/X-Forwarded-For closed on the score path, leftover continue-code/login/search/Baskets/nested privacy-security SPA HTTP routes closed. Do not invent n. Do not rediscover.",
   "applies_erofs": "gone",
   "applies_readonly_rootfs": false,
   "applies_tmpfs": "/tmp only",
@@ -46,5 +46,5 @@
     "Insecure Deserialization",
     "XXE"
   ],
-  "note": "Hunt the current wall (v10). Loop 10 hunted v9. Fill live 0/116; docker_disabled=18. v9 wall APPLIES (GET /api/Challenges/ 200, default-deny 403 on / /login /api). v10 is a working harden with the same apply constraints. Do not invent n. Do not rediscover. Stock is v0. Each loop must raise the wall. Never live programs. Never porn programs."
+  "note": "Hunt the current wall (v11). Loop 11 hunted v10. Fill unavailable this hunt; last live 0/116 on v9 APPLIES; docker_disabled=18. v11 is a working harden with the same apply constraints. Do not invent n. Do not rediscover. Stock is v0. Each loop must raise the wall. Never live programs. Never porn programs."
 }

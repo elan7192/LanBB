@@ -122,7 +122,7 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertEqual(result["status"], "unknown")
         self.assertEqual(result["hacking_total_master"], 116)
         self.assertEqual(result["docker_solvable"], 98)
-        self.assertIn("v10-hardened", result.get("docker") or result.get("wall") or "")
+        self.assertIn("v11-hardened", result.get("docker") or result.get("wall") or "")
 
     def test_copied_skills_exist_without_payloads(self):
         skills = CASE / "skills"
@@ -882,17 +882,161 @@ class JuiceShopCaseTest(unittest.TestCase):
         versions = json.loads(
             (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(versions["wall"], "v10-hardened")
-        self.assertEqual(versions.get("hunted"), "v9-hardened")
+        self.assertIn("v10-hardened", versions["overlays"])
+        self.assertNotEqual(versions["wall"], "v9-hardened")
+        self.assertNotEqual(versions["wall"], "v10-hardened")
+        self.assertIn("burst=1", v10)
+        self.assertIn("EROFS", compose10)
+        self.assertIn("data/static", compose10)
+
+    def test_v11_overlay_is_strictly_harder_than_v10(self):
+        root = CASE.parent.parent
+        v10 = (root / "labs/juice-shop/overlays/v10-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        v11 = (root / "labs/juice-shop/overlays/v11-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        for token in (
+            "/ftp",
+            "/encryptionkeys",
+            "/file-upload",
+            "/snippets",
+            "/graphql",
+            "/api/BasketItems",
+            "/rest/captcha",
+            "/api/Users",
+            "/rest/web3",
+            "/api/Products",
+            "/rest/user {",
+            "/assets {",
+            "/i18n",
+            "/score-board",
+            "location /rest {",
+            "location /api {",
+            "location = / {",
+            "location /search",
+            "location /photo-wall",
+            "location /saved-payment-methods",
+            "location /blockchain",
+            "location /web3-sandbox",
+            "location /faucet",
+            "location /logout",
+            "location /oauth {",
+            "location /health",
+            "location /actuator",
+            "location /change-password",
+            "location /nft-unlock",
+            "location /quarantine",
+            "location /api/Memorys",
+            "location /data {",
+            "if ($is_args)",
+            "if ($http_cookie)",
+            "proxy_cookie_flags",
+            "limit_conn",
+            "Strict-Transport-Security",
+            "map $request_uri",
+            "Origin-Agent-Cluster",
+            "require-trusted-types-for",
+            "X-Download-Options",
+            "X-XSS-Protection",
+            "PUT|PATCH|DELETE",
+            "jndi:",
+            "__proto__",
+            "gzip off",
+            "interest-cohort",
+            "ldap://",
+            "gopher://",
+            "child_process",
+            "etag off",
+            "sandbox;",
+            "form-action 'none'",
+            "clipboard-write=()",
+            "script-src 'none'",
+            "limit_req_status 429",
+            "php|asp",
+            "$host !~ ^(127\\.0\\.0\\.1|localhost)$",
+        ):
+            self.assertIn(token, v10)
+            self.assertIn(token, v11)
+        for extra in (
+            "location /rest/continue-code-findIt",
+            "location /rest/continue-code-fixIt",
+            "location /rest/user/login",
+            "location /rest/products/search",
+            "location /api/Baskets",
+            "location /support/logs",
+            "location /score-board-preview",
+            "location /privacy-security/two-factor-authentication",
+            "location /privacy-security/data-export",
+            "location /privacy-security/last-login-ip",
+            "location /address/select",
+            "location /payment/wallet",
+            "location /thanks",
+            "location /banned",
+            "if ($http_authorization)",
+            "if ($http_origin)",
+            "if ($http_referer)",
+            "rate=4r/m",
+            "worker-src 'none'",
+            "ini|toml",
+            "Object\\.constructor",
+            "%252e",
+            "atob[[:space:]]*\\(",
+            "ambient-light-sensor=()",
+        ):
+            self.assertNotIn(extra, v10)
+            self.assertIn(extra, v11)
+        self.assertIn("location = /api/Challenges/", v11)
+        self.assertIn("GET)$", v11)
+        self.assertEqual(v10.count("proxy_pass"), 1)
+        self.assertEqual(v11.count("proxy_pass"), 1)
+        self.assertNotIn("burst=0", v11)
+        self.assertIn("burst=1", v11)
+        self.assertGreater(v11.count("deny all"), v10.count("deny all"))
+        compose10 = (
+            root / "labs/juice-shop/overlays/v10-hardened/docker-compose.yml"
+        ).read_text(encoding="utf-8")
+        compose11 = (
+            root / "labs/juice-shop/overlays/v11-hardened/docker-compose.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+            compose11,
+        )
+        juice11, _, edge11 = compose11.partition("\n  edge:")
+        juice10, _, edge10 = compose10.partition("\n  edge:")
+        self.assertTrue(edge11)
+        self.assertNotIn("read_only: true", juice11)
+        self.assertNotIn("- /juice-shop/data", juice11)
+        self.assertIn("ReadonlyRootfs=false", juice11)
+        self.assertIn("read_only: true", edge11)
+        self.assertIn("NODE_ENV: production", compose11)
+        self.assertIn("/tmp:size=1m", juice11)
+        self.assertIn("mem_limit: 128m", juice11)
+        self.assertIn("mem_limit: 4m", edge11)
+        self.assertIn("mem_limit: 6m", compose10)
+        self.assertNotIn("mem_limit: 4m", compose10)
+        self.assertIn("127.0.0.1:3000:3000", compose11)
+        self.assertIn("ulimits:", compose11)
+        self.assertIn("pids_limit: 24", juice11)
+        self.assertNotIn("pids_limit: 24", juice10)
+        self.assertIn("EROFS", compose11)
+        self.assertIn("data/static", compose11)
+        versions = json.loads(
+            (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(versions["wall"], "v11-hardened")
+        self.assertEqual(versions.get("hunted"), "v10-hardened")
         self.assertEqual(versions["last_score"], "0/116")
-        self.assertEqual(versions.get("fill"), "live")
-        self.assertEqual(versions.get("fill_wall"), "v9-hardened")
+        self.assertEqual(versions.get("fill"), "unavailable")
+        self.assertEqual(versions.get("fill_wall"), "v10-hardened")
         self.assertEqual(versions.get("last_live_score"), "0/116")
         self.assertEqual(versions.get("last_live_wall"), "v9-hardened")
         self.assertEqual(versions.get("last_live_score_get"), 200)
         self.assertIn("/login", versions.get("last_live_deny_403") or [])
-        self.assertEqual(versions.get("fill_score_get"), 200)
-        self.assertEqual(versions.get("fill_deny_403"), ["/", "/login", "/api"])
+        self.assertEqual(versions.get("fill_score_get"), "unavailable")
+        self.assertEqual(versions.get("fill_deny_403"), "unavailable")
         self.assertEqual(versions.get("score_path"), "GET = /api/Challenges/")
         self.assertEqual(versions.get("bind"), "127.0.0.1:3000")
         self.assertTrue(versions.get("applies") is True)
@@ -902,15 +1046,15 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertTrue(versions.get("data_static_visible") is True)
         self.assertEqual(versions.get("data_static_challenges_yml"), 1593)
         self.assertEqual(versions.get("data_static_security_questions_yml"), 29)
-        self.assertIn("live", versions.get("fill_reason") or "")
-        self.assertIn("APPLIES", versions.get("fill_reason") or "")
-        self.assertIn("v9-hardened", versions.get("fill_reason") or "")
+        self.assertIn("unavailable", versions.get("fill_reason") or "")
+        self.assertIn("v10-hardened", versions.get("fill_reason") or "")
+        self.assertIn("Do not invent n", versions.get("fill_reason") or "")
         self.assertEqual(versions["docker_disabled_env"], 18)
-        self.assertIn("v10-hardened", versions["overlays"])
-        self.assertNotEqual(versions["wall"], "v9-hardened")
-        self.assertIn("burst=1", v10)
-        self.assertIn("EROFS", compose10)
-        self.assertIn("data/static", compose10)
+        self.assertIn("v11-hardened", versions["overlays"])
+        self.assertNotEqual(versions["wall"], "v10-hardened")
+        self.assertIn("burst=1", v11)
+        self.assertIn("EROFS", compose11)
+        self.assertIn("data/static", compose11)
 
 
 if __name__ == "__main__":
