@@ -93,6 +93,8 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "edge_floor_mem": lab.get("edge_floor_mem"),
                 "edge_floor_pids": lab.get("edge_floor_pids"),
                 "edge_floor_reason": lab.get("edge_floor_reason"),
+                "worker_processes": lab.get("worker_processes"),
+                "worker_processes_reason": lab.get("worker_processes_reason"),
             }
         )
     return out
@@ -239,6 +241,14 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             data["edge_floor_reason"] = wall.get("edge_floor_reason") or data.get(
                 "edge_floor_reason"
             )
+            data["worker_processes"] = (
+                wall.get("worker_processes")
+                if wall.get("worker_processes") is not None
+                else data.get("worker_processes")
+            )
+            data["worker_processes_reason"] = wall.get("worker_processes_reason") or data.get(
+                "worker_processes_reason"
+            )
             data["last_score"] = wall.get("last_score") or data.get("last_score")
             data["score"] = data.get("last_score") or data.get("score")
             data["n"] = wall.get("n") if wall.get("n") is not None else data.get("n")
@@ -287,6 +297,8 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "edge_floor_mem": (wall or {}).get("edge_floor_mem"),
         "edge_floor_pids": (wall or {}).get("edge_floor_pids"),
         "edge_floor_reason": (wall or {}).get("edge_floor_reason"),
+        "worker_processes": (wall or {}).get("worker_processes"),
+        "worker_processes_reason": (wall or {}).get("worker_processes_reason"),
         "reason": (wall or {}).get("fill_reason") or _fill_reason(wall or {}),
     }
 

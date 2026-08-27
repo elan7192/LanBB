@@ -25,10 +25,10 @@ python3 tools/case/lanbb.py scope parse juice-shop
 python3 flows/serve.py
 # http://127.0.0.1:8765/  → pick case-bounty
 
-# 4. Optional: start the current wall (v14-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6/v7/v8/v9/v10/v11/v12/v13 forever.
-docker compose -f labs/juice-shop/overlays/v14-hardened/docker-compose.yml up
-# previous wall: labs/juice-shop/overlays/v13-hardened/docker-compose.yml
-# older wall: labs/juice-shop/overlays/v12-hardened/docker-compose.yml
+# 4. Optional: start the current wall (v15-hardened). Do not hunt stock/v1/v2/v3/v4/v5/v6/v7/v8/v9/v10/v11/v12/v13/v14 forever.
+docker compose -f labs/juice-shop/overlays/v15-hardened/docker-compose.yml up
+# previous wall: labs/juice-shop/overlays/v14-hardened/docker-compose.yml
+# older wall: labs/juice-shop/overlays/v13-hardened/docker-compose.yml
 # stock pin: docker compose -f labs/juice-shop/overlays/v0-stock/docker-compose.yml up
 
 # 5. Hunt is CASE-only (scope → in-scope recon skip on loopback → report). No auto-pwn.
@@ -40,14 +40,14 @@ python3 tools/case/lanbb.py case report juice-shop
 #    docker-solvable=98 (18 disabledEnv on Docker). Coding /snippets are separate — do not mix.
 #    GET /rest/continue-code is a token only — do not forge.
 python3 tools/case/lanbb.py case score juice-shop
-# Fill live on v13 overlay this loop: 0/116 (GET /api/Challenges/ HTTP 200). Wall APPLIES (default-deny 403 on /, /login, /api). Edge mem 6m/pids 6 held. Do not invent n. Do not rediscover.
+# Fill live on v14 overlay this loop: 0/116 (GET /api/Challenges/ HTTP 200). Wall APPLIES (default-deny 403 on /, /login, /api). Edge mem 6m/pids 6 held. worker_processes auto OOM-killed nginx (exit 137); v15 bakes worker_processes 1. Do not invent n. Do not rediscover.
 
 # 7. After hunt→harden, emit Pawel memories (no working dump, no wiki)
 python3 tools/case/lanbb.py case memory emit juice-shop \
   --score 0/116 \
-  --hardened "v14-hardened: working harden (no juice EROFS, no tmpfs over data/static) + edge mem>=6m pids>=6 (v13 Fill held 6m/6) + leftover hop/session/token headers closed on score path + leftover continue-code-findIt-apply/fixIt-apply/snippets-fixes/2FA-enter/web3-nft HTTP closed + nginx burst>=1" \
-  --semantic-file programs/juice-shop/memory/semantic-loop-14.md \
-  --loop 14
+  --hardened "v15-hardened: working harden (no juice EROFS, no tmpfs over data/static) + edge mem>=6m pids>=6 (v14 Fill held 6m/6) + worker_processes 1 (v14 auto OOM 137) + leftover remote-user/oauth-proxy/tracing/cloud-auth headers closed on score path + leftover web3-walletExploitAddress/2FA-SPA/ftp-quarantine/solve-server-side/coupon HTTP closed + nginx burst>=1" \
+  --semantic-file programs/juice-shop/memory/semantic-loop-15.md \
+  --loop 15
 ```
 
 Folder:

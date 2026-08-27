@@ -1,29 +1,31 @@
 # CASE report: juice-shop
 
 - Date (Taipei): 2026-08-27
-- UTC: 2026-08-27T03:02:48Z
+- UTC: 2026-08-27T03:16:48Z
 - Kind: lab
 - Lab score: 0/116
-- Fill: live GET /api/Challenges/ on v13-hardened
+- Fill: live GET /api/Challenges/ on v14-hardened
 - Fill GET: 200
 - Fill 403: /, /login, /api
 - Fill POST: see versions.json
-- Last live fill: 0/116 on v13-hardened
+- Last live fill: 0/116 on v14-hardened
 - Last live GET: 200
 - Last live 403: /, /login, /api
 - Last live POST: see versions.json
 - Score path: GET = /api/Challenges/
 - Bind: 127.0.0.1:3000
 - Edge floor: mem 6m / pids 6
-- Edge floor reason: Fill on v11: compose mem 4m/pids 4 FAILED (daemon min 6MB, can't fork). Fill on v12 and v13: mem 6m/pids 6 held (no patch). Live floor is mem 6m pids 6. v14 keeps mem>=6m and pids>=6. Do not drop below that.
+- Edge floor reason: Fill on v11: compose mem 4m/pids 4 FAILED (daemon min 6MB, can't fork). Fill on v12, v13, and v14: mem 6m/pids 6 held. Live floor is mem 6m pids 6. v15 keeps mem>=6m and pids>=6. Do not drop below that.
+- Worker processes: 1
+- Worker processes reason: Fill on v14: worker_processes auto OOM-killed nginx (exit 137) at edge mem 6m / pids 6. Fill patched worker_processes 1 so the edge still listens. v15 bakes worker_processes 1. Do not use worker_processes auto.
 - Authorization: local-docker
-- Hunted wall: v13-hardened
-- Current wall: v14-hardened
-- Applies: True (v13 Fill APPLIES: GET /api/Challenges/ 200, default-deny 403 on / /login /api; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. Edge mem 6m pids 6 held (no patch). v14 keeps those apply constraints and the floor, plus leftover hop/session/token headers closed on the score path, leftover continue-code-findIt-apply/fixIt-apply/snippets-fixes/2FA-enter/web3-nft HTTP routes closed. Do not rediscover.)
+- Hunted wall: v14-hardened
+- Current wall: v15-hardened
+- Applies: True (v14 Fill APPLIES: GET /api/Challenges/ 200, default-deny 403 on / /login /api; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. Edge mem 6m pids 6 held. worker_processes auto OOM-killed nginx (exit 137); Fill patched worker_processes 1. v15 keeps those apply constraints and the floor, bakes worker_processes 1, plus leftover remote-user/oauth-proxy/tracing/cloud-auth headers closed on the score path, leftover web3-walletExploitAddress/2FA-SPA/ftp-quarantine/solve-server-side/coupon HTTP routes closed. Do not rediscover.)
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Fill live score 0/116 on v13-hardened. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Fill live score 0/116 on v14-hardened. Report path completed without an exploit PoC.
 
 ## Scope
 
@@ -50,4 +52,4 @@ Docker-off: Insecure Deserialization, XXE.
 
 ## Close path
 
-Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `v14-hardened` in `labs/juice-shop` (this loop hunted `v13-hardened`). Do not attach payloads or reproduction scripts.
+Harden the lab overlay (auth, WAF-ish rules, close the extra surface). Next hunt uses `v15-hardened` in `labs/juice-shop` (this loop hunted `v14-hardened`). Do not attach payloads or reproduction scripts.

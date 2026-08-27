@@ -143,6 +143,8 @@ function renderGraphList(activeId) {
       g.edge_floor_mem || g.edge_floor_pids != null
         ? " · edge " + escapeHtml(g.edge_floor_mem || "") + "/" + escapeHtml(g.edge_floor_pids)
         : ""
+    }${
+      g.worker_processes != null ? " · workers " + escapeHtml(g.worker_processes) : ""
     }</small>`;
     btn.addEventListener("click", () => openGraph(g.id));
     box.appendChild(btn);
@@ -268,6 +270,18 @@ function graphEdgeFloorReason(graph) {
   const meta = (graph && graph.metadata) || {};
   const lab = meta.lab || {};
   return lab.edge_floor_reason || null;
+}
+
+function graphWorkerProcesses(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.worker_processes != null ? lab.worker_processes : null;
+}
+
+function graphWorkerProcessesReason(graph) {
+  const meta = (graph && graph.metadata) || {};
+  const lab = meta.lab || {};
+  return lab.worker_processes_reason || null;
 }
 
 function graphScorePath(graph) {
@@ -414,6 +428,21 @@ function showEdgeFloorPill(mem, pids, reason) {
   else el.removeAttribute("title");
 }
 
+function showWorkersPill(workers, reason) {
+  const el = $("labWorkers");
+  if (!el) return;
+  if (workers == null || workers === "") {
+    el.textContent = "workers —";
+    el.classList.add("dim");
+    el.removeAttribute("title");
+    return;
+  }
+  el.textContent = "workers " + String(workers) + " (not auto)";
+  el.classList.remove("dim");
+  if (reason) el.setAttribute("title", String(reason));
+  else el.removeAttribute("title");
+}
+
 function showWallPill(text, live) {
   const el = $("labWall");
   if (!el) return;
@@ -461,7 +490,9 @@ async function loadLabScore(
   lastLiveDenyFallback,
   edgeMemFallback,
   edgePidsFallback,
-  edgeReasonFallback
+  edgeReasonFallback,
+  workersFallback,
+  workersReasonFallback
 ) {
   const el = $("labScore");
   if (!el) return;
@@ -483,6 +514,9 @@ async function loadLabScore(
   }
   if (edgeMemFallback || edgePidsFallback != null) {
     showEdgeFloorPill(edgeMemFallback, edgePidsFallback, edgeReasonFallback);
+  }
+  if (workersFallback != null && workersFallback !== "") {
+    showWorkersPill(workersFallback, workersReasonFallback);
   }
   try {
     const data = await getJson("/api/case/score?program=juice-shop");
@@ -548,6 +582,13 @@ async function loadLabScore(
     } else if (!edgeMemFallback && edgePidsFallback == null) {
       showEdgeFloorPill(null, null);
     }
+    const workers = data && data.worker_processes;
+    const workersReason = data && data.worker_processes_reason;
+    if (workers != null && workers !== "") {
+      showWorkersPill(workers, workersReason);
+    } else if (workersFallback == null || workersFallback === "") {
+      showWorkersPill(null);
+    }
   } catch {
     if (!fallback) showScorePill(null, false);
     if (!wallFallback) showWallPill(null, false);
@@ -558,6 +599,7 @@ async function loadLabScore(
     if (appliesFallback == null) showAppliesPill(null);
     if (!lastLiveScoreFallback && !lastLiveWallFallback) showLastLivePill(null, null);
     if (!edgeMemFallback && edgePidsFallback == null) showEdgeFloorPill(null, null);
+    if (workersFallback == null || workersFallback === "") showWorkersPill(null);
   }
 }
 
@@ -606,6 +648,8 @@ function inspect(node) {
     rows.push(["Edge floor mem", lab.edge_floor_mem || graphEdgeFloorMem(state.current) || "-"]);
     rows.push(["Edge floor pids", String(lab.edge_floor_pids != null ? lab.edge_floor_pids : graphEdgeFloorPids(state.current) ?? "-")]);
     rows.push(["Edge floor reason", lab.edge_floor_reason || graphEdgeFloorReason(state.current) || "-"]);
+    rows.push(["Worker processes", String(lab.worker_processes != null ? lab.worker_processes : graphWorkerProcesses(state.current) ?? "-")]);
+    rows.push(["Worker processes reason", lab.worker_processes_reason || graphWorkerProcessesReason(state.current) || "-"]);
     rows.push(["Fill GET", String(lab.fill_score_get != null ? lab.fill_score_get : "-")]);
     rows.push([
       "Fill 403",
@@ -644,6 +688,8 @@ function inspect(node) {
     rows.push(["Edge floor mem", lab.edge_floor_mem || graphEdgeFloorMem(state.current) || "-"]);
     rows.push(["Edge floor pids", String(lab.edge_floor_pids != null ? lab.edge_floor_pids : graphEdgeFloorPids(state.current) ?? "-")]);
     rows.push(["Edge floor reason", lab.edge_floor_reason || graphEdgeFloorReason(state.current) || "-"]);
+    rows.push(["Worker processes", String(lab.worker_processes != null ? lab.worker_processes : graphWorkerProcesses(state.current) ?? "-")]);
+    rows.push(["Worker processes reason", lab.worker_processes_reason || graphWorkerProcessesReason(state.current) || "-"]);
     rows.push(["Fill GET", String(lab.fill_score_get != null ? lab.fill_score_get : "-")]);
     rows.push([
       "Fill 403",
@@ -930,7 +976,12 @@ function showGraph(graph, hint) {
   if (edgeMem || edgePids != null) {
     showEdgeFloorPill(edgeMem, edgePids, edgeReason);
   }
-  loadLabScore(cached, wall, hunted, fill, nextHunt, graphFillReason(graph), coding, applies, graphAppliesReason(graph), lastLiveScore, lastLiveWall, lastLiveGet, lastLivePost, lastLiveDeny, edgeMem, edgePids, edgeReason);
+  const workers = graphWorkerProcesses(graph);
+  const workersReason = graphWorkerProcessesReason(graph);
+  if (workers != null && workers !== "") {
+    showWorkersPill(workers, workersReason);
+  }
+  loadLabScore(cached, wall, hunted, fill, nextHunt, graphFillReason(graph), coding, applies, graphAppliesReason(graph), lastLiveScore, lastLiveWall, lastLiveGet, lastLivePost, lastLiveDeny, edgeMem, edgePids, edgeReason, workers, workersReason);
 }
 
 async function openGraph(id) {

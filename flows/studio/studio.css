@@ -131,6 +131,8 @@ body {
 .pill.edge { color: #c4b5fd; border-color: rgba(196, 181, 253, 0.28); }
 .pill.edge.dim { color: var(--muted); border-color: var(--line); }
 .pill.edge.miss { color: var(--coral); border-color: rgba(240, 113, 103, 0.28); }
+.pill.workers { color: #f5c2e7; border-color: rgba(245, 194, 231, 0.28); }
+.pill.workers.dim { color: var(--muted); border-color: var(--line); }
 
 .rail, .inspector {
   background: rgba(12, 17, 24, 0.92);

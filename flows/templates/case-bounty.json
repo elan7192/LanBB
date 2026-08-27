@@ -1,8 +1,8 @@
 {
   "id": "case-bounty",
   "name": "Authorized bug-bounty CASE",
-      "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N last_score, hunt vs current wall, fill provenance, last live fill plus last-live GET/403/POST, next hunt, coding /snippets-out-of-n/N, score path, bind, edge floor, and whether the wall applies are first-class graph properties; Flow Studio shows them.",
-  "version": "1.13.0",
+      "description": "Default LanBB CASE DAG. Intake, scope, authorization, in-scope recon, Juice Shop lab, 13-skill pick, report, lab harden, close. Scope, authorization, and recon gates fail closed. n/N last_score, hunt vs current wall, fill provenance, last live fill plus last-live GET/403/POST, next hunt, coding /snippets-out-of-n/N, score path, bind, edge floor, nginx worker_processes 1 (not auto), and whether the wall applies are first-class graph properties; Flow Studio shows them.",
+  "version": "1.14.0",
   "nodes": [
     {
       "id": "n_intake",
@@ -219,7 +219,7 @@
       "label": "Juice Shop lab",
       "category": "lab",
       "status": "idle",
-      "description": "In-scope local OWASP Juice Shop only. Hypothetical shop. Current wall is labs/juice-shop/versions.json. Hunted wall is the overlay this loop scored. n/N is GET /api/Challenges solved/total. Coding /snippets stay out of n/N. Fill this hunt vs last live fill. Last-live GET/403/POST stay on last-live when this hunt fill is unavailable. Score path is exact GET /api/Challenges/. Applies records whether the wall is a working harden. Not a live bounty program.",
+      "description": "In-scope local OWASP Juice Shop only. Hypothetical shop. Current wall is labs/juice-shop/versions.json. Hunted wall is the overlay this loop scored. n/N is GET /api/Challenges solved/total. Coding /snippets stay out of n/N. Fill this hunt vs last live fill. Last-live GET/403/POST stay on last-live when this hunt fill is unavailable. Score path is exact GET /api/Challenges/. Applies records whether the wall is a working harden. Edge nginx worker_processes is 1 (not auto). Not a live bounty program.",
       "config": {
         "stage": "lab",
         "badge": "LAB",
@@ -318,7 +318,7 @@
       "label": "Harden lab overlay",
       "category": "harden",
       "status": "idle",
-      "description": "After the report, raise the Juice Shop lab overlay (new vN-hardened under labs/juice-shop/overlays). Working harden: no juice EROFS, no tmpfs over data/static. This is a lab wall change, not a LanBB merge.",
+      "description": "After the report, raise the Juice Shop lab overlay (new vN-hardened under labs/juice-shop/overlays). Working harden: no juice EROFS, no tmpfs over data/static, nginx worker_processes 1 (not auto). This is a lab wall change, not a LanBB merge.",
       "config": {
         "stage": "harden",
         "badge": "WALL",
@@ -648,9 +648,9 @@
     "lab": {
       "program": "juice-shop",
       "score_from": "/api/Challenges",
-      "hunted": "v13-hardened",
-      "wall": "v14-hardened",
-      "next_hunt": "v14-hardened",
+      "hunted": "v14-hardened",
+      "wall": "v15-hardened",
+      "next_hunt": "v15-hardened",
       "last_score": "0/116",
       "n": 0,
       "N": 116,
@@ -658,19 +658,19 @@
       "docker_disabled_env": 18,
       "coding_challenges": "separate /snippets \u2014 not mixed into n/N",
       "fill": "live",
-      "fill_wall": "v13-hardened",
-      "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v13-hardened (HTTP 200); docker_disabled=18. Wall APPLIES: default-deny 403 on /, /login, /api. Working-harden constraints kept (no juice EROFS, no tmpfs over data/static, burst>=1, GET /api/Challenges/ stays open). Edge compose mem 6m/pids 6 held (no patch). v11 4m/4 FAILED (daemon min 6MB, can't fork); live floor mem 6m pids 6. Do not drop below. Do not rediscover. Do not invent n.",
+      "fill_wall": "v14-hardened",
+      "fill_reason": "Fill live 0/116 from GET /api/Challenges/ on v14-hardened (HTTP 200); docker_disabled=18. Wall APPLIES: default-deny 403 on /, /login, /api. Working-harden constraints kept (no juice EROFS, no tmpfs over data/static, burst>=1, GET /api/Challenges/ stays open). Edge compose mem 6m/pids 6 held. v11 4m/4 FAILED (daemon min 6MB, can't fork); live floor mem 6m pids 6. Fill on v14: worker_processes auto OOM-killed nginx (exit 137); Fill patched worker_processes 1 so the edge still listens. v15 bakes worker_processes 1. Do not use auto. Do not drop below the floor. Do not rediscover. Do not invent n.",
       "fill_score_get": 200,
       "fill_deny_403": ["/", "/login", "/api"],
       "last_live_fill": "live",
       "last_live_score": "0/116",
-      "last_live_wall": "v13-hardened",
+      "last_live_wall": "v14-hardened",
       "last_live_score_get": 200,
       "last_live_deny_403": ["/", "/login", "/api"],
       "score_path": "GET = /api/Challenges/",
       "bind": "127.0.0.1:3000",
       "applies": true,
-      "applies_reason": "v13 Fill APPLIES: GET /api/Challenges/ 200, default-deny 403 on / /login /api; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. Edge mem 6m pids 6 held (no patch). v14 keeps those apply constraints and the floor, plus leftover hop/session/token headers closed on the score path, leftover continue-code-findIt-apply/fixIt-apply/snippets-fixes/2FA-enter/web3-nft HTTP routes closed. Do not rediscover.",
+      "applies_reason": "v14 Fill APPLIES: GET /api/Challenges/ 200, default-deny 403 on / /login /api; working harden EROFS_GONE, ReadonlyRootfs=false, tmpfs=/tmp only, data/static visible. Edge mem 6m pids 6 held. worker_processes auto OOM-killed nginx (exit 137); Fill patched worker_processes 1. v15 keeps those apply constraints and the floor, bakes worker_processes 1, plus leftover remote-user/oauth-proxy/tracing/cloud-auth headers closed on the score path, leftover web3-walletExploitAddress/2FA-SPA/ftp-quarantine/solve-server-side/coupon HTTP routes closed. Do not rediscover.",
       "applies_erofs": "gone",
       "applies_readonly_rootfs": false,
       "applies_tmpfs": "/tmp only",
@@ -679,7 +679,9 @@
       "data_static_security_questions_yml": 29,
       "edge_floor_mem": "6m",
       "edge_floor_pids": 6,
-      "edge_floor_reason": "Fill on v11: compose mem 4m/pids 4 FAILED (daemon min 6MB, can't fork). Fill on v12 and v13: mem 6m/pids 6 held (no patch). Live floor is mem 6m pids 6. v14 keeps mem>=6m and pids>=6. Do not drop below that."
+      "edge_floor_reason": "Fill on v11: compose mem 4m/pids 4 FAILED (daemon min 6MB, can't fork). Fill on v12, v13, and v14: mem 6m/pids 6 held. Live floor is mem 6m pids 6. v15 keeps mem>=6m and pids>=6. Do not drop below that.",
+      "worker_processes": 1,
+      "worker_processes_reason": "Fill on v14: worker_processes auto OOM-killed nginx (exit 137) at edge mem 6m / pids 6. Fill patched worker_processes 1 so the edge still listens. v15 bakes worker_processes 1. Do not use worker_processes auto."
     },
     "score": "0/116"
   }
