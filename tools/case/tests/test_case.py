@@ -122,7 +122,7 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertEqual(result["status"], "unknown")
         self.assertEqual(result["hacking_total_master"], 116)
         self.assertEqual(result["docker_solvable"], 98)
-        self.assertIn("v15-hardened", result.get("docker") or result.get("wall") or "")
+        self.assertIn("v16-hardened", result.get("docker") or result.get("wall") or "")
 
     def test_copied_skills_exist_without_payloads(self):
         skills = CASE / "skills"
@@ -1811,13 +1811,278 @@ class JuiceShopCaseTest(unittest.TestCase):
         versions = json.loads(
             (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(versions["wall"], "v15-hardened")
-        self.assertEqual(versions.get("hunted"), "v14-hardened")
+        self.assertIn("v15-hardened", versions["overlays"])
+        self.assertNotEqual(versions["wall"], "v14-hardened")
+        self.assertNotEqual(versions["wall"], "v15-hardened")
+        self.assertIn("burst=1", v15)
+        self.assertIn("EROFS", compose15)
+        self.assertIn("data/static", compose15)
+
+    def test_v16_overlay_is_strictly_harder_than_v15(self):
+        root = CASE.parent.parent
+        v15 = (root / "labs/juice-shop/overlays/v15-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        v16 = (root / "labs/juice-shop/overlays/v16-hardened/nginx.conf").read_text(
+            encoding="utf-8"
+        )
+        for token in (
+            "/ftp",
+            "/encryptionkeys",
+            "/file-upload",
+            "/snippets",
+            "/graphql",
+            "/api/BasketItems",
+            "/rest/captcha",
+            "/api/Users",
+            "/rest/web3",
+            "/api/Products",
+            "/rest/user {",
+            "/assets {",
+            "/i18n",
+            "/score-board",
+            "location /rest {",
+            "location /api {",
+            "location = / {",
+            "location /search",
+            "location /photo-wall",
+            "location /saved-payment-methods",
+            "location /blockchain",
+            "location /web3-sandbox",
+            "location /faucet",
+            "location /logout",
+            "location /oauth {",
+            "location /health",
+            "location /actuator",
+            "location /change-password",
+            "location /nft-unlock",
+            "location /quarantine",
+            "location /api/Memorys",
+            "location /data {",
+            "if ($is_args)",
+            "if ($http_cookie)",
+            "if ($http_authorization)",
+            "if ($http_origin)",
+            "if ($http_referer)",
+            "location /rest/continue-code-findIt",
+            "location /rest/continue-code-fixIt",
+            "location /rest/user/login",
+            "location /api/Baskets",
+            "location /score-board-preview",
+            "location /hacking-instructor",
+            "location /juicy-nft",
+            "location /wallet-web3",
+            "location /rest/continue-code-xss",
+            "location /rest/products/queries",
+            "location /rest/admin/application-configuration",
+            "location /data/static",
+            "location /b2b/v2/orders",
+            "location /.git",
+            "location /server-status",
+            "location /openapi",
+            "if ($http_x_forwarded_host)",
+            "if ($http_x_forwarded_proto)",
+            "if ($http_forwarded)",
+            "if ($http_x_original_url)",
+            "if ($http_x_http_method_override)",
+            "if ($http_proxy_authorization)",
+            "location /rest/continue-code-apply",
+            "location /tutorial",
+            "location /access_token",
+            "location /ftp/package.json.bak",
+            "location /encryptionkeys/premium.key",
+            "location /prometheus",
+            "location /phpmyadmin",
+            "location /wp-admin",
+            "location /cgi-bin",
+            "location /nginx_status",
+            "location /.svn",
+            "if ($http_x_rewrite_url)",
+            "if ($http_x_original_uri)",
+            "if ($http_x_forwarded_prefix)",
+            "if ($http_x_forwarded_port)",
+            "if ($http_x_host)",
+            "if ($http_true_client_ip)",
+            "if ($http_cf_connecting_ip)",
+            "if ($http_x_client_ip)",
+            "if ($http_x_requested_with)",
+            "if ($http_x_csrf_token)",
+            "if ($http_x_api_key)",
+            "if ($http_x_auth_token)",
+            "prefetch-src 'none'",
+            "block-all-mixed-content",
+            "unload=()",
+            "onmouseover",
+            "expect://",
+            "redis://",
+            "proxy_cookie_flags",
+            "limit_conn",
+            "Strict-Transport-Security",
+            "map $request_uri",
+            "Origin-Agent-Cluster",
+            "require-trusted-types-for",
+            "X-Download-Options",
+            "X-XSS-Protection",
+            "PUT|PATCH|DELETE",
+            "jndi:",
+            "__proto__",
+            "gzip off",
+            "interest-cohort",
+            "ldap://",
+            "gopher://",
+            "child_process",
+            "etag off",
+            "sandbox;",
+            "form-action 'none'",
+            "clipboard-write=()",
+            "script-src 'none'",
+            "limit_req_status 429",
+            "php|asp",
+            "worker-src 'none'",
+            "ini|toml",
+            "$host !~ ^(127\\.0\\.0\\.1|localhost)$",
+            "navigate-to 'none'",
+            "picture-in-picture=()",
+            "jar|war",
+            "shell_exec",
+            "base64_decode",
+            "/dev/tcp",
+            "location /rest/continue-code-findIt-apply",
+            "location /rest/continue-code-fixIt-apply",
+            "location /snippets/fixes",
+            "location /two-factor-authentication-enter",
+            "location /rest/web3/nftUnlocked",
+            "location /grafana",
+            "location /healthz",
+            "location /telescope",
+            "location /graphiql",
+            "if ($http_x_forwarded_scheme)",
+            "if ($http_x_original_host)",
+            "if ($http_x_cluster_client_ip)",
+            "if ($http_fastly_client_ip)",
+            "if ($http_client_ip)",
+            "if ($http_x_id_token)",
+            "if ($http_x_access_token)",
+            "if ($http_x_session_token)",
+            "if ($http_via)",
+            "rate=1r/m",
+            "document-domain=()",
+            "/etc/shadow",
+            "wget[[:space:]]",
+            "location /rest/web3/walletExploitAddress",
+            "location /two-factor-authentication {",
+            "location /ftp/quarantine",
+            "location /solve/challenges/server-side",
+            "location /rest/coupon",
+            "location /netdata",
+            "location /cadvisor",
+            "location /minio",
+            "location /pgadmin",
+            "location /sonarqube",
+            "location /argocd",
+            "location /vault",
+            "if ($http_x_remote_user)",
+            "if ($http_remote_user)",
+            "if ($http_x_forwarded_user)",
+            "if ($http_x_forwarded_email)",
+            "if ($http_x_auth_request_user)",
+            "if ($http_x_auth_request_email)",
+            "if ($http_x_original_forwarded_for)",
+            "if ($http_wl_proxy_client_ip)",
+            "if ($http_x_amzn_trace_id)",
+            "if ($http_traceparent)",
+            "if ($http_x_request_id)",
+            "if ($http_cf_ray)",
+            "shared-storage=()",
+            "nslookup",
+            "python[[:space:]]-c",
+            "/proc/self/environ",
+            "worker_processes 1",
+        ):
+            self.assertIn(token, v15)
+            self.assertIn(token, v16)
+        for extra in (
+            "location /.well-known/csaf",
+            "location /assets/public/images/products",
+            "location /rest/coupon/apply",
+            "location /adminer",
+            "location /mongo-express",
+            "location /jaeger",
+            "location /zipkin",
+            "location /kiali",
+            "location /rancher",
+            "location /cockpit",
+            "location /longhorn",
+            "if ($http_tracestate)",
+            "if ($http_baggage)",
+            "if ($http_x_b3_traceid)",
+            "if ($http_x_amzn_oidc_identity)",
+            "if ($http_x_goog_iap_jwt_assertion)",
+            "if ($http_cf_access_jwt_assertion)",
+            "if ($http_x_auth_request_access_token)",
+            "if ($http_x_forwarded_client_cert)",
+            "ch-ua=()",
+            "deferred-fetch=()",
+            "mkfifo",
+            "certutil[[:space:]]",
+            "id_rsa",
+        ):
+            self.assertNotIn(extra, v15)
+            self.assertIn(extra, v16)
+        self.assertIn("worker_processes 1", v15)
+        self.assertIn("worker_processes 1", v16)
+        self.assertNotIn("worker_processes auto;", v15)
+        self.assertNotIn("worker_processes auto;", v16)
+        self.assertIn("location = /api/Challenges/", v16)
+        self.assertIn("GET)$", v16)
+        self.assertEqual(v15.count("proxy_pass"), 1)
+        self.assertEqual(v16.count("proxy_pass"), 1)
+        self.assertNotIn("burst=0", v16)
+        self.assertIn("burst=1", v16)
+        self.assertGreater(v16.count("deny all"), v15.count("deny all"))
+        compose15 = (
+            root / "labs/juice-shop/overlays/v15-hardened/docker-compose.yml"
+        ).read_text(encoding="utf-8")
+        compose16 = (
+            root / "labs/juice-shop/overlays/v16-hardened/docker-compose.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "sha256:73c53fbf442e8337b3ea3d98c7e8550308854701ebdfce4cc39768f36b75430e",
+            compose16,
+        )
+        juice16, _, edge16 = compose16.partition("\n  edge:")
+        juice15, _, edge15 = compose15.partition("\n  edge:")
+        self.assertTrue(edge16)
+        self.assertNotIn("read_only: true", juice16)
+        self.assertNotIn("- /juice-shop/data", juice16)
+        self.assertIn("ReadonlyRootfs=false", juice16)
+        self.assertIn("read_only: true", edge16)
+        self.assertIn("NODE_ENV: production", compose16)
+        self.assertIn("/tmp:size=1m", juice16)
+        self.assertIn("mem_limit: 128m", juice16)
+        self.assertIn("mem_limit: 6m", edge16)
+        self.assertIn("pids_limit: 6", edge16)
+        self.assertNotIn("mem_limit: 4m", edge16)
+        self.assertNotIn("pids_limit: 4", edge16)
+        self.assertIn("mem_limit: 6m", edge15)
+        self.assertIn("pids_limit: 6", edge15)
+        self.assertIn("127.0.0.1:3000:3000", compose16)
+        self.assertIn("ulimits:", compose16)
+        self.assertIn("EROFS", compose16)
+        self.assertIn("data/static", compose16)
+        self.assertIn("daemon min 6MB", compose16)
+        self.assertIn("source worker_processes 1 held", compose16)
+        self.assertIn("OOM=false", compose16)
+        versions = json.loads(
+            (root / "labs/juice-shop/versions.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(versions["wall"], "v16-hardened")
+        self.assertEqual(versions.get("hunted"), "v15-hardened")
         self.assertEqual(versions["last_score"], "0/116")
         self.assertEqual(versions.get("fill"), "live")
-        self.assertEqual(versions.get("fill_wall"), "v14-hardened")
+        self.assertEqual(versions.get("fill_wall"), "v15-hardened")
         self.assertEqual(versions.get("last_live_score"), "0/116")
-        self.assertEqual(versions.get("last_live_wall"), "v14-hardened")
+        self.assertEqual(versions.get("last_live_wall"), "v15-hardened")
         self.assertEqual(versions.get("last_live_score_get"), 200)
         self.assertIn("/login", versions.get("last_live_deny_403") or [])
         self.assertEqual(versions.get("fill_score_get"), 200)
@@ -1835,18 +2100,22 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertEqual(versions.get("edge_floor_pids"), 6)
         self.assertIn("4m", versions.get("edge_floor_reason") or "")
         self.assertEqual(versions.get("worker_processes"), 1)
-        self.assertIn("exit 137", versions.get("worker_processes_reason") or "")
+        self.assertIs(versions.get("worker_processes_oom"), False)
+        self.assertIs(versions.get("worker_processes_source"), True)
+        self.assertIs(versions.get("worker_processes_fill_patch"), False)
+        self.assertIn("source", versions.get("worker_processes_reason") or "")
+        self.assertIn("OOM=false", versions.get("worker_processes_reason") or "")
         self.assertIn("live", versions.get("fill_reason") or "")
         self.assertIn("APPLIES", versions.get("fill_reason") or "")
-        self.assertIn("v14-hardened", versions.get("fill_reason") or "")
-        self.assertIn("worker_processes auto", versions.get("fill_reason") or "")
+        self.assertIn("v15-hardened", versions.get("fill_reason") or "")
+        self.assertIn("no Fill patch", versions.get("fill_reason") or "")
         self.assertIn("Do not invent n", versions.get("fill_reason") or "")
         self.assertEqual(versions["docker_disabled_env"], 18)
-        self.assertIn("v15-hardened", versions["overlays"])
-        self.assertNotEqual(versions["wall"], "v14-hardened")
-        self.assertIn("burst=1", v15)
-        self.assertIn("EROFS", compose15)
-        self.assertIn("data/static", compose15)
+        self.assertIn("v16-hardened", versions["overlays"])
+        self.assertNotEqual(versions["wall"], "v15-hardened")
+        self.assertIn("burst=1", v16)
+        self.assertIn("EROFS", compose16)
+        self.assertIn("data/static", compose16)
 
 
 if __name__ == "__main__":
