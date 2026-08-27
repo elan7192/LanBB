@@ -349,6 +349,9 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertNotIn("CONNECT|OPTIONS", v4)
         self.assertIn("GET|HEAD|POST|OPTIONS", v4)
         self.assertNotIn("GET|HEAD|POST|OPTIONS", v5)
+        self.assertIn("burst=0", v4)
+        self.assertNotIn("burst=0", v5)
+        self.assertIn("burst=1", v5)
         self.assertGreater(v5.count("deny all"), v4.count("deny all"))
         compose4 = (
             root / "labs/juice-shop/overlays/v4-hardened/docker-compose.yml"
@@ -373,7 +376,7 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertEqual(versions["wall"], "v5-hardened")
         self.assertEqual(versions.get("hunted"), "v4-hardened")
         self.assertEqual(versions["last_score"], "0/116")
-        self.assertEqual(versions.get("fill"), "unavailable")
+        self.assertEqual(versions.get("fill"), "live")
         self.assertEqual(versions.get("fill_wall"), "v4-hardened")
         self.assertEqual(versions["docker_disabled_env"], 18)
         self.assertIn("v5-hardened", versions["overlays"])

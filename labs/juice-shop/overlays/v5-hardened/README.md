@@ -15,6 +15,7 @@ Raises the wall:
 - Edge mem/pids/cpu tighter
 - Drop OPTIONS from the method allowlist (GET/HEAD/POST only)
 - Broader WAF-ish tokens; WAF now also on login (still signatures only; no PoC)
+- `limit_req` burst>=1 (v4 used burst=0, which nginx rejects; Fill patched v4 to burst=1 so the edge listens)
 - Tighter body/rate/connection/timeouts
 - Trusted Types + Origin-Agent-Cluster
 - Closed another class v4 left open: registration, password-reset, whoami/session, OAuth, Web3/NFT, catalog/search, hints/swagger/robots, remaining info-leak APIs

@@ -40,12 +40,12 @@ python3 tools/case/lanbb.py case report juice-shop
 #    docker-solvable=98 (18 disabledEnv on Docker). Coding /snippets are separate — do not mix.
 #    GET /rest/continue-code is a token only — do not forge.
 python3 tools/case/lanbb.py case score juice-shop
-# Fill unavailable on v4 overlay this loop: 0/116 honest. Do not invent n.
+# Fill live on v4 overlay this loop: 0/116 (docker_disabled=18). Do not invent n.
 
 # 7. After hunt→harden, emit Pawel memories (no working dump, no wiki)
 python3 tools/case/lanbb.py case memory emit juice-shop \
   --score 0/116 \
-  --hardened "v5-hardened: juice read-only + drop OPTIONS + login WAF + identity/Web3/catalog/search/info-leak closed" \
+  --hardened "v5-hardened: juice read-only + drop OPTIONS + login WAF + identity/Web3/catalog/search/info-leak closed + nginx burst>=1" \
   --semantic-file programs/juice-shop/memory/semantic-loop-5.md \
   --loop 5
 ```

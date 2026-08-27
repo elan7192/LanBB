@@ -1,17 +1,17 @@
 # CASE report: juice-shop
 
 - Date (Taipei): 2026-08-27
-- UTC: 2026-08-27T00:43:41Z
+- UTC: 2026-08-27T00:48:41Z
 - Kind: lab
 - Lab score: 0/116
-- Fill: unavailable GET /api/Challenges/ on v4-hardened
+- Fill: live GET /api/Challenges/ on v4-hardened
 - Authorization: local-docker
 - Hunted wall: v4-hardened
 - Current wall: v5-hardened
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Fill unavailable score 0/116 on v4-hardened. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Fill live score 0/116 on v4-hardened. Report path completed without an exploit PoC.
 
 ## Scope
 

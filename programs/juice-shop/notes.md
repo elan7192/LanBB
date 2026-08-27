@@ -13,6 +13,6 @@ Loop 3 hunted `v2-hardened`. Fill live score **0/116** (GET `/api/Challenges/`, 
 
 Loop 4 hunted `v3-hardened`. Fill **unavailable** (GET `/api/Challenges/` connection refused; docker not installed). Honest score **0/116**. Report path still wrote. Wall is now `v4-hardened`.
 
-Loop 5 hunted `v4-hardened`. Fill **unavailable** (GET `/api/Challenges/` connection refused; docker not installed). Honest score **0/116**. Report path still wrote. Wall is now `v5-hardened`.
+Loop 5 hunted `v4-hardened`. Fill live score **0/116** (GET `/api/Challenges/`, docker_disabled=18). Report path still wrote. Wall is now `v5-hardened` (nginx `limit_req` burst>=1).
 
 Coverage honesty: the 13-skill pack does not cover Cryptographic Issues, Miscellaneous, Security Misconfiguration, Security through Obscurity. Docker-off: Insecure Deserialization, XXE.
