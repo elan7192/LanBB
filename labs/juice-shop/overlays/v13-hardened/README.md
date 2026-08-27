@@ -1,6 +1,6 @@
 # v13-hardened
 
-Stricter than `v12-hardened`. Next hunt must use this wall, not v12.
+Stricter than `v12-hardened`. Previous wall. Next hunt must use `v14-hardened`, not v13.
 
 This overlay is a **working harden** that actually applies. Fill on v12 scored live 0/116 (GET `/api/Challenges/` HTTP 200). Wall APPLIES: default-deny 403 on `/`, `/login`, `/api`. v13 keeps those apply constraints (no juice EROFS, no tmpfs over data/static, burst>=1, exact GET `/api/Challenges/` stays open). v5 juice `read_only` EROFS-skipped `.well-known/csaf` and `tmpfs /juice-shop/data` hid `data/static`. v13 does not copy those skipped locks. Juice stays at 128m so the score harness can still apply.
 
