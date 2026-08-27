@@ -95,6 +95,9 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "edge_floor_reason": lab.get("edge_floor_reason"),
                 "worker_processes": lab.get("worker_processes"),
                 "worker_processes_reason": lab.get("worker_processes_reason"),
+                "worker_processes_oom": lab.get("worker_processes_oom"),
+                "worker_processes_source": lab.get("worker_processes_source"),
+                "worker_processes_fill_patch": lab.get("worker_processes_fill_patch"),
             }
         )
     return out
@@ -249,6 +252,21 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             data["worker_processes_reason"] = wall.get("worker_processes_reason") or data.get(
                 "worker_processes_reason"
             )
+            data["worker_processes_oom"] = (
+                wall.get("worker_processes_oom")
+                if wall.get("worker_processes_oom") is not None
+                else data.get("worker_processes_oom")
+            )
+            data["worker_processes_source"] = (
+                wall.get("worker_processes_source")
+                if wall.get("worker_processes_source") is not None
+                else data.get("worker_processes_source")
+            )
+            data["worker_processes_fill_patch"] = (
+                wall.get("worker_processes_fill_patch")
+                if wall.get("worker_processes_fill_patch") is not None
+                else data.get("worker_processes_fill_patch")
+            )
             data["last_score"] = wall.get("last_score") or data.get("last_score")
             data["score"] = data.get("last_score") or data.get("score")
             data["n"] = wall.get("n") if wall.get("n") is not None else data.get("n")
@@ -299,6 +317,9 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "edge_floor_reason": (wall or {}).get("edge_floor_reason"),
         "worker_processes": (wall or {}).get("worker_processes"),
         "worker_processes_reason": (wall or {}).get("worker_processes_reason"),
+        "worker_processes_oom": (wall or {}).get("worker_processes_oom"),
+        "worker_processes_source": (wall or {}).get("worker_processes_source"),
+        "worker_processes_fill_patch": (wall or {}).get("worker_processes_fill_patch"),
         "reason": (wall or {}).get("fill_reason") or _fill_reason(wall or {}),
     }
 
