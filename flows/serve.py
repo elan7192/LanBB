@@ -71,6 +71,7 @@ def list_graphs() -> List[Dict[str, Any]]:
                 "score": meta.get("score") or lab.get("last_score"),
                 "wall": lab.get("wall"),
                 "hunted": lab.get("hunted"),
+                "fill": lab.get("fill"),
             }
         )
     return out
@@ -141,6 +142,18 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
             # Current wall is versions.json; hunted is the overlay this loop scored.
             data["wall"] = wall.get("wall") or data.get("wall")
             data["hunted"] = wall.get("hunted") or data.get("hunted")
+            data["fill"] = wall.get("fill") or data.get("fill")
+            data["docker_disabled_env"] = wall.get("docker_disabled_env") or data.get(
+                "docker_disabled_env"
+            )
+            if wall.get("fill") == "live":
+                data["last_score"] = wall.get("last_score") or data.get("last_score")
+                data["score"] = data.get("last_score") or data.get("score")
+                data["n"] = wall.get("n") if wall.get("n") is not None else data.get("n")
+                data["N"] = wall.get("N") or wall.get("challenges") or data.get("N")
+                data["reason"] = (
+                    "Fill live n/N from GET /api/Challenges/ on hunted wall; not rediscovered"
+                )
             if not data.get("available"):
                 data["docker"] = (
                     "docker compose -f labs/juice-shop/overlays/"
@@ -158,7 +171,13 @@ def case_score(program: str) -> Tuple[int, Dict[str, Any]]:
         "N": (wall or {}).get("N") or (wall or {}).get("challenges"),
         "wall": (wall or {}).get("wall"),
         "hunted": (wall or {}).get("hunted"),
-        "reason": "live lab not scored; last_score is the hunt result; wall is the next overlay",
+        "fill": (wall or {}).get("fill"),
+        "docker_disabled_env": (wall or {}).get("docker_disabled_env"),
+        "reason": (
+            "Fill live n/N from GET /api/Challenges/ on hunted wall; wall is the next overlay"
+            if (wall or {}).get("fill") == "live"
+            else "live lab not scored; last_score is the hunt result; wall is the next overlay"
+        ),
     }
 
 

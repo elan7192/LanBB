@@ -249,6 +249,8 @@ class JuiceShopCaseTest(unittest.TestCase):
         self.assertEqual(versions["wall"], "v3-hardened")
         self.assertEqual(versions.get("hunted"), "v2-hardened")
         self.assertEqual(versions["last_score"], "0/116")
+        self.assertEqual(versions.get("fill"), "live")
+        self.assertEqual(versions["docker_disabled_env"], 18)
         self.assertIn("v3-hardened", versions["overlays"])
         self.assertNotEqual(versions["wall"], "v2-hardened")
 

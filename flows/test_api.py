@@ -98,6 +98,8 @@ class GraphFilesTest(unittest.TestCase):
         self.assertRegex(graph["metadata"]["score"], r"^\d+/\d+$")
         self.assertEqual(graph["metadata"]["lab"]["wall"], "v3-hardened")
         self.assertEqual(graph["metadata"]["lab"]["hunted"], "v2-hardened")
+        self.assertEqual(graph["metadata"]["lab"].get("fill"), "live")
+        self.assertEqual(graph["metadata"]["lab"].get("docker_disabled_env"), 18)
         self.assertEqual(graph["version"], "1.3.0")
         report_to_harden = [
             e for e in graph["edges"] if e["source"] == "n_report" and e["target"] == "n_harden"
@@ -225,7 +227,7 @@ class ApiTest(unittest.TestCase):
         versions = self.tmp / "labs" / "juice-shop" / "versions.json"
         versions.parent.mkdir(parents=True)
         versions.write_text(
-            '{"wall":"v3-hardened","hunted":"v2-hardened","last_score":"0/116","n":0,"N":116}\n'
+            '{"wall":"v3-hardened","hunted":"v2-hardened","last_score":"0/116","n":0,"N":116,"fill":"live","docker_disabled_env":18}\n'
         )
         status, data = get(f"{self.base}/api/case/score?program=juice-shop")
         self.assertEqual(status, 200)
@@ -233,6 +235,8 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(data.get("last_score"), "0/116")
         self.assertEqual(data.get("wall"), "v3-hardened")
         self.assertEqual(data.get("hunted"), "v2-hardened")
+        self.assertEqual(data.get("fill"), "live")
+        self.assertEqual(data.get("docker_disabled_env"), 18)
 
 
 def get_status(url: str):

@@ -653,7 +653,9 @@
       "last_score": "0/116",
       "n": 0,
       "N": 116,
-      "docker_solvable": 98
+      "docker_solvable": 98,
+      "docker_disabled_env": 18,
+      "fill": "live"
     },
     "score": "0/116"
   }

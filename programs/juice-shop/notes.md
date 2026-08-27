@@ -9,6 +9,6 @@ Authorized CASE file. Evidence dumps, screenshots, and HTTP traffic stay gitigno
 
 Loop 2 hunted `v1-hardened`. Score 0/116 (lab docker was not running in this agent VM). Report path still wrote. Wall became `v2-hardened`.
 
-Loop 3 hunted `v2-hardened`. Score 0/116 (no Docker, nothing on :3000). Report path still wrote. Wall is now `v3-hardened`.
+Loop 3 hunted `v2-hardened`. Fill live score **0/116** (GET `/api/Challenges/`, docker_disabled=18). Report path still wrote. Wall is now `v3-hardened`.
 
 Coverage honesty: the 13-skill pack does not cover Cryptographic Issues, Miscellaneous, Security Misconfiguration, Security through Obscurity. Docker-off: Insecure Deserialization, XXE.

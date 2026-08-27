@@ -4,13 +4,14 @@
 - UTC: 2026-08-27T00:18:51Z
 - Kind: lab
 - Lab score: 0/116
+- Fill: live GET /api/Challenges/ on v2-hardened (docker_disabled=18)
 - Authorization: local-docker
 - Hunted wall: v2-hardened
 - Current wall: v3-hardened
 
 ## Judgment
 
-Authorized CASE against the in-scope lab only. Score 0/116. Report path completed without an exploit PoC.
+Authorized CASE against the in-scope lab only. Live Fill score 0/116 on v2-hardened (docker_disabled=18). Report path completed without an exploit PoC.
 
 ## Scope
 
