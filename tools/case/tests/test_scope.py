@@ -78,6 +78,29 @@ class FailClosedScopeTest(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertTrue(result.get("skipped") or not result.get("ran_subfaster"))
 
+    def test_userinfo_url_is_rejected_even_if_host_looks_in_scope(self):
+        cli.case_new("juice-shop", self.tmp)
+        with self.assertRaises(scope_mod.ScopeError) as ctx:
+            scope_mod.require_in_scope(
+                "juice-shop", "http://evil.example@127.0.0.1:3000", self.tmp
+            )
+        self.assertIn("userinfo", str(ctx.exception).lower())
+
+    def test_control_characters_in_target_are_rejected(self):
+        cli.case_new("juice-shop", self.tmp)
+        with self.assertRaises(scope_mod.ScopeError) as ctx:
+            scope_mod.require_in_scope(
+                "juice-shop", "127.0.0.1\x003000", self.tmp
+            )
+        self.assertIn("control", str(ctx.exception).lower())
+
+    def test_programs_gitignore_covers_recon_dump_types(self):
+        text = (HERE.parents[2] / "programs" / ".gitignore").read_text(
+            encoding="utf-8"
+        )
+        for needle in ("*.jsonl", "*.sqlite3", "katana", "nuclei"):
+            self.assertIn(needle, text)
+
 
 if __name__ == "__main__":
     unittest.main()
