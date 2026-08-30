@@ -1,5 +1,9 @@
-# Evidence — raw recon dumps, screenshots, HTTP traffic
+# Evidence — raw recon dumps, screenshots, HTTP traffic.
+# Live program dumps (jsonl/sqlite/katana/nuclei/host lists) stay untracked.
 **/recon/subdomains/*
+!**/recon/subdomains/.gitkeep
+**/recon/**
+!**/recon/subdomains/
 !**/recon/subdomains/.gitkeep
 **/screenshots/
 **/http-traffic/
@@ -10,6 +14,12 @@
 **/*.jpg
 **/*.jpeg
 **/*.webp
+**/*.jsonl
+**/*.sqlite3
+**/*.sqlite
+**/katana*.txt
+**/nuclei*.txt
+**/httpx*
 score.json
 *.dump
 *.log
