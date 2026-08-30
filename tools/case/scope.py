@@ -111,6 +111,10 @@ def normalize_host(value: str) -> str:
     text = (value or "").strip()
     if not text or text.startswith("#"):
         return ""
+    if any(ord(char) < 0x20 or ord(char) == 0x7F for char in text):
+        raise ScopeError(
+            f"fail-closed: control characters in target {value!r} are rejected"
+        )
     text = text.split()[0].strip(" `.,;\"'")
     if text.startswith("<") and text.endswith(">"):
         text = text[1:-1]
@@ -118,6 +122,10 @@ def normalize_host(value: str) -> str:
         text = "http:" + text
     if "://" in text:
         parsed = urlparse(text)
+        if parsed.username or parsed.password:
+            raise ScopeError(
+                f"fail-closed: userinfo in target {value!r} is rejected"
+            )
         host = parsed.hostname or ""
         port = parsed.port
     else:
